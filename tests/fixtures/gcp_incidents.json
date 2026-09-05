@@ -1,0 +1,435 @@
+[
+  {
+    "id": "J5ia5t9p3g9Q5Wi7r8Ev",
+    "number": "847028556969787721",
+    "begin": "2026-09-01T14:44:00+00:00",
+    "created": "2026-09-01T16:03:12+00:00",
+    "end": null,
+    "modified": "2026-09-03T17:47:02+00:00",
+    "external_desc": "Multiple products in us-central1-b are experiencing network service degradation.",
+    "updates": [
+      {
+        "created": "2026-09-03T17:47:02+00:00",
+        "modified": "2026-09-03T17:47:02+00:00",
+        "when": "2026-09-03T17:47:02+00:00",
+        "status": "AVAILABLE",
+        "affected_locations": [],
+        "text": "## Preliminary Incident Report\nWe sincerely apologize for the disruption this incident caused to your business. We know how much you rely on Google Cloud, and we regret the impact on your environment."
+      },
+      {
+        "created": "2026-09-01T19:12:28+00:00",
+        "modified": "2026-09-03T17:47:02+00:00",
+        "when": "2026-09-01T19:12:28+00:00",
+        "status": "SERVICE_DISRUPTION",
+        "affected_locations": [
+          {
+            "title": "Iowa (us-central1)",
+            "id": "us-central1"
+          }
+        ],
+        "text": "**Summary**\nMultiple products in us-central1-b experienced network service degradation.\n**Description**\nThe issue was affecting a portion of the us-central1-b zone. The remaining zones in the region w"
+      }
+    ],
+    "most_recent_update": {
+      "created": "2026-09-03T17:47:02+00:00",
+      "modified": "2026-09-03T17:47:02+00:00",
+      "when": "2026-09-03T17:47:02+00:00",
+      "text": "## Preliminary Incident Report\nWe sincerely apologize for the disruption this incident caused to your business. We know how much you rely on Google Cloud, and we regret the impact on your environment. We are working to address the root cause and prevent this from occurring in the future.\nPlease note",
+      "status": "AVAILABLE",
+      "affected_locations": []
+    },
+    "status_impact": "SERVICE_DISRUPTION",
+    "severity": "medium",
+    "service_key": "zall",
+    "service_name": "Multiple Products",
+    "affected_products": [
+      {
+        "title": "AlloyDB for PostgreSQL",
+        "id": "fPovtKbaWN9UTepMm3kJ",
+        "current_title": "AlloyDB for PostgreSQL"
+      },
+      {
+        "title": "Apigee",
+        "id": "9Y13BNFy4fJydvjdsN3X",
+        "current_title": "Apigee"
+      },
+      {
+        "title": "Cloud Filestore",
+        "id": "jog4nyYkquiLeSK5s26q",
+        "current_title": "Cloud Filestore"
+      }
+    ],
+    "uri": "incidents/J5ia5t9p3g9Q5Wi7r8Ev",
+    "currently_affected_locations": [
+      {
+        "title": "South Carolina (us-east1)",
+        "id": "us-east1"
+      }
+    ],
+    "previously_affected_locations": [
+      {
+        "title": "Iowa (us-central1)",
+        "id": "us-central1"
+      }
+    ]
+  },
+  {
+    "id": "utF3FMFdQfwBzJcGG6vf",
+    "number": "5789456648280872492",
+    "begin": "2026-08-20T15:40:00+00:00",
+    "created": "2026-08-20T16:44:37+00:00",
+    "end": "2026-08-20T19:20:00+00:00",
+    "modified": "2026-08-27T21:45:02+00:00",
+    "external_desc": "We are investigating an issue where customers may experience timeouts, service degradations, errors, and elevated latencies across multiple products in the us-west1 region.",
+    "updates": [
+      {
+        "created": "2026-08-27T21:45:02+00:00",
+        "modified": "2026-08-27T21:45:02+00:00",
+        "when": "2026-08-27T21:45:02+00:00",
+        "status": "AVAILABLE",
+        "affected_locations": [],
+        "text": "# Incident Report\n## Summary\nOn Thursday, 20 August 2026, from 08:00 to 10:22 US/Pacific (15:00 to 17:22 UTC), multiple Google Cloud services in the us-west1 region experienced elevated latency, provi"
+      },
+      {
+        "created": "2026-08-25T06:20:02+00:00",
+        "modified": "2026-08-27T21:45:02+00:00",
+        "when": "2026-08-25T06:20:02+00:00",
+        "status": "AVAILABLE",
+        "affected_locations": [],
+        "text": "# Preliminary Incident Report\nWe sincerely apologize for the disruption this incident caused to your business operations. Recognizing your reliance on Google Cloud, we express our sincere regrets for "
+      }
+    ],
+    "most_recent_update": {
+      "created": "2026-08-27T21:45:02+00:00",
+      "modified": "2026-08-27T21:45:02+00:00",
+      "when": "2026-08-27T21:45:02+00:00",
+      "text": "# Incident Report\n## Summary\nOn Thursday, 20 August 2026, from 08:00 to 10:22 US/Pacific (15:00 to 17:22 UTC), multiple Google Cloud services in the us-west1 region experienced elevated latency, provisioning failures, increased error rates, and widespread service degradations for a total duration of",
+      "status": "AVAILABLE",
+      "affected_locations": []
+    },
+    "status_impact": "SERVICE_OUTAGE",
+    "severity": "high",
+    "service_key": "zall",
+    "service_name": "Multiple Products",
+    "affected_products": [
+      {
+        "title": "AlloyDB for PostgreSQL",
+        "id": "fPovtKbaWN9UTepMm3kJ",
+        "current_title": "AlloyDB for PostgreSQL"
+      },
+      {
+        "title": "Apigee Edge Public Cloud",
+        "id": "SumcdgBT6GQBzp1vmdXu",
+        "current_title": "Apigee Edge Public Cloud"
+      },
+      {
+        "title": "Apigee X",
+        "id": "yWJWs53wK43DqGpQRhPV",
+        "current_title": "Apigee X"
+      }
+    ],
+    "uri": "incidents/utF3FMFdQfwBzJcGG6vf",
+    "currently_affected_locations": [],
+    "previously_affected_locations": [
+      {
+        "title": "Global",
+        "id": "global"
+      },
+      {
+        "title": "Oregon (us-west1)",
+        "id": "us-west1"
+      }
+    ]
+  },
+  {
+    "id": "3BvH3LVGcupoYqV6F4Nw",
+    "number": "11738310674864064645",
+    "begin": "2026-07-15T23:57:00+00:00",
+    "created": "2026-07-16T03:30:59+00:00",
+    "end": "2026-07-16T12:25:00+00:00",
+    "modified": "2026-07-25T13:16:55+00:00",
+    "external_desc": "Google Cloud VMware Engine (GCVE), Google Cloud NetApp Volumes, and Bare Metal Solutions (BMS) services are experiencing a service outage in europe-west4-a due to a cooling failure.",
+    "updates": [
+      {
+        "created": "2026-07-25T13:16:55+00:00",
+        "modified": "2026-07-25T13:16:55+00:00",
+        "when": "2026-07-25T13:16:55+00:00",
+        "status": "AVAILABLE",
+        "affected_locations": [],
+        "text": "## \\# Incident Report\n## \\#\\# Summary\nOn Wednesday, 15 July 2026, Google Cloud VMware Engine (GCVE), Bare Metal Solution (BMS), and Google Cloud NetApp Volumes (GCNV) experienced service interruptions"
+      },
+      {
+        "created": "2026-07-18T00:22:37+00:00",
+        "modified": "2026-07-25T13:16:55+00:00",
+        "when": "2026-07-18T00:22:37+00:00",
+        "status": "AVAILABLE",
+        "affected_locations": [],
+        "text": "# Preliminary Incident Report\nWe sincerely apologize for the disruption this incident caused to your business. We know how much you rely on Google Cloud, and we regret the impact on your productivity."
+      }
+    ],
+    "most_recent_update": {
+      "created": "2026-07-25T13:16:55+00:00",
+      "modified": "2026-07-25T13:16:55+00:00",
+      "when": "2026-07-25T13:16:55+00:00",
+      "text": "## \\# Incident Report\n## \\#\\# Summary\nOn Wednesday, 15 July 2026, Google Cloud VMware Engine (GCVE), Bare Metal Solution (BMS), and Google Cloud NetApp Volumes (GCNV) experienced service interruptions for a total duration of 14 hours, 55 minutes.\nThe root cause for this outage is a 3ms voltage drop ",
+      "status": "AVAILABLE",
+      "affected_locations": []
+    },
+    "status_impact": "SERVICE_DISRUPTION",
+    "severity": "medium",
+    "service_key": "zall",
+    "service_name": "Multiple Products",
+    "affected_products": [
+      {
+        "title": "Bare Metal Solution",
+        "id": "5gQF7Qk9XfQ32pStX6Hb",
+        "current_title": "Bare Metal Solution"
+      },
+      {
+        "title": "Google Cloud NetApp Volumes",
+        "id": "vtzMUyQ4z9CbA1x6z85s",
+        "current_title": "Google Cloud NetApp Volumes"
+      },
+      {
+        "title": "VMWare engine",
+        "id": "9H6gWUHvb2ZubeoxzQ1Y",
+        "current_title": "VMWare engine"
+      }
+    ],
+    "uri": "incidents/3BvH3LVGcupoYqV6F4Nw",
+    "currently_affected_locations": [],
+    "previously_affected_locations": [
+      {
+        "title": "Netherlands (europe-west4)",
+        "id": "europe-west4"
+      }
+    ]
+  },
+  {
+    "id": "T8gmtofFSTGT5tbhyciF",
+    "number": "5362718329524538692",
+    "begin": "2026-07-14T17:00:00+00:00",
+    "created": "2026-07-14T20:24:18+00:00",
+    "end": "2026-07-15T03:40:00+00:00",
+    "modified": "2026-07-24T07:14:47+00:00",
+    "external_desc": "Google Cloud VMware Engine (GCVE) Stretched Cluster customers are experiencing zonal outages impacting network connectivity across multiple regions.",
+    "updates": [
+      {
+        "created": "2026-07-24T07:10:18+00:00",
+        "modified": "2026-07-24T07:14:47+00:00",
+        "when": "2026-07-24T07:10:18+00:00",
+        "status": "AVAILABLE",
+        "affected_locations": [],
+        "text": "## Incident Report\n## Summary\nOn Tuesday, 14 July 2026 10:00 PT, Google Cloud VMware Engine (GCVE) Stretched Cluster customers in the australia-southeast2 and europe-west3 zones experienced inter-site"
+      },
+      {
+        "created": "2026-07-20T18:31:26+00:00",
+        "modified": "2026-07-24T07:10:18+00:00",
+        "when": "2026-07-20T18:31:26+00:00",
+        "status": "AVAILABLE",
+        "affected_locations": [],
+        "text": "## Preliminary Incident Report\nWe sincerely apologize for the disruption this incident caused to your business. We know how much you rely on Google Cloud, and we regret the impact on your productivity"
+      }
+    ],
+    "most_recent_update": {
+      "created": "2026-07-24T07:10:18+00:00",
+      "modified": "2026-07-24T07:14:47+00:00",
+      "when": "2026-07-24T07:10:18+00:00",
+      "text": "## Incident Report\n## Summary\nOn Tuesday, 14 July 2026 10:00 PT, Google Cloud VMware Engine (GCVE) Stretched Cluster customers in the australia-southeast2 and europe-west3 zones experienced inter-site communication failures.\nThe disruption was traced to a network configuration update that introduced",
+      "status": "AVAILABLE",
+      "affected_locations": []
+    },
+    "status_impact": "SERVICE_DISRUPTION",
+    "severity": "medium",
+    "service_key": "9H6gWUHvb2ZubeoxzQ1Y",
+    "service_name": "VMWare engine",
+    "affected_products": [
+      {
+        "title": "VMWare engine",
+        "id": "9H6gWUHvb2ZubeoxzQ1Y",
+        "current_title": "VMWare engine"
+      }
+    ],
+    "uri": "incidents/T8gmtofFSTGT5tbhyciF",
+    "currently_affected_locations": [],
+    "previously_affected_locations": [
+      {
+        "title": "Melbourne (australia-southeast2)",
+        "id": "australia-southeast2"
+      },
+      {
+        "title": "Frankfurt (europe-west3)",
+        "id": "europe-west3"
+      }
+    ]
+  },
+  {
+    "id": "5fGQt4VbkDnr3Yp8PXPr",
+    "number": "1464522124090870782",
+    "begin": "2026-06-05T07:00:00+00:00",
+    "created": "2026-06-10T01:13:50+00:00",
+    "end": "2026-06-26T19:00:00+00:00",
+    "modified": "2026-06-29T23:06:10+00:00",
+    "external_desc": "Network traffic to Google Cloud originating from Delhi, Chennai, Mumbai and surrounding areas is experiencing intermittent periods of elevated latency and possible packet loss.",
+    "updates": [
+      {
+        "created": "2026-06-29T23:06:10+00:00",
+        "modified": "2026-06-29T23:06:10+00:00",
+        "when": "2026-06-29T23:06:10+00:00",
+        "status": "AVAILABLE",
+        "affected_locations": [],
+        "text": "**Summary**\nNetwork traffic to Google Cloud originating from Delhi, Chennai, Mumbai and surrounding areas experienced intermittent periods of elevated latency and possible packet loss.\n**Description**"
+      },
+      {
+        "created": "2026-06-23T22:52:49+00:00",
+        "modified": "2026-06-29T23:06:10+00:00",
+        "when": "2026-06-23T22:52:49+00:00",
+        "status": "SERVICE_DISRUPTION",
+        "affected_locations": [
+          {
+            "title": "Delhi (asia-south2)",
+            "id": "asia-south2"
+          },
+          {
+            "title": "Global",
+            "id": "global"
+          }
+        ],
+        "text": "**Summary**\nNetwork traffic to Google Cloud originating from Delhi, Chennai, Mumbai and surrounding areas is experiencing intermittent periods of elevated latency and possible packet loss.\n**Descripti"
+      }
+    ],
+    "most_recent_update": {
+      "created": "2026-06-29T23:06:10+00:00",
+      "modified": "2026-06-29T23:06:10+00:00",
+      "when": "2026-06-29T23:06:10+00:00",
+      "text": "**Summary**\nNetwork traffic to Google Cloud originating from Delhi, Chennai, Mumbai and surrounding areas experienced intermittent periods of elevated latency and possible packet loss.\n**Description**\nTraffic rerouting from the impacted Delhi facility caused a subset of Hybrid Connectivity, Virtual ",
+      "status": "AVAILABLE",
+      "affected_locations": []
+    },
+    "status_impact": "SERVICE_DISRUPTION",
+    "severity": "medium",
+    "service_key": "zall",
+    "service_name": "Multiple Products",
+    "affected_products": [
+      {
+        "title": "Hybrid Connectivity",
+        "id": "5x6CGnZvSHQZ26KtxpK1",
+        "current_title": "Hybrid Connectivity"
+      },
+      {
+        "title": "Media CDN",
+        "id": "FK8WX6iZ3FuQL6qUwski",
+        "current_title": "Media CDN"
+      },
+      {
+        "title": "Virtual Private Cloud (VPC)",
+        "id": "BSGtCUnz6ZmyajsjgTKv",
+        "current_title": "Virtual Private Cloud (VPC)"
+      }
+    ],
+    "uri": "incidents/5fGQt4VbkDnr3Yp8PXPr",
+    "currently_affected_locations": [],
+    "previously_affected_locations": [
+      {
+        "title": "Delhi (asia-south2)",
+        "id": "asia-south2"
+      },
+      {
+        "title": "Global",
+        "id": "global"
+      }
+    ]
+  },
+  {
+    "id": "41E5S3mkTGDfkZuJZH5k",
+    "number": "6876619551109882402",
+    "begin": "2026-02-27T12:37:00+00:00",
+    "created": "2026-02-27T16:12:30+00:00",
+    "end": "2026-02-27T14:35:00+00:00",
+    "modified": "2026-03-09T05:25:43+00:00",
+    "external_desc": "Vertex AI Gemini API customers experienced increased error rates when accessing the global endpoint.",
+    "updates": [
+      {
+        "created": "2026-03-09T05:25:43+00:00",
+        "modified": "2026-03-09T05:25:43+00:00",
+        "when": "2026-03-09T05:25:43+00:00",
+        "status": "AVAILABLE",
+        "affected_locations": [],
+        "text": "# Incident Report\n## Summary\nOn Friday, 27 February 2026 at 04:37 US/Pacific, customers using Vertex AI Gemini API models experienced increased error rates. Impacted services included Google Cloud Sup"
+      },
+      {
+        "created": "2026-03-04T23:23:18+00:00",
+        "modified": "2026-03-09T05:25:43+00:00",
+        "when": "2026-03-04T23:23:18+00:00",
+        "status": "AVAILABLE",
+        "affected_locations": [],
+        "text": "# Preliminary Incident Report\nWe apologize for the inconvenience this service disruption may have caused. We would like to provide some information about this incident below. Please note, this informa"
+      }
+    ],
+    "most_recent_update": {
+      "created": "2026-03-09T05:25:43+00:00",
+      "modified": "2026-03-09T05:25:43+00:00",
+      "when": "2026-03-09T05:25:43+00:00",
+      "text": "# Incident Report\n## Summary\nOn Friday, 27 February 2026 at 04:37 US/Pacific, customers using Vertex AI Gemini API models experienced increased error rates. Impacted services included Google Cloud Support, Agent Assist, Vertex Gemini API and Dialogflow CX in US regions and the global endpoint. The i",
+      "status": "AVAILABLE",
+      "affected_locations": []
+    },
+    "status_impact": "SERVICE_INFORMATION",
+    "severity": "low",
+    "service_key": "zall",
+    "service_name": "Multiple Products",
+    "affected_products": [
+      {
+        "title": "Agent Assist",
+        "id": "eUntUKqUrHdbBLNcVVXq",
+        "current_title": "Agent Assist"
+      },
+      {
+        "title": "Dialogflow CX",
+        "id": "BnCicQdHSdxaCv8Ya6Vm",
+        "current_title": "Dialogflow CX"
+      },
+      {
+        "title": "Vertex Gemini API",
+        "id": "Z0FZJAMvEB4j3NbCJs6B",
+        "current_title": "Gemini on Agent Platform"
+      }
+    ],
+    "uri": "incidents/41E5S3mkTGDfkZuJZH5k",
+    "currently_affected_locations": [],
+    "previously_affected_locations": [
+      {
+        "title": "Global",
+        "id": "global"
+      },
+      {
+        "title": "Montréal (northamerica-northeast1)",
+        "id": "northamerica-northeast1"
+      },
+      {
+        "title": "São Paulo (southamerica-east1)",
+        "id": "southamerica-east1"
+      },
+      {
+        "title": "Iowa (us-central1)",
+        "id": "us-central1"
+      },
+      {
+        "title": "South Carolina (us-east1)",
+        "id": "us-east1"
+      },
+      {
+        "title": "Northern Virginia (us-east4)",
+        "id": "us-east4"
+      },
+      {
+        "title": "Columbus (us-east5)",
+        "id": "us-east5"
+      },
+      {
+        "title": "Oregon (us-west1)",
+        "id": "us-west1"
+      }
+    ]
+  }
+]
