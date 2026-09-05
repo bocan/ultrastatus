@@ -60,11 +60,14 @@ svg.map .marker { cursor: pointer; outline: none; }
 svg.map .marker:focus-visible { stroke: var(--link); stroke-width: 2; }
 svg.map .cards-layer { pointer-events: none; overflow: visible; }
 svg.map .cards { position: relative; width: 100%; height: 100%; font: 11px/1.35 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; color: var(--ink); }
+/* Hidden cards use visibility, not pointer-events, so the grace period after
+   leaving a marker keeps the card hoverable while the pointer travels to it.
+   Shown: no delay. Hidden: stay fully visible 450 ms, then fade, then vanish. */
 svg.map .card { position: absolute; width: 22%; box-sizing: border-box; padding: 8px; border: 1px solid var(--border);
-  border-radius: 6px; background: var(--surface); opacity: 0; pointer-events: none;
-  transition: opacity 0s linear 0.15s; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12); }
+  border-radius: 6px; background: var(--surface); opacity: 0; visibility: hidden; pointer-events: auto;
+  transition: opacity 0.15s ease 0.45s, visibility 0s linear 0.6s; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12); }
 @media (prefers-color-scheme: dark) { svg.map .card { box-shadow: none; } }
-svg.map .card:hover { opacity: 1; pointer-events: auto; transition-delay: 0s; }
+svg.map .card:hover { opacity: 1; visibility: visible; transition-delay: 0s; }
 svg.map .card-head { margin-bottom: 4px; }
 svg.map .card-tags { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; margin-bottom: 4px; }
 svg.map .card .chip { padding: 1px 5px; border-radius: 4px; font-size: 9px; }
@@ -73,6 +76,20 @@ svg.map .card li { margin: 3px 0; }
 svg.map .card a { color: var(--link); }
 svg.map .card .muted { color: var(--ink-2); }
 svg.map .card .mine-tag { color: var(--ok-fg); font-weight: 600; font-size: 9px; }
+svg.map .card.pinned { opacity: 1; visibility: visible; transition-delay: 0s; }
+svg.map { touch-action: none; outline: none; }
+svg.map:focus-visible { outline: 2px solid var(--link); outline-offset: 2px; border-radius: 6px; }
+svg.map g.viewport { transform-origin: 0 0; }
+svg.map g.viewport.animate { transition: transform 250ms ease; }
+@media (prefers-reduced-motion: reduce) { svg.map g.viewport.animate { transition: none; } }
+svg.map text.label { display: none; font: 11px system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; fill: var(--ink-2); pointer-events: none; }
+svg.map.zoomed text.label { display: block; }
+.map-toolbar { display: flex; flex-wrap: wrap; gap: 0.35rem; align-items: center; margin-bottom: 0.5rem; }
+.map-toolbar button { font: inherit; font-size: 0.85rem; padding: 0.25rem 0.6rem; border: 1px solid var(--border); border-radius: 6px; background: var(--surface); color: var(--ink); cursor: pointer; }
+.map-toolbar button:hover { border-color: var(--link); }
+.map-toolbar .zoom-buttons { margin-left: auto; display: flex; gap: 0.35rem; }
+.map-toolbar .zoom-buttons button { min-width: 2.2rem; font-weight: 700; }
+.map-toolbar .hint { color: var(--ink-2); font-size: 0.8rem; }
 {{ map_css | safe }}
 .global-list { list-style: none; padding: 0; margin: 0 0 0.75rem; display: flex; flex-direction: column; gap: 0.25rem; }
 .global-list li { font-size: 0.9rem; }
@@ -139,6 +156,24 @@ footer ul { list-style: none; padding: 0; margin: 0.25rem 0 0; display: flex; fl
 {% endfor %}
 </ul>
 {% endif %}
+
+<div class="map-toolbar" hidden>
+  <button type="button" data-preset="world">World</button>
+  <button type="button" data-preset="north-america">N. America</button>
+  <button type="button" data-preset="south-america">S. America</button>
+  <button type="button" data-preset="europe">Europe</button>
+  <button type="button" data-preset="middle-east-africa">Middle East &amp; Africa</button>
+  <button type="button" data-preset="asia">Asia</button>
+  <button type="button" data-preset="oceania">Oceania</button>
+  {% if filter_active %}
+  <button type="button" data-preset="mine">My regions</button>
+  {% endif %}
+  <span class="hint">Scroll to zoom, drag to pan, click a marker to pin its card</span>
+  <span class="zoom-buttons">
+    <button type="button" data-zoom="in" aria-label="Zoom in">+</button>
+    <button type="button" data-zoom="out" aria-label="Zoom out">-</button>
+  </span>
+</div>
 
 <div class="map-wrap">
 {{ map_svg | safe }}
@@ -260,5 +295,6 @@ footer ul { list-style: none; padding: 0; margin: 0.25rem 0 0; display: flex; fl
   {% endfor %}
   </ul>
 </footer>
+<script>{{ map_js | safe }}</script>
 </body>
 </html>

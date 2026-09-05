@@ -49,13 +49,13 @@ def test_hover_css_one_rule_per_marker_with_hover_and_focus():
         rule = next(r for r in rules if f'[data-key="{m.cloud}:{m.code}"]:hover' in r)
         assert f'[data-key="{m.cloud}:{m.code}"]:focus-visible' in rule
         assert f'.card[data-key="{m.cloud}:{m.code}"]' in rule
-        assert "opacity:1" in rule and "pointer-events:auto" in rule
+        assert "opacity:1" in rule and "visibility:visible" in rule
 
 
 def test_card_opens_left_past_the_flip_line():
     assert card_style(_marker(x=900.0)).startswith("right: ")
     assert "left:" not in card_style(_marker(x=900.0))
-    assert card_style(_marker(x=100.0)).startswith("left: 10.8%")
+    assert card_style(_marker(x=100.0)).startswith("left: 10.4%")
 
 
 def test_card_opens_upward_in_the_bottom_third():
@@ -110,6 +110,6 @@ def test_page_contains_rules_and_still_no_script(conn, tmp_path):
     assert ctx["map_css"].count(":focus-visible)") == len(regions.all_regions())
     html = render(conn, tmp_path / "site", now=NOW).read_text()
     assert html.count(":focus-visible)") == len(regions.all_regions())
-    assert "<script" not in html
+    assert html.count("<script") == 1  # ADR-0012's inline script, nothing external
     assert '<div class="card" data-key="aws:eu-west-2"' in html
     assert '<a href="https://x.test/a">Edge trouble</a>' in html

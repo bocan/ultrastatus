@@ -69,13 +69,13 @@ The `xmlns` attribute on the inner `div` is required for `foreignObject` content
 
 ### Showing a card
 
-Cards are hidden with opacity and pointer events, never with `display: none`, so the pointer can travel from the marker onto the card.
+Cards are hidden with `visibility` and opacity, never with `display: none` and never with `pointer-events`, so the pointer can travel from the marker onto the card.
 
 ```css
 svg.map .cards-layer { pointer-events: none; overflow: visible; }
-svg.map .card { position: absolute; width: 22%; opacity: 0; pointer-events: none;
-                transition: opacity 0s linear 0.15s; }
-svg.map .card:hover { opacity: 1; pointer-events: auto; transition-delay: 0s; }
+svg.map .card { position: absolute; width: 22%; opacity: 0; visibility: hidden; pointer-events: auto;
+                transition: opacity 0.15s ease 0.45s, visibility 0s linear 0.6s; }
+svg.map .card:hover { opacity: 1; visibility: visible; transition-delay: 0s; }
 ```
 
 One generated rule per marker:
@@ -83,13 +83,13 @@ One generated rule per marker:
 ```css
 svg.map:has([data-key="aws:eu-west-2"]:hover) .card[data-key="aws:eu-west-2"],
 svg.map:has([data-key="aws:eu-west-2"]:focus-visible) .card[data-key="aws:eu-west-2"] {
-  opacity: 1; pointer-events: auto; transition-delay: 0s;
+  opacity: 1; visibility: visible; transition-delay: 0s;
 }
 ```
 
 Why this shape. SVG paints in document order and has no `z-index`. A card inside a marker's own group would sit under every marker drawn later. Putting all cards in one layer at the end of the SVG puts them on top of everything. The `:has()` selector lets a hover on the marker reveal a card that is not its descendant. Keyboard focus on the circle does the same.
 
-The 150 ms hide delay covers the pointer's trip across the gap between marker and card. The show has no delay.
+Why `visibility` and not `pointer-events`. `pointer-events` cannot be transitioned, so it would switch off the instant the pointer left the marker, and the card could never be reached. `visibility` can be delayed. After the pointer leaves the marker the card stays fully visible and hoverable for 450 ms, then fades over 150 ms, then becomes hidden. Once the pointer is on the card, `.card:hover` holds it open. Showing has no delay. A hidden card has `visibility: hidden`, which also blocks pointer events, so hidden cards never intercept hovers meant for markers under them.
 
 `:has()` is supported by Chrome 105, Safari 15.4, and Firefox 121 or newer. Older browsers keep the `<title>` tooltip and never see a card. Do not add a JavaScript fallback.
 
@@ -98,11 +98,11 @@ The 150 ms hide delay covers the pointer's trip across the gap between marker an
 All numbers are canvas units on the 1000 by 402.8 cropped canvas, converted to percentages of the `foreignObject` for `left`, `right`, `top`, and `bottom`.
 
 - Card width is 220 units, written as `width: 22%`.
-- Horizontal: when `x <= 700`, `left = x + 8`. Otherwise `right = 1000 - x + 8`. The card opens away from the nearer edge.
+- Horizontal: when `x <= 700`, `left = x + 4`. Otherwise `right = 1000 - x + 4`. The card opens away from the nearer edge.
 - Vertical: when `y - 13.9 <= 260`, `top = y - 10`. Otherwise `bottom = 416.7 - y - 10`. The card grows downward in the top two thirds and upward in the bottom third.
 - Convert with `left / 1000 * 100` and `top / 402.8 * 100`, one decimal place.
 
-The card overlaps the marker by 2 units on the near side so there is no dead gap. That is why the offset is 8 while the marker radius is 5 or 6.
+The card edge sits 4 units from the marker centre, inside a radius 6 marker and touching a radius 4 one, so there is no dead gap. An earlier draft used 8, which left a 2 unit gap and, together with an instant `pointer-events` switch, made links unreachable.
 
 ### Content
 
@@ -165,6 +165,7 @@ The `<title>` children stay. They are the accessible name and the fallback.
 
 - Do not put cards inside marker groups. They will be covered by later markers.
 - Do not use `display: none` for hidden cards. The pointer cannot reach a card that is not there.
+- Do not hide cards with `pointer-events: none`. It cannot be delayed, so the card becomes unreachable the instant the pointer leaves the marker. Use `visibility` with a transition delay.
 - `foreignObject` content needs the XHTML namespace on its root element or it will not render in some browsers.
 - Percentage `top` and `bottom` inside `foreignObject` are relative to its height. Use the cropped height, 402.8, not 500.
 - Card text scales with the map width. On a narrow phone it will be small. That is acceptable for v1; ADR-0012 can counter-scale.

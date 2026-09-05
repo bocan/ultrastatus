@@ -2,6 +2,7 @@
 
 import sqlite3
 from datetime import datetime, timedelta, timezone
+from importlib import resources
 from pathlib import Path
 
 from jinja2 import Environment, PackageLoader, select_autoescape
@@ -161,6 +162,7 @@ def build_context(conn: sqlite3.Connection, now: datetime) -> dict:
         "resolved_elsewhere": [_incident_dict(i, labels) for i in resolved_elsewhere],
         "map_svg": map_svg,
         "map_css": map_css,
+        "map_js": map_js(),
         "global_incidents": [d for d, i in zip(open_dicts, open_incidents) if not _on_map(i)],
     }
 
@@ -197,6 +199,11 @@ def build_map(
 
 def build_map_svg(open_incidents: list[Incident], stale_clouds: set[str], config: Config = Config(frozenset())) -> str:
     return build_map(open_incidents, stale_clouds, config)[0]
+
+
+def map_js() -> str:
+    """The pan and zoom script, inlined into the page so it makes no request."""
+    return resources.files("statusboard").joinpath("static/map.js").read_text(encoding="utf-8")
 
 
 def _format_ts(value: str | None) -> str:

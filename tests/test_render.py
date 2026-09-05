@@ -1,3 +1,4 @@
+import re
 from datetime import timedelta
 
 import pytest
@@ -109,7 +110,11 @@ def test_render_writes_page_for_empty_database(conn, tmp_path):
     assert target.name == "index.html"
     assert "No open incidents." in html
     assert "Nothing resolved in the last 7 days." in html
-    assert "<script" not in html
+    # ADR-0012: exactly one inline script, nothing fetched from the network.
+    assert html.count("<script") == 1
+    assert "<script src" not in html and "<script " not in html
+    assert '<link rel="stylesheet"' not in html
+    assert not re.search(r'<(script|link|img|iframe)[^>]+(src|href)="https?://', html)
     assert html.count('class="tile level-') == 9
     assert 'http-equiv="refresh"' in html
 

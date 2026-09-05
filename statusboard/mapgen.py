@@ -1,4 +1,4 @@
-"""World map as inline SVG: equirectangular projection, land path, region markers, hover cards."""
+"""World map as inline SVG: equirectangular projection, land path, region markers, hover cards, presets."""
 
 import html
 import json
@@ -14,6 +14,7 @@ LAT_MAX = 85.0   # crop the empty Arctic
 LAT_MIN = -60.0  # crop Antarctica
 RADIUS_MINE = 6
 RADIUS_OTHER = 4
+LABEL_OFFSET = (8, 4)
 
 # Three clouds share many cities. Offset each cloud so markers stay distinct.
 OFFSETS: dict[str, tuple[int, int]] = {"aws": (0, 0), "gcp": (7, 5), "azure": (-7, 5)}
@@ -21,15 +22,27 @@ CLOUD_LABELS: dict[str, str] = {"aws": "AWS", "gcp": "GCP", "azure": "Azure"}
 
 LEVEL_RANK: dict[str, int] = {"ok": 0, "stale": 0, "minor": 1, "major": 2, "critical": 3}
 
-GEOJSON_NAME = "world-110m.geojson"
+GEOJSON_NAME = "world-50m.geojson"
 LAND_PATH_NAME = "world-land.svgpath"
 
 # Hover card placement, in canvas units on the cropped canvas.
 CARD_WIDTH = 220
-CARD_GAP = 8            # marker centre to card edge; overlaps the marker by 2 units
+CARD_GAP = 4            # marker centre to card edge; a radius 6 marker overlaps the card by 2 units
 CARD_FLIP_X = 700       # past this, the card opens to the left
 CARD_FLIP_Y = 260       # past this many units below the crop top, the card opens upward
 CARD_MAX_INCIDENTS = 5
+
+# Continent presets in canvas units: every marker in the group plus a 30 unit margin,
+# measured from regions.csv on 2026-09-06.
+CONTINENT_BOXES: dict[str, tuple[float, float, float, float]] = {
+    "north-america": (123, 78, 210, 150),
+    "south-america": (267, 285, 141, 93),
+    "europe": (446, 55, 167, 118),
+    "middle-east-africa": (514, 131, 167, 248),
+    "asia": (658, 109, 267, 193),
+    "oceania": (866, 314, 134, 76),
+}
+MINE_MARGIN = 40
 
 
 def project(lon: float, lat: float, width: int = WIDTH, height: int = HEIGHT) -> tuple[float, float]:
@@ -139,6 +152,33 @@ def marker_layout(
     return markers
 
 
+def _clamp_box(box: tuple[float, float, float, float], width: int, top: float, bottom: float):
+    x, y, w, h = box
+    x = max(0.0, x)
+    y = max(top, y)
+    w = min(w, width - x)
+    h = min(h, bottom - y)
+    return (round(x, 1), round(y, 1), round(w, 1), round(h, 1))
+
+
+def preset_boxes(markers: list[Marker], filter_active: bool = False, width: int = WIDTH, height: int = HEIGHT):
+    """Named view boxes (x, y, w, h) in canvas units. 'mine' frames the mine markers, else the world."""
+    top, bottom = crop_bounds(width, height)
+    world = (0.0, round(top, 1), float(width), round(bottom - top, 1))
+    boxes = {"world": world}
+    for name, box in CONTINENT_BOXES.items():
+        boxes[name] = _clamp_box(box, width, top, bottom)
+    mine = [m for m in markers if m.mine] if filter_active else []
+    if mine:
+        xs = [m.x for m in mine]
+        ys = [m.y for m in mine]
+        box = (min(xs) - MINE_MARGIN, min(ys) - MINE_MARGIN, max(xs) - min(xs) + 2 * MINE_MARGIN, max(ys) - min(ys) + 2 * MINE_MARGIN)
+        boxes["mine"] = _clamp_box(box, width, top, bottom)
+    else:
+        boxes["mine"] = world
+    return boxes
+
+
 def card_style(m: Marker, width: int = WIDTH, height: int = HEIGHT) -> str:
     """Absolute position for the card, as percentages of the cropped canvas."""
     top, bottom = crop_bounds(width, height)
@@ -161,7 +201,7 @@ def _chip(level: str) -> str:
 def card_html(m: Marker, filter_active: bool) -> str:
     e = html.escape
     parts = [
-        f'<div class="card" data-key="{e(m.key)}" style="{card_style(m)}">',
+        f'<div class="card" data-key="{e(m.key)}" data-x="{m.x:.1f}" data-y="{m.y:.1f}" style="{card_style(m)}">',
         f'<div class="card-head"><b>{e(CLOUD_LABELS.get(m.cloud, m.cloud))} {e(m.code)}</b> '
         f'<span class="muted">{e(m.name)}</span></div>',
         f'<div class="card-tags">{_chip(m.level)}',
@@ -194,7 +234,7 @@ def hover_css(markers: list[Marker]) -> str:
         rules.append(
             f'svg.map:has([data-key="{key}"]:hover) .card[data-key="{key}"],'
             f'svg.map:has([data-key="{key}"]:focus-visible) .card[data-key="{key}"]'
-            "{opacity:1;pointer-events:auto;transition-delay:0s}"
+            "{opacity:1;visibility:visible;transition-delay:0s}"
         )
     return "\n".join(rules)
 
@@ -205,11 +245,16 @@ def render_svg(
     width: int = WIDTH,
     height: int = HEIGHT,
     filter_active: bool = False,
+    presets: dict | None = None,
 ) -> str:
     top, bottom = crop_bounds(width, height)
+    presets = presets if presets is not None else preset_boxes(markers, filter_active, width, height)
+    presets_attr = html.escape(json.dumps(presets, separators=(",", ":")), quote=True)
     parts = [
         f'<svg class="map" viewBox="0 {top:.1f} {width} {bottom - top:.1f}" width="100%" '
-        'preserveAspectRatio="xMidYMid meet" role="img" aria-label="World map of cloud region status">',
+        'preserveAspectRatio="xMidYMid meet" role="img" aria-label="World map of cloud region status" '
+        f'tabindex="0" data-presets="{presets_attr}">',
+        '<g class="viewport">',
         f'<path class="land" d="{land}"/>',
     ]
     for m in markers:
@@ -220,8 +265,14 @@ def render_svg(
             f'cx="{m.x:.1f}" cy="{m.y:.1f}" r="{radius}">'
             f"<title>{html.escape(m.tooltip)}</title></circle>"
         )
-    # Cards live in one layer after every marker. SVG has no z-index, so this is
-    # the only way a card can sit above markers drawn later than its own.
+        parts.append(
+            f'<text class="label" x="{m.x + LABEL_OFFSET[0]:.1f}" y="{m.y + LABEL_OFFSET[1]:.1f}">'
+            f"{html.escape(m.code)}</text>"
+        )
+    parts.append("</g>")
+    # Cards live in one layer after every marker and outside the zoomed viewport.
+    # SVG has no z-index, so this is the only way a card can sit above markers
+    # drawn later than its own, and it keeps cards at constant screen size.
     parts.append(
         f'<foreignObject class="cards-layer" x="0" y="{top:.1f}" width="{width}" height="{bottom - top:.1f}">'
         '<div xmlns="http://www.w3.org/1999/xhtml" class="cards">'

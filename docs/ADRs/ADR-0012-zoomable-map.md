@@ -91,7 +91,7 @@ The SVG has `tabindex="0"` so keys work after a click. Keyboard handlers only fi
 
 ### Markers at zoom
 
-Markers keep a constant screen size. On every state change the script sets `r = baseRadius / scale` and `stroke-width = 1 / scale` on each circle, where `baseRadius` is 6 for mine and 4 for other. Labels get `font-size = 11 / scale` and are shown only when `scale >= 3`, through a `zoomed` class on the SVG. At `scale >= 3` the cloud offsets shrink to `(dx / scale, dy / scale)` is **not** done. Offsets stay in canvas units so markers spread apart as you zoom. That is the point of zooming.
+Markers keep a constant screen size. On every state change the script sets `r = baseRadius / scale` and `stroke-width = 1 / scale` on each circle, where `baseRadius` is 6 for mine and 4 for other. Labels get `font-size = 11 / scale` and are shown only when `scale >= 5`, through a `zoomed` class on the SVG. The first draft said 3, but the Europe preset lands at about 3.1 and its 39 labels overlap into a pile. At 5 the cluster has spread enough to read. At `scale >= 3` the cloud offsets shrink to `(dx / scale, dy / scale)` is **not** done. Offsets stay in canvas units so markers spread apart as you zoom. That is the point of zooming.
 
 ### Hover card
 
@@ -164,7 +164,7 @@ Manual checklist, recorded in the ADR handoff when done:
 - Drag pans, clicks do not.
 - Pinch works on a phone or in Chrome device mode.
 - Hover card pins on click, closes on Escape, and stays the same screen size at 4x zoom.
-- Labels appear at scale 3.
+- Labels appear at scale 5.
 - Reload keeps the last view.
 - With JavaScript disabled the map still renders with tooltips.
 
