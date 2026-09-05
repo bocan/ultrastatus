@@ -6,7 +6,8 @@ from pathlib import Path
 
 from jinja2 import Environment, PackageLoader, select_autoescape
 
-from statusboard import db
+from statusboard import db, regions
+from statusboard.mapgen import land_path, marker_layout, render_svg
 from statusboard.model import Incident
 from statusboard.providers import PROVIDERS
 
@@ -116,12 +117,34 @@ def build_context(conn: sqlite3.Connection, now: datetime) -> dict:
             }
         )
 
+    open_dicts = [_incident_dict(i, labels) for i in open_incidents]
+    stale_clouds = {p["name"] for p in providers if p["level"] == "stale" and p["name"] in ("aws", "gcp", "azure")}
     return {
         "generated_at": db.to_iso(now),
         "providers": providers,
-        "open": [_incident_dict(i, labels) for i in open_incidents],
+        "open": open_dicts,
         "resolved": [_incident_dict(i, labels) for i in resolved],
+        "map_svg": build_map_svg(open_incidents, stale_clouds),
+        "global_incidents": [d for d, i in zip(open_dicts, open_incidents) if not _on_map(i)],
     }
+
+
+def _on_map(inc: Incident) -> bool:
+    return any(regions.lookup(r.cloud, r.code) is not None for r in inc.regions)
+
+
+def build_map_svg(open_incidents: list[Incident], stale_clouds: set[str]) -> str:
+    levels: dict[tuple[str, str], str] = {}
+    titles: dict[tuple[str, str], list[str]] = {}
+    for inc in open_incidents:
+        for r in inc.regions:
+            key = (r.cloud, r.code)
+            current = levels.get(key, "ok")
+            if SEVERITY_RANK[inc.severity] > SEVERITY_RANK.get(current, 0):
+                levels[key] = inc.severity
+            titles.setdefault(key, []).append(inc.title)
+    markers = marker_layout(regions.all_regions(), levels, titles, stale_clouds)
+    return render_svg(markers, land_path())
 
 
 def _format_ts(value: str | None) -> str:

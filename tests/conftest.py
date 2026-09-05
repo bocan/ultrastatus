@@ -40,5 +40,5 @@ def make_incident(
         resolved_at=resolved_at,
         url=url,
         last_message=last_message,
-        regions=list(regions) if regions else [Region("aws", "us-east-1")],
+        regions=list(regions) if regions is not None else [Region("aws", "us-east-1")],
     )
