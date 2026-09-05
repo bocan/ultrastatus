@@ -1,0 +1,143 @@
+cloud,code,name,lat,lon
+aws,af-south-1,Cape Town,-33.9,18.4
+aws,ap-east-1,Hong Kong,22.3,114.2
+aws,ap-east-2,Taipei,25.0,121.6
+aws,ap-northeast-1,Tokyo,35.7,139.7
+aws,ap-northeast-2,Seoul,37.6,127.0
+aws,ap-northeast-3,Osaka,34.7,135.5
+aws,ap-south-1,Mumbai,19.1,72.9
+aws,ap-south-2,Hyderabad,17.4,78.5
+aws,ap-southeast-1,Singapore,1.3,103.8
+aws,ap-southeast-2,Sydney,-33.9,151.2
+aws,ap-southeast-3,Jakarta,-6.2,106.8
+aws,ap-southeast-4,Melbourne,-37.8,145.0
+aws,ap-southeast-5,Malaysia (Kuala Lumpur),3.1,101.7
+aws,ap-southeast-6,New Zealand (Auckland),-36.8,174.8
+aws,ap-southeast-7,Thailand (Bangkok),13.8,100.5
+aws,ca-central-1,Canada Central (Montreal),45.5,-73.6
+aws,ca-west-1,Canada West (Calgary),51.0,-114.1
+aws,cn-north-1,Beijing,39.9,116.4
+aws,cn-northwest-1,Ningxia,37.5,105.2
+aws,eu-central-1,Frankfurt,50.1,8.7
+aws,eu-central-2,Zurich,47.4,8.5
+aws,eu-north-1,Stockholm,59.3,18.1
+aws,eu-south-1,Milan,45.5,9.2
+aws,eu-south-2,Spain (Zaragoza),41.6,-0.9
+aws,eu-west-1,Ireland (Dublin),53.3,-6.3
+aws,eu-west-2,London,51.5,-0.1
+aws,eu-west-3,Paris,48.9,2.4
+aws,il-central-1,Tel Aviv,32.1,34.8
+aws,me-central-1,UAE (Abu Dhabi),24.5,54.4
+aws,me-south-1,Bahrain (Manama),26.2,50.6
+aws,mx-central-1,Mexico Central (Queretaro),20.6,-100.4
+aws,sa-east-1,Sao Paulo,-23.5,-46.6
+aws,us-east-1,N. Virginia (Ashburn),39.0,-77.5
+aws,us-east-2,Ohio (Columbus),40.0,-83.0
+aws,us-gov-east-1,GovCloud US-East (Ohio),40.0,-83.0
+aws,us-gov-west-1,GovCloud US-West (Oregon),45.8,-119.7
+aws,us-west-1,N. California (San Francisco),37.8,-122.4
+aws,us-west-2,Oregon (Boardman),45.8,-119.7
+azure,australiacentral,Australia Central,-35.3,149.1
+azure,australiacentral2,Australia Central 2,-35.3,149.1
+azure,australiaeast,Australia East,-33.9,151.2
+azure,australiasoutheast,Australia Southeast,-37.8,145.0
+azure,austriaeast,Austria East,48.2,16.4
+azure,belgiumcentral,Belgium Central,50.8,4.4
+azure,brazilsouth,Brazil South,-23.5,-46.6
+azure,brazilsoutheast,Brazil Southeast,-22.9,-43.2
+azure,canadacentral,Canada Central,43.7,-79.4
+azure,canadaeast,Canada East,46.8,-71.2
+azure,centralindia,Central India,18.5,73.9
+azure,centralus,Central US,41.6,-93.6
+azure,chilecentral,Chile Central,-33.4,-70.6
+azure,chinaeast2,China East 2,31.2,121.5
+azure,chinaeast3,China East 3,31.2,121.5
+azure,chinanorth2,China North 2,39.9,116.4
+azure,chinanorth3,China North 3,40.8,114.9
+azure,eastasia,East Asia,22.3,114.2
+azure,eastus,East US,37.4,-79.8
+azure,eastus2,East US 2,36.7,-78.4
+azure,francecentral,France Central,48.9,2.4
+azure,francesouth,France South,43.3,5.4
+azure,germanynorth,Germany North,52.5,13.4
+azure,germanywestcentral,Germany West Central,50.1,8.7
+azure,indonesiacentral,Indonesia Central,-6.2,106.8
+azure,israelcentral,Israel Central,32.1,34.8
+azure,italynorth,Italy North,45.5,9.2
+azure,japaneast,Japan East,35.7,139.7
+azure,japanwest,Japan West,34.7,135.5
+azure,koreacentral,Korea Central,37.6,127.0
+azure,koreasouth,Korea South,35.2,129.1
+azure,malaysiawest,Malaysia West,3.1,101.7
+azure,mexicocentral,Mexico Central,20.6,-100.4
+azure,newzealandnorth,New Zealand North,-36.8,174.8
+azure,northcentralus,North Central US,41.9,-87.6
+azure,northeurope,North Europe,53.3,-6.3
+azure,norwayeast,Norway East,59.9,10.8
+azure,norwaywest,Norway West,59.0,5.7
+azure,polandcentral,Poland Central,52.2,21.0
+azure,qatarcentral,Qatar Central,25.3,51.5
+azure,southafricanorth,South Africa North,-26.2,28.0
+azure,southafricawest,South Africa West,-33.9,18.4
+azure,southcentralus,South Central US,29.4,-98.5
+azure,southeastasia,Southeast Asia,1.3,103.8
+azure,southindia,South India,13.1,80.3
+azure,spaincentral,Spain Central,40.4,-3.7
+azure,swedencentral,Sweden Central,60.7,17.1
+azure,switzerlandnorth,Switzerland North,47.4,8.5
+azure,switzerlandwest,Switzerland West,46.2,6.1
+azure,uaecentral,UAE Central,24.5,54.4
+azure,uaenorth,UAE North,25.2,55.3
+azure,uksouth,UK South,51.5,-0.1
+azure,ukwest,UK West,51.5,-3.2
+azure,usgovarizona,US Gov Arizona,33.4,-112.1
+azure,usgovtexas,US Gov Texas,29.4,-98.5
+azure,usgovvirginia,US Gov Virginia,37.4,-79.8
+azure,westcentralus,West Central US,41.0,-104.8
+azure,westeurope,West Europe,52.4,4.9
+azure,westindia,West India,19.1,72.9
+azure,westus,West US,37.8,-122.4
+azure,westus2,West US 2,47.2,-119.9
+azure,westus3,West US 3,33.4,-112.1
+gcp,africa-south1,Johannesburg,-26.2,28.0
+gcp,asia-east1,Taiwan (Changhua),24.1,120.5
+gcp,asia-east2,Hong Kong,22.3,114.2
+gcp,asia-northeast1,Tokyo,35.7,139.7
+gcp,asia-northeast2,Osaka,34.7,135.5
+gcp,asia-northeast3,Seoul,37.6,127.0
+gcp,asia-south1,Mumbai,19.1,72.9
+gcp,asia-south2,Delhi,28.6,77.2
+gcp,asia-southeast1,Singapore,1.3,103.8
+gcp,asia-southeast2,Jakarta,-6.2,106.8
+gcp,australia-southeast1,Sydney,-33.9,151.2
+gcp,australia-southeast2,Melbourne,-37.8,145.0
+gcp,europe-central2,Warsaw,52.2,21.0
+gcp,europe-north1,Finland (Hamina),60.6,27.2
+gcp,europe-north2,Stockholm,59.3,18.1
+gcp,europe-southwest1,Madrid,40.4,-3.7
+gcp,europe-west1,Belgium (St. Ghislain),50.5,3.8
+gcp,europe-west10,Berlin,52.5,13.4
+gcp,europe-west12,Turin,45.1,7.7
+gcp,europe-west2,London,51.5,-0.1
+gcp,europe-west3,Frankfurt,50.1,8.7
+gcp,europe-west4,Netherlands (Eemshaven),53.4,6.8
+gcp,europe-west6,Zurich,47.4,8.5
+gcp,europe-west8,Milan,45.5,9.2
+gcp,europe-west9,Paris,48.9,2.4
+gcp,me-central1,Doha,25.3,51.5
+gcp,me-central2,Dammam,26.4,50.1
+gcp,me-west1,Tel Aviv,32.1,34.8
+gcp,northamerica-northeast1,Montreal,45.5,-73.6
+gcp,northamerica-northeast2,Toronto,43.7,-79.4
+gcp,northamerica-south1,Queretaro,20.6,-100.4
+gcp,southamerica-east1,Sao Paulo,-23.5,-46.6
+gcp,southamerica-west1,Santiago,-33.4,-70.6
+gcp,us-central1,Iowa (Council Bluffs),41.3,-95.9
+gcp,us-east1,South Carolina (Moncks Corner),33.2,-80.0
+gcp,us-east4,N. Virginia (Ashburn),39.0,-77.5
+gcp,us-east5,Ohio (Columbus),40.0,-83.0
+gcp,us-south1,Texas (Dallas),32.8,-96.8
+gcp,us-west1,Oregon (The Dalles),45.6,-121.2
+gcp,us-west2,Los Angeles,34.1,-118.2
+gcp,us-west3,Salt Lake City,40.8,-111.9
+gcp,us-west4,Las Vegas,36.2,-115.1
