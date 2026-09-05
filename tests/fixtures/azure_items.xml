@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss xmlns:a10="http://www.w3.org/2005/Atom"
+  version="2.0">
+  <channel xmlns:slash="http://purl.org/rss/1.0/modules/slash/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:wfw="http://wellformedweb.org/CommentAPI/" xmlns:dc="http://purl.org/dc/elements/1.1/">
+    <title>Azure Status</title>
+    <link>https://status.azure.com/en-us/status/</link>
+    <description>Azure Status</description>
+    <language>en-us</language>
+    <lastBuildDate>Fri, 19 Jul 2024 14:20:13 Z</lastBuildDate>
+    <item>
+      <guid
+        isPermaLink="false">awareness-virtual-machines</guid>
+      <link>https://status.azure.com/en-us/status/</link>
+      <category>Virtual Machines</category>
+      <category>West Europe</category>
+      <category>North Europe</category>
+      <category>East US 2</category>
+      <title>Awareness - Virtual Machines </title>
+      <description>&lt;p&gt;We have been made aware of an issue impacting Virtual Machines running Windows Client and Windows Server, running the CrowdStrike Falcon agent, which may encounter a bug check (BSOD) and get stuck in a restarting state.&amp;nbsp;&lt;/p&gt;&lt;p&gt;Updated: We approximate impact started as early as 04:09 UTC on the 18th of July, when this update started rolling out.&lt;/p&gt;&lt;p&gt;Additionally, we're continuing to investigate additional mitigation options for customers and will share more information as it becomes known.&lt;/p&gt;</description>
+      <pubDate>Thu, 18 Jul 2024 04:09:00 Z</pubDate>
+    </item>
+    <item>
+      <link>https://status.azure.com/en-us/status/</link>
+      <title>Storage - East US 2 - Mitigated</title>
+      <description>&lt;p&gt;&lt;strong&gt;Impact statement:&lt;/strong&gt; Between 09:00 and 10:30 UTC customers using Storage in East US 2 may have seen elevated latency. This has been mitigated.&lt;/p&gt;</description>
+      <pubDate>Tue, 30 Jul 2024 10:30:00 Z</pubDate>
+    </item>
+    <item>
+      <guid
+        isPermaLink="false">network-infrastructure-issues-accessing-a-subset-of-microsoft-services</guid>
+      <link>https://status.azure.com/en-us/status/</link>
+      <category>Network Infrastructure</category>
+      <category>Public Non-Regional</category>
+      <category>UK South</category>
+      <title>Network Infrastructure - Issues accessing a subset of Microsoft services</title>
+      <description>&lt;p&gt;&lt;strong&gt;Impact statement: &lt;/strong&gt;Starting approximately at 11:45 UTC on 30 July 2024, a subset of customers may have experienced issues connecting to Microsoft services globally.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;Current Status:&lt;/strong&gt; An unexpected usage spike resulted in Azure Front Door (AFD) components performing below acceptable thresholds, leading to intermittent errors, timeout, and latency spikes.&lt;/p&gt;</description>
+      <pubDate>Tue, 30 Jul 2024 12:00:00 Z</pubDate>
+    </item>
+  </channel>
+</rss>
