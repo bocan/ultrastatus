@@ -13,6 +13,9 @@ Each ADR is one session of work for a model. Run them in order. Each one lists w
 | [0007](ADR-0007-azure-provider.md) | Azure provider | RSS parsing, region names found in text |
 | [0008](ADR-0008-static-dashboard.md) | Static dashboard | `render` command, Jinja2 page, cron |
 | [0009](ADR-0009-world-map.md) | World map | Inline SVG map with region markers |
+| [0010](ADR-0010-statuspage-providers.md) | Statuspage providers | One class for GitHub, Cloudflare, Claude, npm, and Docker |
+
+ADR-0010 is out of numeric order on purpose. Run it after ADR-0004 and before ADR-0005, so the dashboard in ADR-0008 sees every provider.
 
 ## How to run one
 

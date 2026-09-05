@@ -31,7 +31,7 @@ db.recent_resolved(conn, since) -> list[Incident]
 db.last_polls(conn) -> dict[provider, (polled_at, error | None)]
 ```
 
-The five provider names: `github`, `gcp`, `aws`, `databricks`, `azure`.
+The nine provider names: `aws`, `gcp`, `azure`, `github`, `databricks`, `cloudflare`, `claude`, `npm`, `docker`. The last four come from ADR-0010.
 
 ## Implementation plan
 
@@ -70,7 +70,7 @@ Returns a plain dict the template consumes:
 
 Rules:
 
-- Provider order is fixed: AWS, GCP, Azure, GitHub, Databricks.
+- Provider order is fixed: AWS, GCP, Azure, GitHub, Databricks, Cloudflare, Claude, npm, Docker. Tiles wrap onto a second row on narrow screens.
 - `level` is the worst severity among that provider's open incidents. `ok` when there are none.
 - `level` is `stale` when the last poll is older than 15 minutes or its `error` is not None, regardless of incidents. A stale provider still lists its open incidents.
 - A provider with no `poll_run` row is `stale` with `polled_at: None`.
@@ -82,10 +82,10 @@ Rules:
 
 1. Header: `Cloud status`, generated time, and a note `refreshes every 2 minutes` if the meta refresh is set.
 2. `<meta http-equiv="refresh" content="120">`.
-3. A row of five provider tiles. Each tile shows the label, a large coloured status word, open incident count, and `polled 3 min ago` or the error text.
+3. A row of nine provider tiles. Each tile shows the label, a large coloured status word, open incident count, and `polled 3 min ago` or the error text.
 4. `Open incidents` table: provider, severity, title linked to `url` when present, started, updated, regions, last message truncated to 240 characters with a `title` attribute holding the full text.
 5. `Resolved in the last 7 days` table: same columns plus resolved time.
-6. Footer: links to the five source status pages.
+6. Footer: links to the nine source status pages.
 
 An empty open table shows `No open incidents.` An empty resolved table shows `Nothing resolved in the last 7 days.`
 
@@ -131,7 +131,7 @@ Also note: `poll` exits 1 when one provider fails but still writes the others, s
 
 `tests/test_render.py`:
 
-- `build_context` with an empty database gives five providers, all `stale`, `polled_at` None, empty lists.
+- `build_context` with an empty database gives nine providers, all `stale`, `polled_at` None, empty lists.
 - With one open `critical` aws incident and a fresh poll, aws is `critical`, the others are `ok` or `stale` as their polls dictate.
 - A provider whose last poll is 20 minutes old is `stale` even with no incidents.
 - A provider whose last poll has an error is `stale` and the context carries the error text.
@@ -142,7 +142,7 @@ Also note: `poll` exits 1 when one provider fails but still writes the others, s
 ## Acceptance criteria
 
 - `make test` passes.
-- `make refresh` produces `site/index.html`. Opening it in a browser shows five tiles and both tables.
+- `make refresh` produces `site/index.html`. Opening it in a browser shows nine tiles and both tables.
 - The page validates as HTML with no external requests. Check the browser network tab: one request only.
 
 ## Gotchas

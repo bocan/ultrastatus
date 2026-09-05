@@ -80,7 +80,7 @@ Markers with an incident render after all `ok` markers so they draw on top.
 
 ### Global incidents
 
-An open incident with no regions is global. Show a line above the map: `Global: <provider> <title>` for each, with the severity colour. GitHub incidents always land here.
+An open incident with no regions is global. Show a line above the map: `Global: <provider> <title>` for each, with the severity colour. GitHub, Cloudflare, Claude, npm, and Docker incidents always land here.
 
 ### Legend
 
