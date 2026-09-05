@@ -79,6 +79,33 @@ def test_stale_cloud_greys_only_ok_markers():
     assert all(level == "stale" for k, level in by_key.items() if k != key)
 
 
+def test_all_markers_mine_when_filter_empty():
+    markers = marker_layout(regions.all_regions(), {}, my_regions=frozenset())
+    assert all(m.mine for m in markers)
+    svg = render_svg(markers, "M0 0Z")
+    assert "marker-other" not in svg
+    assert 'r="6"' in svg and 'r="4"' not in svg
+
+
+def test_only_my_marker_is_large_and_bright():
+    rows = regions.all_regions()
+    markers = marker_layout(rows, {}, my_regions={("aws", "eu-west-2")})
+    mine = [m for m in markers if m.mine]
+    assert [(m.cloud, m.code) for m in mine] == [("aws", "eu-west-2")]
+    svg = render_svg(markers, "M0 0Z")
+    assert svg.count("marker-other") == len(rows) - 1
+    assert svg.count('r="6"') == 1
+    assert svg.count('r="4"') == len(rows) - 1
+
+
+def test_elsewhere_incident_draws_before_my_incident():
+    rows = regions.all_regions()
+    levels = {("aws", "us-east-1"): "major", ("aws", "eu-west-2"): "major"}
+    markers = marker_layout(rows, levels, my_regions={("aws", "eu-west-2")})
+    assert markers[-1].code == "eu-west-2"
+    assert markers[-2].code == "us-east-1"
+
+
 def test_render_svg_shape_and_tooltip():
     markers = [
         Marker("aws", "us-east-1", "N. Virginia (Ashburn)", 284.7, 141.7, "critical", ["A <b>bad</b> day", "Two", "Three", "Four"]),

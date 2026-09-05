@@ -46,6 +46,15 @@ svg.map .marker-minor    { fill: var(--minor-fg); }
 svg.map .marker-major    { fill: var(--major-fg); }
 svg.map .marker-critical { fill: var(--critical-fg); }
 svg.map .marker-stale    { fill: var(--stale-fg); }
+svg.map .marker-other    { opacity: 0.4; }
+.banner { margin: 0 0 1rem; padding: 0.6rem 0.9rem; border-radius: 8px; font-weight: 600; }
+.banner-clear { color: var(--ok-fg); background: var(--ok-bg); }
+.banner-open  { color: var(--major-fg); background: var(--major-bg); }
+.tile .elsewhere { color: var(--ink-2); opacity: 0.75; }
+details.elsewhere-block { margin: 0.5rem 0 2rem; }
+details.elsewhere-block summary { cursor: pointer; color: var(--ink-2); font-weight: 600; padding: 0.25rem 0; }
+details.elsewhere-block .table-wrap { margin-top: 0.5rem; margin-bottom: 0; }
+.legend .swatch-big { width: 0.9rem; height: 0.9rem; background: var(--ok-fg); }
 .global-list { list-style: none; padding: 0; margin: 0 0 0.75rem; display: flex; flex-direction: column; gap: 0.25rem; }
 .global-list li { font-size: 0.9rem; }
 .global-list .level { display: inline-block; padding: 0.05rem 0.45rem; border-radius: 5px; font-weight: 600; font-size: 0.8rem; text-transform: uppercase; margin-right: 0.35rem; }
@@ -94,6 +103,16 @@ footer ul { list-style: none; padding: 0; margin: 0.25rem 0 0; display: flex; fl
   <span class="meta">Generated {{ generated_at | ts }}. Refreshes every 2 minutes.</span>
 </header>
 
+{% if filter_active %}
+<p class="banner {{ 'banner-clear' if all_clear else 'banner-open' }}">
+  {% if all_clear %}
+  All clear in your regions: {{ my_region_labels | join(', ') }}
+  {% else %}
+  {{ open | length }} open incident{{ '' if open | length == 1 else 's' }} in your regions
+  {% endif %}
+</p>
+{% endif %}
+
 {% if global_incidents %}
 <ul class="global-list">
 {% for i in global_incidents %}
@@ -120,6 +139,9 @@ footer ul { list-style: none; padding: 0; margin: 0.25rem 0 0; display: flex; fl
     </svg>Azure left, AWS centre, GCP right
   </span>
   <span>Databricks incidents are shown on their host cloud's marker.</span>
+  {% if filter_active %}
+  <span><span class="swatch swatch-big"></span>large = your regions</span>
+  {% endif %}
 </div>
 
 <div class="tiles">
@@ -127,7 +149,14 @@ footer ul { list-style: none; padding: 0; margin: 0.25rem 0 0; display: flex; fl
   <div class="tile level-{{ p.level }}">
     <h2>{{ p.label }}</h2>
     <span class="level level-{{ p.level }}">{{ p.level }}</span>
+    {% if filter_active and p.has_regions %}
+    <div class="count">{{ p.open_count }} open in your regions</div>
+    {% if p.elsewhere_count %}
+    <div class="count elsewhere">{{ p.elsewhere_count }} elsewhere</div>
+    {% endif %}
+    {% else %}
     <div class="count">{{ p.open_count }} open incident{{ '' if p.open_count == 1 else 's' }}</div>
+    {% endif %}
     {% if p.poll_error %}
     <div class="error">Poll failed: {{ p.poll_error }}</div>
     {% elif p.polled_ago %}
@@ -156,31 +185,51 @@ footer ul { list-style: none; padding: 0; margin: 0.25rem 0 0; display: flex; fl
 {% endfor %}
 {% endmacro %}
 
-<section>
-  <h2>Open incidents</h2>
-  {% if open %}
+{% macro open_table(rows) %}
   <div class="table-wrap">
   <table>
     <thead><tr><th>Provider</th><th>Severity</th><th>Title</th><th>Started</th><th>Updated</th><th>Regions</th><th>Last message</th></tr></thead>
-    <tbody>{{ incident_rows(open, false) }}</tbody>
+    <tbody>{{ incident_rows(rows, false) }}</tbody>
   </table>
   </div>
+{% endmacro %}
+
+{% macro resolved_table(rows) %}
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>Provider</th><th>Severity</th><th>Title</th><th>Started</th><th>Updated</th><th>Resolved</th><th>Regions</th><th>Last message</th></tr></thead>
+    <tbody>{{ incident_rows(rows, true) }}</tbody>
+  </table>
+  </div>
+{% endmacro %}
+
+<section>
+  <h2>{% if filter_active %}Open in your regions{% else %}Open incidents{% endif %}</h2>
+  {% if open %}
+  {{ open_table(open) }}
   {% else %}
-  <p class="empty">No open incidents.</p>
+  <p class="empty">{% if filter_active %}No open incidents in your regions.{% else %}No open incidents.{% endif %}</p>
+  {% endif %}
+  {% if open_elsewhere %}
+  <details class="elsewhere-block">
+    <summary>Open elsewhere ({{ open_elsewhere | length }})</summary>
+    {{ open_table(open_elsewhere) }}
+  </details>
   {% endif %}
 </section>
 
 <section>
-  <h2>Resolved in the last 7 days</h2>
+  <h2>{% if filter_active %}Resolved in your regions, last 7 days{% else %}Resolved in the last 7 days{% endif %}</h2>
   {% if resolved %}
-  <div class="table-wrap">
-  <table>
-    <thead><tr><th>Provider</th><th>Severity</th><th>Title</th><th>Started</th><th>Updated</th><th>Resolved</th><th>Regions</th><th>Last message</th></tr></thead>
-    <tbody>{{ incident_rows(resolved, true) }}</tbody>
-  </table>
-  </div>
+  {{ resolved_table(resolved) }}
   {% else %}
-  <p class="empty">Nothing resolved in the last 7 days.</p>
+  <p class="empty">{% if filter_active %}Nothing resolved in your regions in the last 7 days.{% else %}Nothing resolved in the last 7 days.{% endif %}</p>
+  {% endif %}
+  {% if resolved_elsewhere %}
+  <details class="elsewhere-block">
+    <summary>Resolved elsewhere ({{ resolved_elsewhere | length }})</summary>
+    {{ resolved_table(resolved_elsewhere) }}
+  </details>
   {% endif %}
 </section>
 

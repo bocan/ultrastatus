@@ -7,6 +7,7 @@ from pathlib import Path
 from jinja2 import Environment, PackageLoader, select_autoescape
 
 from statusboard import db, regions
+from statusboard.config import Config, load_config
 from statusboard.mapgen import land_path, marker_layout, render_svg
 from statusboard.model import Incident
 from statusboard.providers import PROVIDERS
@@ -24,6 +25,10 @@ PROVIDER_ORDER: list[tuple[str, str]] = [
     ("npm", "npm"),
     ("docker", "Docker"),
 ]
+
+CLOUD_PROVIDERS = ("aws", "gcp", "azure")
+# Providers whose incidents carry regions, so the filter can split them.
+REGIONAL_PROVIDERS = ("aws", "gcp", "azure", "databricks")
 
 SOURCE_URLS: dict[str, str] = {
     "aws": "https://health.aws.amazon.com/health/status",
@@ -84,15 +89,37 @@ def _incident_dict(inc: Incident, labels: dict[str, str]) -> dict:
     }
 
 
+def _on_map(inc: Incident) -> bool:
+    return any(regions.lookup(r.cloud, r.code) is not None for r in inc.regions)
+
+
+def is_mine(inc: Incident, config: Config) -> bool:
+    """Global incidents and incidents with no mappable region are always mine."""
+    if not config.active or not _on_map(inc):
+        return True
+    return any((r.cloud, r.code) in config.my_regions for r in inc.regions)
+
+
+def _open_sort_key(inc: Incident):
+    return (-SEVERITY_RANK[inc.severity], -inc.updated_at.timestamp())
+
+
 def build_context(conn: sqlite3.Connection, now: datetime) -> dict:
+    config = load_config()
     labels = {name: _label(name, default) for name, default in PROVIDER_ORDER}
-    open_incidents = db.open_incidents(conn)
+    open_incidents = sorted(db.open_incidents(conn), key=_open_sort_key)
     resolved = db.recent_resolved(conn, now - RESOLVED_WINDOW)
     polls = db.last_polls(conn)
 
+    open_mine = [i for i in open_incidents if is_mine(i, config)]
+    open_elsewhere = [i for i in open_incidents if not is_mine(i, config)]
+    resolved_mine = [i for i in resolved if is_mine(i, config)]
+    resolved_elsewhere = [i for i in resolved if not is_mine(i, config)]
+
     providers = []
     for name, _default in PROVIDER_ORDER:
-        mine = [i for i in open_incidents if i.provider == name]
+        mine = [i for i in open_mine if i.provider == name]
+        elsewhere = [i for i in open_elsewhere if i.provider == name]
         level = _worst([i.severity for i in mine])
         poll = polls.get(name)
         polled_at, poll_error, polled_ago = None, None, None
@@ -110,6 +137,8 @@ def build_context(conn: sqlite3.Connection, now: datetime) -> dict:
                 "label": labels[name],
                 "level": level,
                 "open_count": len(mine),
+                "elsewhere_count": len(elsewhere),
+                "has_regions": name in REGIONAL_PROVIDERS,
                 "polled_at": polled_at,
                 "polled_ago": polled_ago,
                 "poll_error": poll_error,
@@ -117,23 +146,24 @@ def build_context(conn: sqlite3.Connection, now: datetime) -> dict:
             }
         )
 
+    stale_clouds = {p["name"] for p in providers if p["level"] == "stale" and p["name"] in CLOUD_PROVIDERS}
     open_dicts = [_incident_dict(i, labels) for i in open_incidents]
-    stale_clouds = {p["name"] for p in providers if p["level"] == "stale" and p["name"] in ("aws", "gcp", "azure")}
     return {
         "generated_at": db.to_iso(now),
         "providers": providers,
-        "open": open_dicts,
-        "resolved": [_incident_dict(i, labels) for i in resolved],
-        "map_svg": build_map_svg(open_incidents, stale_clouds),
+        "filter_active": config.active,
+        "my_region_labels": sorted(f"{cloud} {code}" for cloud, code in config.my_regions),
+        "all_clear": not open_mine,
+        "open": [_incident_dict(i, labels) for i in open_mine],
+        "open_elsewhere": [_incident_dict(i, labels) for i in open_elsewhere],
+        "resolved": [_incident_dict(i, labels) for i in resolved_mine],
+        "resolved_elsewhere": [_incident_dict(i, labels) for i in resolved_elsewhere],
+        "map_svg": build_map_svg(open_incidents, stale_clouds, config),
         "global_incidents": [d for d, i in zip(open_dicts, open_incidents) if not _on_map(i)],
     }
 
 
-def _on_map(inc: Incident) -> bool:
-    return any(regions.lookup(r.cloud, r.code) is not None for r in inc.regions)
-
-
-def build_map_svg(open_incidents: list[Incident], stale_clouds: set[str]) -> str:
+def build_map_svg(open_incidents: list[Incident], stale_clouds: set[str], config: Config = Config(frozenset())) -> str:
     levels: dict[tuple[str, str], str] = {}
     titles: dict[tuple[str, str], list[str]] = {}
     for inc in open_incidents:
@@ -143,7 +173,7 @@ def build_map_svg(open_incidents: list[Incident], stale_clouds: set[str]) -> str
             if SEVERITY_RANK[inc.severity] > SEVERITY_RANK.get(current, 0):
                 levels[key] = inc.severity
             titles.setdefault(key, []).append(inc.title)
-    markers = marker_layout(regions.all_regions(), levels, titles, stale_clouds)
+    markers = marker_layout(regions.all_regions(), levels, titles, stale_clouds, config.my_regions)
     return render_svg(markers, land_path())
 
 

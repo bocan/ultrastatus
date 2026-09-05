@@ -1,0 +1,11 @@
+# Copy to statusboard.toml and list the regions you run in.
+# Codes are the canonical ones from statusboard/data/regions.csv:
+#   aws   us-east-1, eu-west-2, ...
+#   gcp   us-central1, europe-west2, ...
+#   azure eastus, uksouth, westeurope, ...
+# Remove the file, or leave [regions] empty, to show every region equally.
+
+[regions]
+aws   = ["eu-west-2", "us-east-1"]
+gcp   = ["europe-west2"]
+azure = ["uksouth", "westeurope"]

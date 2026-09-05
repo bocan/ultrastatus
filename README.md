@@ -15,6 +15,19 @@ make test
 
 `make help` lists every target.
 
+## Your regions
+
+Copy `statusboard.example.toml` to `statusboard.toml` and list the regions you run in:
+
+```toml
+[regions]
+aws   = ["eu-west-2", "us-east-1"]
+gcp   = ["europe-west2"]
+azure = ["uksouth"]
+```
+
+With the file present, the page puts your regions first: a banner says whether you are all clear, cloud tiles count incidents in your regions and mute the rest, your markers draw large and the others faint, and incidents elsewhere collapse under a details block. Without the file every region is treated equally. The path can be changed with `STATUSBOARD_CONFIG`. A typo in a region code stops `make render` with a suggestion. The filter applies at render time only, so the database keeps every incident.
+
 ## Database
 
 Path comes from `STATUSBOARD_DB`, default `./statusboard.sqlite3`. Three tables: `incident`, `incident_region`, `poll_run`. See ADR-0001 for the schema and the rule that every column must have a reader and a writer.

@@ -6,6 +6,12 @@ from statusboard import db
 from statusboard.model import Incident, Region
 
 
+@pytest.fixture(autouse=True)
+def no_user_config(monkeypatch, tmp_path):
+    """Never let a developer's real statusboard.toml leak into the tests."""
+    monkeypatch.setenv("STATUSBOARD_CONFIG", str(tmp_path / "no-such-config.toml"))
+
+
 @pytest.fixture
 def conn(tmp_path):
     connection = db.connect(str(tmp_path / "test.sqlite3"))

@@ -12,7 +12,8 @@ WIDTH = 1000
 HEIGHT = 500
 LAT_MAX = 85.0   # crop the empty Arctic
 LAT_MIN = -60.0  # crop Antarctica
-RADIUS = 5
+RADIUS_MINE = 6
+RADIUS_OTHER = 4
 
 # Three clouds share many cities. Offset each cloud so markers stay distinct.
 OFFSETS: dict[str, tuple[int, int]] = {"aws": (0, 0), "gcp": (7, 5), "azure": (-7, 5)}
@@ -77,6 +78,7 @@ class Marker:
     y: float
     level: str
     titles: list[str] = field(default_factory=list)
+    mine: bool = True
 
     @property
     def tooltip(self) -> str:
@@ -91,8 +93,13 @@ def marker_layout(
     levels: dict[tuple[str, str], str],
     titles: dict[tuple[str, str], list[str]] | None = None,
     stale_clouds: set[str] | frozenset[str] = frozenset(),
+    my_regions: set[tuple[str, str]] | frozenset[tuple[str, str]] = frozenset(),
 ) -> list[Marker]:
-    """One marker per region row. Markers with an incident come last so they draw on top."""
+    """One marker per region row.
+
+    Draw order: markers with an incident come last so they sit on top, and among
+    those, mine after elsewhere. An empty my_regions means every marker is mine.
+    """
     titles = titles or {}
     markers = []
     for region in regions:
@@ -102,8 +109,11 @@ def marker_layout(
             level = "stale"
         x, y = project(region.lon, region.lat)
         dx, dy = OFFSETS.get(region.cloud, (0, 0))
-        markers.append(Marker(region.cloud, region.code, region.name, x + dx, y + dy, level, list(titles.get(key, []))))
-    markers.sort(key=lambda m: LEVEL_RANK.get(m.level, 0))
+        mine = not my_regions or key in my_regions
+        markers.append(
+            Marker(region.cloud, region.code, region.name, x + dx, y + dy, level, list(titles.get(key, [])), mine)
+        )
+    markers.sort(key=lambda m: (LEVEL_RANK.get(m.level, 0), m.mine))
     return markers
 
 
@@ -116,8 +126,10 @@ def render_svg(markers: list[Marker], land: str, width: int = WIDTH, height: int
         f'<path class="land" d="{land}"/>',
     ]
     for m in markers:
+        classes = f"marker marker-{m.level}" + ("" if m.mine else " marker-other")
+        radius = RADIUS_MINE if m.mine else RADIUS_OTHER
         parts.append(
-            f'<circle class="marker marker-{m.level}" cx="{m.x:.1f}" cy="{m.y:.1f}" r="{RADIUS}">'
+            f'<circle class="{classes}" cx="{m.x:.1f}" cy="{m.y:.1f}" r="{radius}">'
             f"<title>{html.escape(m.tooltip)}</title></circle>"
         )
     parts.append("</svg>")

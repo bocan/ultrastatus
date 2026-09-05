@@ -1,10 +1,24 @@
 from datetime import timedelta
 
+import pytest
+
 from statusboard import db
+from statusboard import render as render_module
+from statusboard.config import Config
 from statusboard.model import Region
 from statusboard.render import PROVIDER_ORDER, build_context, render
 
 from conftest import make_incident, utc
+
+
+@pytest.fixture
+def config(monkeypatch):
+    """Call with a set of (cloud, code) pairs to activate the filter for one test."""
+
+    def activate(my_regions):
+        monkeypatch.setattr(render_module, "load_config", lambda: Config(frozenset(my_regions)))
+
+    return activate
 
 NOW = utc(2026, 9, 5, 20, 10, 0)
 EXPECTED_NAMES = ["aws", "gcp", "azure", "github", "databricks", "cloudflare", "claude", "npm", "docker"]
@@ -111,3 +125,90 @@ def test_render_includes_incident_title_and_link(conn, tmp_path):
     assert "Edge &lt;b&gt;trouble&lt;/b&gt;" in html  # autoescaped
     assert "Edge <b>trouble</b>" not in html
     assert "2026-09-05 10:00 UTC" in html
+
+
+# ADR-0011: region filter.
+
+
+def test_inactive_config_matches_unfiltered_shape(conn):
+    ctx = build_context(conn, NOW)
+    assert ctx["filter_active"] is False
+    assert ctx["my_region_labels"] == []
+    assert ctx["open_elsewhere"] == [] and ctx["resolved_elsewhere"] == []
+    assert all(p["elsewhere_count"] == 0 for p in ctx["providers"])
+
+
+def test_elsewhere_incident_does_not_raise_tile_level(conn, config):
+    config({("aws", "eu-west-2")})
+    _fresh_polls(conn)
+    db.upsert_incident(conn, make_incident(provider="aws", external_id="a", severity="critical", regions=[Region("aws", "us-east-1")]))
+    ctx = build_context(conn, NOW)
+    aws = {p["name"]: p for p in ctx["providers"]}["aws"]
+    assert aws["level"] == "ok"
+    assert aws["open_count"] == 0
+    assert aws["elsewhere_count"] == 1
+    assert [i["title"] for i in ctx["open_elsewhere"]] == ["Something broke"]
+    assert ctx["open"] == []
+    assert ctx["all_clear"] is True
+
+
+def test_my_region_incident_sets_level_and_clears_all_clear(conn, config):
+    config({("aws", "eu-west-2")})
+    _fresh_polls(conn)
+    db.upsert_incident(conn, make_incident(provider="aws", external_id="a", severity="minor", regions=[Region("aws", "eu-west-2")]))
+    ctx = build_context(conn, NOW)
+    assert {p["name"]: p["level"] for p in ctx["providers"]}["aws"] == "minor"
+    assert ctx["all_clear"] is False
+    assert len(ctx["open"]) == 1
+    assert ctx["my_region_labels"] == ["aws eu-west-2"]
+
+
+def test_global_and_unmapped_incidents_are_always_mine(conn, config):
+    config({("azure", "uksouth")})
+    db.upsert_incident(conn, make_incident(provider="github", external_id="g", title="GitHub thing", regions=[]))
+    db.upsert_incident(conn, make_incident(provider="gcp", external_id="x", title="GCP global", regions=[Region("gcp", "global")]))
+    ctx = build_context(conn, NOW)
+    assert {i["title"] for i in ctx["open"]} == {"GitHub thing", "GCP global"}
+    assert ctx["open_elsewhere"] == []
+
+
+def test_databricks_on_my_host_region_is_mine(conn, config):
+    config({("aws", "eu-west-2")})
+    _fresh_polls(conn)
+    db.upsert_incident(conn, make_incident(provider="databricks", external_id="d", severity="major", regions=[Region("aws", "eu-west-2")]))
+    ctx = build_context(conn, NOW)
+    assert [i["provider"] for i in ctx["open"]] == ["databricks"]
+    assert {p["name"]: p["level"] for p in ctx["providers"]}["databricks"] == "major"
+    assert "London): major. Something broke" in ctx["map_svg"]
+
+
+def test_open_sorts_by_severity_then_updated(conn):
+    db.upsert_incident(conn, make_incident(provider="aws", external_id="old-minor", title="old minor", severity="minor", updated_at=NOW - timedelta(hours=5)))
+    db.upsert_incident(conn, make_incident(provider="aws", external_id="new-minor", title="new minor", severity="minor", updated_at=NOW - timedelta(hours=1)))
+    db.upsert_incident(conn, make_incident(provider="aws", external_id="crit", title="crit", severity="critical", updated_at=NOW - timedelta(hours=9)))
+    ctx = build_context(conn, NOW)
+    assert [i["title"] for i in ctx["open"]] == ["crit", "new minor", "old minor"]
+
+
+def test_rendered_html_banner_and_details(conn, config, tmp_path):
+    config({("aws", "eu-west-2")})
+    _fresh_polls(conn)
+    html = render(conn, tmp_path / "a", now=NOW).read_text()
+    assert "All clear in your regions: aws eu-west-2" in html
+    assert "<details" not in html
+    assert "Open in your regions" in html
+
+    db.upsert_incident(conn, make_incident(provider="aws", external_id="e", regions=[Region("aws", "us-east-1")]))
+    html = render(conn, tmp_path / "b", now=NOW).read_text()
+    assert "Open elsewhere (1)" in html
+    assert "<details" in html
+    assert "0 open in your regions" in html
+    assert "1 elsewhere" in html
+
+
+def test_rendered_html_without_config_is_unchanged(conn, tmp_path):
+    html = render(conn, tmp_path / "site", now=NOW).read_text()
+    assert "banner" not in html.split("</style>")[1]
+    assert "<details" not in html
+    assert "Open incidents" in html
+    assert "your regions" not in html.split("</style>")[1]

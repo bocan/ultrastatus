@@ -57,11 +57,16 @@ def _cmd_poll(args: argparse.Namespace) -> int:
 
 
 def _cmd_render(args: argparse.Namespace) -> int:
+    from statusboard.config import ConfigError
     from statusboard.render import render
 
     conn = db.connect(args.db)
     db.init_schema(conn)
-    target = render(conn, args.out)
+    try:
+        target = render(conn, args.out)
+    except ConfigError as exc:
+        print(f"config error: {exc}", file=sys.stderr)
+        return 1
     print(f"wrote {target}")
     return 0
 
