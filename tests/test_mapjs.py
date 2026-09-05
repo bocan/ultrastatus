@@ -22,6 +22,12 @@ out.panClamped = M.panBy({ scale: 2, tx: 0, ty: 0 }, 99999, 99999, view);
 out.panClampedNeg = M.panBy({ scale: 2, tx: 0, ty: 0 }, -99999, -99999, view);
 out.fitEurope = M.fitBox({ x: 446, y: 55, w: 167, h: 118 }, view);
 out.fitWorld = M.fitBox({ x: 0, y: 13.9, w: 1000, h: 402.8 }, view);
+out.wheelNotch = M.wheelFactor(100, 0);
+out.wheelNotchOut = M.wheelFactor(-100, 0);
+out.wheelTrackpad = M.wheelFactor(3, 0);
+out.wheelLines = M.wheelFactor(3, 1);
+out.wheelHuge = M.wheelFactor(50000, 0);
+out.wheelHugeOut = M.wheelFactor(-50000, 0);
 out.cardLeft = M.cardStyle(100, 100, view);
 out.cardRight = M.cardStyle(900, 380, view);
 process.stdout.write(JSON.stringify(out));
@@ -79,6 +85,21 @@ def test_fit_box_frames_europe(results):
         assert VIEW["x"] <= sx <= VIEW["x"] + VIEW["w"]
         assert VIEW["y"] <= sy <= VIEW["y"] + VIEW["h"]
     assert results["fitWorld"] == {"scale": 1, "tx": 0, "ty": 0}
+
+
+def test_wheel_factor_is_proportional_and_clamped(results):
+    # Positive deltaY scrolls down, which zooms out, so the factor is below 1.
+    assert 0.85 < results["wheelNotch"] < 0.88
+    assert 1.14 < results["wheelNotchOut"] < 1.16
+    assert abs(results["wheelNotch"] * results["wheelNotchOut"] - 1) < 1e-9
+    # A 3 px trackpad tick barely moves; 30 of them add up to about one notch.
+    assert 0.99 < results["wheelTrackpad"] < 1.0
+    assert abs(results["wheelTrackpad"] ** 33 - results["wheelNotch"]) < 0.01
+    # Line mode is 16 px per line.
+    assert abs(results["wheelLines"] - results["wheelTrackpad"] ** 16) < 1e-9
+    # A wild delta is capped to one step of 1.5x either way.
+    assert abs(results["wheelHuge"] - 1 / 1.5) < 1e-9
+    assert results["wheelHugeOut"] == 1.5
 
 
 def test_card_style_matches_python_rules(results):

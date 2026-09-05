@@ -6,6 +6,10 @@
   var MIN_SCALE = 1, MAX_SCALE = 8, FIT_MARGIN = 0.05;
   var CARD_GAP = 4, CARD_FLIP_X = 700, CARD_FLIP_Y = 260, CARD_LIFT = 10;
   var LABEL_ZOOM = 5, PRESET_ANIMATE_MS = 250, DRAG_THRESHOLD_PX = 3;
+  /* One mouse notch is about 100 px of deltaY and should zoom about 1.15x.
+     A trackpad fires many events of a few px each; scaling by the delta keeps
+     that smooth instead of stacking a fixed factor per event. */
+  var WHEEL_SENSITIVITY = 0.0014, WHEEL_MAX_STEP = 1.5;
 
   function clampScale(s) { return Math.min(MAX_SCALE, Math.max(MIN_SCALE, s)); }
 
@@ -47,8 +51,16 @@
     return style;
   }
 
+  /* Zoom factor for one wheel event, proportional to its delta. deltaMode 1 is
+     lines, 2 is pages; both are converted to a pixel estimate first. */
+  function wheelFactor(deltaY, deltaMode) {
+    var px = deltaY * (deltaMode === 1 ? 16 : deltaMode === 2 ? 400 : 1);
+    var f = Math.exp(-px * WHEEL_SENSITIVITY);
+    return Math.min(WHEEL_MAX_STEP, Math.max(1 / WHEEL_MAX_STEP, f));
+  }
+
   var MapMath = { clampScale: clampScale, clampState: clampState, zoomAt: zoomAt, panBy: panBy,
-                  fitBox: fitBox, cardStyle: cardStyle };
+                  fitBox: fitBox, cardStyle: cardStyle, wheelFactor: wheelFactor };
   if (typeof window !== "undefined") window.MapMath = MapMath;
   if (typeof module !== "undefined" && module.exports) module.exports = MapMath;
   if (typeof document === "undefined") return;
@@ -132,7 +144,7 @@
     if (onCard(e.target)) return;  /* let a long card scroll the page instead of zooming */
     e.preventDefault();
     var p = toCanvas(e.clientX, e.clientY);
-    state = zoomAt(state, e.deltaY < 0 ? 1.2 : 1 / 1.2, p.x, p.y, view);
+    state = zoomAt(state, wheelFactor(e.deltaY, e.deltaMode), p.x, p.y, view);
     apply(false);
   }, { passive: false });
 

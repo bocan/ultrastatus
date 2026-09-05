@@ -77,7 +77,7 @@ fitBox(box, view)                               -> state that frames {x, y, w, h
 
 | Input | Action |
 |---|---|
-| Wheel over the map | zoom by 1.2 per notch, centred on the cursor. `preventDefault` so the page does not scroll. |
+| Wheel over the map | zoom proportional to `deltaY`, `exp(-deltaY * 0.0014)`, about 1.15x per 100 px mouse notch, capped at 1.5x per event, centred on the cursor. `deltaMode` lines and pages are converted to a pixel estimate first. `preventDefault` so the page does not scroll. |
 | Drag | pan. Ignore drags under 3 px so a click is still a click. |
 | Double click | zoom in by 2 at the cursor |
 | Pinch (two touches) | zoom, centred between the fingers |
@@ -179,7 +179,7 @@ Manual checklist, recorded in the ADR handoff when done:
 ## Gotchas
 
 - `getScreenCTM()` returns the matrix for the element, so call it on the `<svg>`, not the transformed group, then invert it to turn client pixels into canvas units before applying `zoomAt`.
-- Wheel `deltaY` differs by device. Use the sign only, one notch per event, and let trackpads fire many small events.
+- Wheel `deltaY` differs by device. Do not use the sign only. A trackpad or Magic Mouse fires dozens of small events per swipe, and a fixed factor per event zooms violently. Scale the factor by the delta so those small events add up to one gentle step.
 - Pointer capture: call `setPointerCapture` on `pointerdown` so a drag that leaves the SVG keeps panning.
 - Setting `r` on 150 circles per frame is fine. Do not rebuild the DOM.
 - Keep the `<title>` child. It is the fallback and the accessible name.
