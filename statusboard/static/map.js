@@ -10,6 +10,9 @@
      A trackpad fires many events of a few px each; scaling by the delta keeps
      that smooth instead of stacking a fixed factor per event. */
   var WHEEL_SENSITIVITY = 0.0014, WHEEL_MAX_STEP = 1.5;
+  /* Label gap from the marker centre, in screen pixels. Labels live inside the
+     zoomed group, so the gap is divided by the scale each frame, like the radius. */
+  var LABEL_DX = 9, LABEL_DY = 4;
 
   function clampScale(s) { return Math.min(MAX_SCALE, Math.max(MIN_SCALE, s)); }
 
@@ -80,6 +83,8 @@
   var labels = Array.prototype.slice.call(svg.querySelectorAll("text.label"));
   var cards = Array.prototype.slice.call(svg.querySelectorAll(".card"));
   var baseRadius = circles.map(function (c) { return Number(c.getAttribute("r")); });
+  var centreX = circles.map(function (c) { return Number(c.getAttribute("cx")); });
+  var centreY = circles.map(function (c) { return Number(c.getAttribute("cy")); });
   var cardByKey = {};
   cards.forEach(function (card) { cardByKey[card.getAttribute("data-key")] = card; });
 
@@ -110,7 +115,13 @@
       c.setAttribute("r", (baseRadius[i] / s).toFixed(2));
       c.style.strokeWidth = (1 / s).toFixed(3);
     });
-    labels.forEach(function (t) { t.style.fontSize = (11 / s).toFixed(2) + "px"; });
+    labels.forEach(function (t, i) {
+      t.style.fontSize = (11 / s).toFixed(2) + "px";
+      if (i < circles.length) {
+        t.setAttribute("x", (centreX[i] + LABEL_DX / s).toFixed(2));
+        t.setAttribute("y", (centreY[i] + LABEL_DY / s).toFixed(2));
+      }
+    });
     svg.classList.toggle("zoomed", s >= LABEL_ZOOM);
     repositionCards();
     try { localStorage.setItem("statusboard.view", JSON.stringify(state)); } catch (e) { /* private mode */ }

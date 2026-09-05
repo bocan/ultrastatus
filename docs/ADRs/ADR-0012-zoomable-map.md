@@ -91,7 +91,7 @@ The SVG has `tabindex="0"` so keys work after a click. Keyboard handlers only fi
 
 ### Markers at zoom
 
-Markers keep a constant screen size. On every state change the script sets `r = baseRadius / scale` and `stroke-width = 1 / scale` on each circle, where `baseRadius` is 6 for mine and 4 for other. Labels get `font-size = 11 / scale` and are shown only when `scale >= 5`, through a `zoomed` class on the SVG. The first draft said 3, but the Europe preset lands at about 3.1 and its 39 labels overlap into a pile. At 5 the cluster has spread enough to read. At `scale >= 3` the cloud offsets shrink to `(dx / scale, dy / scale)` is **not** done. Offsets stay in canvas units so markers spread apart as you zoom. That is the point of zooming.
+Markers keep a constant screen size. On every state change the script sets `r = baseRadius / scale` and `stroke-width = 1 / scale` on each circle, where `baseRadius` is 6 for mine and 4 for other. Labels get `font-size = 11 / scale` and are shown only when `scale >= 5`, through a `zoomed` class on the SVG. Their `x` and `y` are also reset each frame to the marker centre plus `9 / scale` and `4 / scale`, so the gap between dot and label stays 9 by 4 screen pixels. The static offset written by `mapgen` only serves the no-script page. Without this the gap grows with the zoom and, in a dense cluster, a label lands beside a different region's dot. The first draft said 3, but the Europe preset lands at about 3.1 and its 39 labels overlap into a pile. At 5 the cluster has spread enough to read. At `scale >= 3` the cloud offsets shrink to `(dx / scale, dy / scale)` is **not** done. Offsets stay in canvas units so markers spread apart as you zoom. That is the point of zooming.
 
 ### Hover card
 
