@@ -14,8 +14,12 @@ Each ADR is one session of work for a model. Run them in order. Each one lists w
 | [0008](ADR-0008-static-dashboard.md) | Static dashboard | `render` command, Jinja2 page, cron |
 | [0009](ADR-0009-world-map.md) | World map | Inline SVG map with region markers |
 | [0010](ADR-0010-statuspage-providers.md) | Statuspage providers | One class for GitHub, Cloudflare, Claude, npm, and Docker |
+| [0011](ADR-0011-region-filter.md) | Region filter | `statusboard.toml` names your regions; tiles, tables, and map put them first |
+| [0012](ADR-0012-zoomable-map.md) | Zoomable map | Pan, zoom, hover cards, and continent presets with one inline script |
 
 ADR-0010 is out of numeric order on purpose. Run it after ADR-0004 and before ADR-0005, so the dashboard in ADR-0008 sees every provider.
+
+ADR-0001 to ADR-0010 are built. ADR-0011 and ADR-0012 are next, in that order.
 
 ## How to run one
 
