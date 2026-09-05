@@ -56,6 +56,16 @@ def _cmd_poll(args: argparse.Namespace) -> int:
     return poll_providers(conn, providers)
 
 
+def _cmd_render(args: argparse.Namespace) -> int:
+    from statusboard.render import render
+
+    conn = db.connect(args.db)
+    db.init_schema(conn)
+    target = render(conn, args.out)
+    print(f"wrote {target}")
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="statusboard")
     parser.add_argument("--db", default=None, help="SQLite path (default: $STATUSBOARD_DB or ./statusboard.sqlite3)")
@@ -67,6 +77,10 @@ def build_parser() -> argparse.ArgumentParser:
     p_poll = sub.add_parser("poll", help="poll every registered provider")
     p_poll.add_argument("--only", default=None, help="poll a single provider by name")
     p_poll.set_defaults(func=_cmd_poll)
+
+    p_render = sub.add_parser("render", help="write the static dashboard from the database")
+    p_render.add_argument("--out", default="site", help="output directory (default: site)")
+    p_render.set_defaults(func=_cmd_render)
     return parser
 
 

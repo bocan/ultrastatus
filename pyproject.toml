@@ -3,7 +3,9 @@ name = "statusboard"
 version = "0.1.0"
 description = "Poll public cloud status feeds into SQLite and render one dashboard."
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+    "jinja2>=3.1.6",
+]
 
 [project.scripts]
 statusboard = "statusboard.cli:main"

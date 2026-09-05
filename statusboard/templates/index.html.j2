@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="refresh" content="120">
+<title>Cloud status</title>
+<style>
+:root {
+  color-scheme: light dark;
+  --bg: #ffffff;
+  --surface: #f6f8fa;
+  --border: #d0d7de;
+  --ink: #1f2328;
+  --ink-2: #57606a;
+  --link: #0969da;
+  --ok-fg: #1a7f37;       --ok-bg: #dafbe1;
+  --minor-fg: #9a6700;    --minor-bg: #fff8c5;
+  --major-fg: #bc4c00;    --major-bg: #fff1e5;
+  --critical-fg: #cf222e; --critical-bg: #ffebe9;
+  --stale-fg: #57606a;    --stale-bg: #eaeef2;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --border: #30363d;
+    --ink: #e6edf3;
+    --ink-2: #8b949e;
+    --link: #58a6ff;
+    --ok-fg: #3fb950;       --ok-bg: #12261e;
+    --minor-fg: #d29922;    --minor-bg: #2b2410;
+    --major-fg: #f0883e;    --major-bg: #2f1a0a;
+    --critical-fg: #f85149; --critical-bg: #2e1214;
+    --stale-fg: #8b949e;    --stale-bg: #21262d;
+  }
+}
+* { box-sizing: border-box; }
+body { margin: 0; padding: 1.5rem; background: var(--bg); color: var(--ink);
+  font: 15px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+a { color: var(--link); }
+header { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.5rem 1.5rem; margin-bottom: 1.25rem; }
+header h1 { font-size: 1.5rem; margin: 0; }
+header .meta { color: var(--ink-2); font-size: 0.9rem; }
+.tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr)); gap: 0.75rem; margin-bottom: 2rem; }
+.tile { border: 1px solid var(--border); border-radius: 8px; padding: 0.75rem 0.9rem; background: var(--surface); }
+.tile h2 { font-size: 1rem; margin: 0 0 0.35rem; font-weight: 600; }
+.tile .level { display: inline-block; font-size: 1.15rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.02em; padding: 0.15rem 0.5rem; border-radius: 6px; }
+.tile .count, .tile .polled { color: var(--ink-2); font-size: 0.85rem; margin-top: 0.35rem; }
+.tile .error { color: var(--critical-fg); font-size: 0.85rem; margin-top: 0.35rem; word-break: break-word; }
+.level-ok       { color: var(--ok-fg);       background: var(--ok-bg); }
+.level-minor    { color: var(--minor-fg);    background: var(--minor-bg); }
+.level-major    { color: var(--major-fg);    background: var(--major-bg); }
+.level-critical { color: var(--critical-fg); background: var(--critical-bg); }
+.level-stale    { color: var(--stale-fg);    background: var(--stale-bg); }
+.tile.level-ok, .tile.level-minor, .tile.level-major, .tile.level-critical, .tile.level-stale { background: var(--surface); color: var(--ink); }
+.tile.level-critical { border-color: var(--critical-fg); }
+.tile.level-major    { border-color: var(--major-fg); }
+section h2 { font-size: 1.15rem; margin: 0 0 0.5rem; }
+.table-wrap { overflow-x: auto; margin-bottom: 2rem; }
+table { border-collapse: collapse; width: 100%; font-size: 0.9rem; }
+th, td { text-align: left; vertical-align: top; padding: 0.45rem 0.6rem; border-bottom: 1px solid var(--border); }
+th { color: var(--ink-2); font-weight: 600; white-space: nowrap; }
+td.sev span { display: inline-block; padding: 0.05rem 0.45rem; border-radius: 5px; font-weight: 600; font-size: 0.8rem; text-transform: uppercase; }
+td.when { white-space: nowrap; color: var(--ink-2); }
+td.regions { font-size: 0.8rem; color: var(--ink-2); }
+td.msg { max-width: 34rem; color: var(--ink-2); }
+.empty { color: var(--ink-2); padding: 0.5rem 0 1.5rem; }
+footer { color: var(--ink-2); font-size: 0.85rem; border-top: 1px solid var(--border); padding-top: 1rem; }
+footer ul { list-style: none; padding: 0; margin: 0.25rem 0 0; display: flex; flex-wrap: wrap; gap: 0.5rem 1rem; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Cloud status</h1>
+  <span class="meta">Generated {{ generated_at | ts }}. Refreshes every 2 minutes.</span>
+</header>
+
+<div class="tiles">
+{% for p in providers %}
+  <div class="tile level-{{ p.level }}">
+    <h2>{{ p.label }}</h2>
+    <span class="level level-{{ p.level }}">{{ p.level }}</span>
+    <div class="count">{{ p.open_count }} open incident{{ '' if p.open_count == 1 else 's' }}</div>
+    {% if p.poll_error %}
+    <div class="error">Poll failed: {{ p.poll_error }}</div>
+    {% elif p.polled_ago %}
+    <div class="polled">polled {{ p.polled_ago }}</div>
+    {% else %}
+    <div class="polled">never polled</div>
+    {% endif %}
+  </div>
+{% endfor %}
+</div>
+
+{% macro incident_rows(rows, show_resolved) %}
+{% for i in rows %}
+  <tr>
+    <td>{{ i.provider_label }}</td>
+    <td class="sev"><span class="level-{{ i.severity }}">{{ i.severity }}</span></td>
+    <td>{% if i.url %}<a href="{{ i.url }}">{{ i.title }}</a>{% else %}{{ i.title }}{% endif %}</td>
+    <td class="when">{{ i.started_at | ts }}</td>
+    <td class="when">{{ i.updated_at | ts }}</td>
+    {% if show_resolved %}
+    <td class="when">{{ i.resolved_at | ts }}</td>
+    {% endif %}
+    <td class="regions">{{ i.region_labels | join(', ') }}</td>
+    <td class="msg" title="{{ i.last_message_full }}">{{ i.last_message }}</td>
+  </tr>
+{% endfor %}
+{% endmacro %}
+
+<section>
+  <h2>Open incidents</h2>
+  {% if open %}
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>Provider</th><th>Severity</th><th>Title</th><th>Started</th><th>Updated</th><th>Regions</th><th>Last message</th></tr></thead>
+    <tbody>{{ incident_rows(open, false) }}</tbody>
+  </table>
+  </div>
+  {% else %}
+  <p class="empty">No open incidents.</p>
+  {% endif %}
+</section>
+
+<section>
+  <h2>Resolved in the last 7 days</h2>
+  {% if resolved %}
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>Provider</th><th>Severity</th><th>Title</th><th>Started</th><th>Updated</th><th>Resolved</th><th>Regions</th><th>Last message</th></tr></thead>
+    <tbody>{{ incident_rows(resolved, true) }}</tbody>
+  </table>
+  </div>
+  {% else %}
+  <p class="empty">Nothing resolved in the last 7 days.</p>
+  {% endif %}
+</section>
+
+<footer>
+  Sources
+  <ul>
+  {% for p in providers %}
+    <li><a href="{{ p.source_url }}">{{ p.label }}</a></li>
+  {% endfor %}
+  </ul>
+</footer>
+</body>
+</html>
