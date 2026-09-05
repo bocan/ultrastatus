@@ -21,7 +21,7 @@ Path comes from `STATUSBOARD_DB`, default `./statusboard.sqlite3`. Three tables:
 
 ## Deviations from the ADRs
 
-None yet. Record any here so later sessions see them.
+- ADR-0004: no `aws_utf16_sample.bin` fixture. The test builds the UTF-16 bytes from the UTF-8 fixture at run time, so no binary file sits in git. Coverage is the same.
 
 ## Notes from implementation
 

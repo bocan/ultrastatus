@@ -12,3 +12,4 @@ def register(provider: Provider) -> None:
 # Provider modules are imported here explicitly, one line per provider.
 import statusboard.providers.github  # noqa: E402,F401
 import statusboard.providers.gcp  # noqa: E402,F401
+import statusboard.providers.aws  # noqa: E402,F401

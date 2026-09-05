@@ -1,0 +1,102 @@
+[
+  {
+    "date": "1772369485",
+    "arn": "arn:aws:health:me-central-1::event/MULTIPLE_SERVICES/AWS_MULTIPLE_SERVICES_OPERATIONAL_ISSUE/AWS_MULTIPLE_SERVICES_OPERATIONAL_ISSUE_5E6B8_EF2498889B5",
+    "region_name": "UAE",
+    "status": "3",
+    "service": "multipleservices-me-central-1",
+    "service_name": "Multiple services",
+    "summary": "Increased Error Rates",
+    "event_log": [
+      {
+        "summary": "Increased Error Rates",
+        "message": "We are investigating issues with AWS services in the ME-CENTRAL-1 Region.",
+        "status": 1,
+        "timestamp": 1772369485
+      },
+      {
+        "summary": "Increased Error Rates",
+        "message": "We are providing an update on the ongoing service disruptions affecting the AWS Middle East (UAE) Region (ME-CENTRAL-1). We continue to make progress on recover",
+        "status": 3,
+        "timestamp": 1772554485
+      },
+      {
+        "summary": "Increased Error Rates",
+        "message": "We are providing an update on the ongoing service disruption. The Middle East (UAE) Region (ME-CENTRAL-1) has suffered damage as a result of the conflict in the",
+        "status": 3,
+        "timestamp": 1777533954
+      }
+    ],
+    "impacted_services": {
+      "cloudwatchsynthetics-me-central-1": {
+        "service_name": "Amazon CloudWatch Synthetics",
+        "current": "3",
+        "max": "3"
+      },
+      "s3rtc-me-central-1": {
+        "service_name": "Amazon S3 Replication Time Control",
+        "current": "3",
+        "max": "3"
+      }
+    },
+    "impacted_service_status_changes": [
+      {
+        "service": "acm-pca-me-central-1",
+        "service_name": "AWS Private Certificate Authority",
+        "previous_status": "0",
+        "current_status": "3",
+        "timestamp": 1772369485000
+      }
+    ]
+  },
+  {
+    "date": "1772430987",
+    "arn": "arn:aws:health:me-south-1::event/MULTIPLE_SERVICES/AWS_MULTIPLE_SERVICES_OPERATIONAL_ISSUE/AWS_MULTIPLE_SERVICES_OPERATIONAL_ISSUE_E6426_01AD72B4E1E",
+    "region_name": "Bahrain",
+    "status": "3",
+    "service": "multipleservices-me-south-1",
+    "service_name": "Multiple services",
+    "summary": "Increased Error Rates",
+    "event_log": [
+      {
+        "summary": "Increased connectivity issues and API Error Rates",
+        "message": "We are investigating increased API error rates in a single Availability Zone (mes1-az2) in the ME-SOUTH-1 Region.",
+        "status": 1,
+        "timestamp": 1772430987
+      },
+      {
+        "summary": "Increased Connectivity Issues and API Error Rates",
+        "message": "We are providing an update on the ongoing service disruptions affecting the AWS Middle East (Bahrain) Region (ME-SOUTH-1). We continue to make progress on recov",
+        "status": 1,
+        "timestamp": 1772556000
+      },
+      {
+        "summary": "Increased Connectivity Issues and API Error Rates",
+        "message": "We are providing an update on the ongoing service disruption. The Middle East (Bahrain) Region (ME-SOUTH-1) has suffered damage due to the conflict in the Middl",
+        "status": 3,
+        "timestamp": 1777532831
+      }
+    ],
+    "impacted_services": {
+      "resourcegroups-me-south-1": {
+        "service_name": "AWS Resource Groups",
+        "current": "3",
+        "max": "3"
+      },
+      "s3-me-south-1": {
+        "service_name": "Amazon Simple Storage Service",
+        "current": "3",
+        "max": "3"
+      }
+    },
+    "impacted_service_status_changes": [
+      {
+        "service": "acm-pca-me-south-1",
+        "service_name": "AWS Private Certificate Authority",
+        "previous_status": "0",
+        "current_status": "3",
+        "timestamp": 1772430987000
+      }
+    ]
+  }
+]
