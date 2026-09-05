@@ -32,6 +32,8 @@ From ADR-0009: `project()`, `geojson_to_path()`, `marker_layout()`, `render_svg(
 
 From ADR-0011: `Marker.mine` and `my_region_labels`.
 
+From ADR-0013: the cards layer, `data-key` on circles, `hover_css`, and the placement rules for `left`, `right`, `top`, and `bottom`.
+
 From ADR-0008: the rule that the page makes no external requests. The rule that the page has no `<script>` tag is replaced by this ADR. See the test plan.
 
 ## Implementation plan
@@ -39,12 +41,12 @@ From ADR-0008: the rule that the page makes no external requests. The rule that 
 1. Replace the 1:110m GeoJSON with Natural Earth 1:50m admin 0 countries from the same repository, file `geojson/ne_50m_admin_0_countries.geojson`. Regenerate `world-land.svgpath` with `make world-svg`. Coordinates stay at one decimal. Check the size budget in the acceptance criteria. If it fails, fall back to `ne_50m_land.geojson`, which has no internal borders and is smaller.
 2. In `mapgen.py`:
    - Wrap the land path and the markers in `<g class="viewport">`. The script transforms this group.
-   - Give every circle `data-cloud`, `data-code`, `data-name`, `data-level`, `data-mine`, and `data-titles`. `data-titles` is a JSON array of `{title, url, severity, provider}` objects, HTML-escaped. Keep the `<title>` child as the no-script fallback.
+   - Circles already carry `data-key`, `tabindex`, and a `<title>` from ADR-0013. Nothing more is needed on them. The cards layer from ADR-0013 stays outside `g.viewport`.
    - Add a `<text class="label">` element after each circle with the region code, positioned 8 units right of the marker. Hidden by CSS until the zoom threshold.
    - Add `preset_boxes() -> dict[str, tuple[float, float, float, float]]` returning `(x, y, w, h)` in canvas units for `world`, `north-america`, `south-america`, `europe`, `middle-east-africa`, `asia`, `oceania`, and `mine`. `mine` is the bounding box of mine markers plus a 40 unit margin, or `world` when no filter is active. Continent boxes are fixed constants given below.
    - `render_svg` emits the presets as a `data-presets` JSON attribute on the `<svg>`.
 3. Write `statusboard/static/map.js`. Plain JavaScript, no modules, no build step. Under 300 lines. Pure functions first, DOM code after, so tests can load the pure part under node.
-4. In the template, add a toolbar above the map, a hover card `<div>`, and the script inline at the end of the body: `<script>{{ map_js | safe }}</script>`.
+4. In the template, add a toolbar above the map and the script inline at the end of the body: `<script>{{ map_js | safe }}</script>`.
 5. In `render.py`, read `static/map.js` with `importlib.resources` and pass it as `map_js`.
 6. Update tests.
 
@@ -93,19 +95,10 @@ Markers keep a constant screen size. On every state change the script sets `r = 
 
 ### Hover card
 
-One `<div class="hover-card" hidden>` in the page. On `mouseenter` of a circle, fill and show it near the cursor, flipped to the left or above when it would leave the viewport. On `mouseleave`, hide it after 150 ms unless the pointer moved into the card. On click, pin it. A pinned card stays until Escape, a click elsewhere, or a click on another marker.
+The cards themselves come from ADR-0013, pure CSS, and already exist when this ADR runs. This ADR adds two things:
 
-Card content:
-
-```
-AWS eu-west-2  London           <- cloud label, code, name
-MAJOR                           <- level chip, same classes as tiles
-• Increased API error rates     <- one line per incident, title linked to url, severity chip
-• Elevated latency
-Your region                     <- only when data-mine is true
-```
-
-Up to five incidents, then `and N more`. All content comes from data attributes. Nothing is fetched.
+- **Pinning.** A click on a marker adds a `pinned` class to its card. A pinned card stays visible until Escape, a click elsewhere, or a click on another marker. CSS: `.card.pinned { opacity: 1; pointer-events: auto; }`.
+- **Zoom-safe placement.** The cards layer is outside the transformed viewport group. On every state change the script recomputes each visible or pinned card's `left`, `right`, `top`, and `bottom` from the marker's canvas position and the current transform, using ADR-0013's placement rules. Cards keep constant screen size. Hidden cards are not repositioned until they show.
 
 ### Presets
 
@@ -138,7 +131,7 @@ Without JavaScript the page is ADR-0009's map: static, `<title>` tooltips, no to
 
 ## Dependencies
 
-- ADR-0009 and ADR-0011 complete.
+- ADR-0009, ADR-0011, and ADR-0013 complete.
 - No new Python packages.
 - `node` is optional, for `tests/test_mapjs.py` only. The test is skipped when `node` is not on the path.
 
@@ -146,8 +139,8 @@ Without JavaScript the page is ADR-0009's map: static, `<title>` tooltips, no to
 
 `tests/test_mapgen.py` additions:
 
-- Every circle carries the six data attributes. `data-titles` parses as JSON and contains the escaped incident title and url.
 - A label element follows each circle with the region code.
+- A click on a marker adds `pinned` to its card and to no other. Test this under node with a minimal DOM stub, or leave it to the manual checklist if the stub costs more than 30 lines.
 - `preset_boxes()` returns the eight keys, and every marker in `regions.csv` for Europe falls inside the `europe` box. Repeat for `asia` and `north-america` using a fixed list of codes per continent in the test.
 - With an active filter, the `mine` box contains every mine marker and no dimension is zero. With one mine marker the box still has the 40 unit margin.
 - The `<svg>` carries `data-presets` that parses to the same dict.
@@ -170,7 +163,7 @@ Manual checklist, recorded in the ADR handoff when done:
 - Wheel zoom keeps the point under the cursor still.
 - Drag pans, clicks do not.
 - Pinch works on a phone or in Chrome device mode.
-- Hover card appears, flips at the right edge, pins on click, closes on Escape.
+- Hover card pins on click, closes on Escape, and stays the same screen size at 4x zoom.
 - Labels appear at scale 3.
 - Reload keeps the last view.
 - With JavaScript disabled the map still renders with tooltips.
@@ -190,7 +183,6 @@ Manual checklist, recorded in the ADR handoff when done:
 - Pointer capture: call `setPointerCapture` on `pointerdown` so a drag that leaves the SVG keeps panning.
 - Setting `r` on 150 circles per frame is fine. Do not rebuild the DOM.
 - Keep the `<title>` child. It is the fallback and the accessible name.
-- JSON in a data attribute must be HTML-escaped with `html.escape(..., quote=True)`. The browser unescapes it before `JSON.parse`.
 - Do not animate with `requestAnimationFrame` loops. Set the transform once per input event, and use a CSS transition on the group for preset jumps only.
 - The `meta refresh` reload still fires. The saved view restores it. Do not remove the refresh in this ADR.
 

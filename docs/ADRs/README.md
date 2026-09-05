@@ -15,11 +15,14 @@ Each ADR is one session of work for a model. Run them in order. Each one lists w
 | [0009](ADR-0009-world-map.md) | World map | Inline SVG map with region markers |
 | [0010](ADR-0010-statuspage-providers.md) | Statuspage providers | One class for GitHub, Cloudflare, Claude, npm, and Docker |
 | [0011](ADR-0011-region-filter.md) | Region filter | `statusboard.toml` names your regions; tiles, tables, and map put them first |
-| [0012](ADR-0012-zoomable-map.md) | Zoomable map | Pan, zoom, hover cards, and continent presets with one inline script |
+| [0012](ADR-0012-zoomable-map.md) | Zoomable map | Pan, zoom, click-to-pin, and continent presets with one inline script |
+| [0013](ADR-0013-css-hover-cards.md) | CSS hover cards | Real hover cards on the map with no JavaScript |
 
 ADR-0010 is out of numeric order on purpose. Run it after ADR-0004 and before ADR-0005, so the dashboard in ADR-0008 sees every provider.
 
-ADR-0001 to ADR-0010 are built. ADR-0011 and ADR-0012 are next, in that order.
+ADR-0013 is also out of order. Run ADR-0011, then ADR-0013, then ADR-0012. The zoomable map builds on the cards.
+
+ADR-0001 to ADR-0010 are built. ADR-0011, ADR-0013, and ADR-0012 are next, in that order.
 
 ## How to run one
 
