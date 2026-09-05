@@ -1,0 +1,185 @@
+{
+  "page": {
+    "id": "kctbh9vrtdwd",
+    "name": "GitHub",
+    "url": "https://www.githubstatus.com",
+    "time_zone": "Etc/UTC",
+    "updated_at": "2026-09-05T20:28:52.391Z"
+  },
+  "incidents": [
+    {
+      "id": "zw1hbx2yyhvr",
+      "name": "Disruption with Copilot Code Review",
+      "status": "resolved",
+      "created_at": "2026-09-04T20:39:03.203Z",
+      "updated_at": "2026-09-04T22:26:46.758Z",
+      "monitoring_at": "2026-09-04T22:25:44.372Z",
+      "resolved_at": "2026-09-04T22:26:46.740Z",
+      "impact": "major",
+      "shortlink": "https://stspg.io/dddfhld6fj0z",
+      "started_at": "2026-09-04T20:39:03.195Z",
+      "page_id": "kctbh9vrtdwd",
+      "incident_updates": [
+        {
+          "id": "b9rw73n3fw0t",
+          "status": "resolved",
+          "body": "This incident has been resolved. Thank you for your patience and understanding as we addressed this issue. A detailed root cause analysis will be shared as soon as it is available.",
+          "created_at": "2026-09-04T22:26:46.740Z",
+          "display_at": "2026-09-04T22:26:46.740Z"
+        },
+        {
+          "id": "13sfslzl9prq",
+          "status": "monitoring",
+          "body": "The degradation has been mitigated. We are monitoring to ensure stability.",
+          "created_at": "2026-09-04T22:25:44.372Z",
+          "display_at": "2026-09-04T22:25:44.372Z"
+        },
+        {
+          "id": "fjym0dpyfr4d",
+          "status": "investigating",
+          "body": "We are applying the mitigation and expect recovery within approximately 30 minutes.",
+          "created_at": "2026-09-04T21:54:22.688Z",
+          "display_at": "2026-09-04T21:54:22.688Z"
+        }
+      ],
+      "components": [],
+      "reminder_intervals": null,
+      "body": null
+    },
+    {
+      "id": "r05vk75c594j",
+      "name": "Degradation in repos contents API",
+      "status": "resolved",
+      "created_at": "2026-09-04T22:02:15.790Z",
+      "updated_at": "2026-09-04T22:23:34.900Z",
+      "monitoring_at": null,
+      "resolved_at": "2026-09-04T22:23:34.887Z",
+      "impact": "minor",
+      "shortlink": "https://stspg.io/vhmsw2rhdcgv",
+      "started_at": "2026-09-04T22:02:15.783Z",
+      "page_id": "kctbh9vrtdwd",
+      "incident_updates": [
+        {
+          "id": "7pl0zx2bs24h",
+          "status": "resolved",
+          "body": "This incident has been resolved. Thank you for your patience and understanding as we addressed this issue. A detailed root cause analysis will be shared as soon as it is available.",
+          "created_at": "2026-09-04T22:23:34.887Z",
+          "display_at": "2026-09-04T22:23:34.887Z"
+        },
+        {
+          "id": "qk55yks6crd4",
+          "status": "investigating",
+          "body": "We are investigating reports of impacted performance for some GitHub services.",
+          "created_at": "2026-09-04T22:02:15.829Z",
+          "display_at": "2026-09-04T22:02:15.829Z"
+        }
+      ],
+      "components": [],
+      "reminder_intervals": null,
+      "body": null
+    },
+    {
+      "id": "tx9qn4khd664",
+      "name": "Incident with Copilot AI Model Providers",
+      "status": "resolved",
+      "created_at": "2026-08-27T10:04:52.529Z",
+      "updated_at": "2026-09-01T09:12:16.884Z",
+      "monitoring_at": null,
+      "resolved_at": "2026-08-27T12:12:58.387Z",
+      "impact": "critical",
+      "shortlink": "https://stspg.io/573gc8p4328b",
+      "started_at": "2026-08-27T10:04:52.519Z",
+      "page_id": "kctbh9vrtdwd",
+      "incident_updates": [
+        {
+          "id": "t68vzvfvdtb7",
+          "status": "resolved",
+          "body": "On August 27th, 2026, between approximately 09:20 and 12:14 UTC, the Copilot service experienced a degradation of the Kimi K3 model due to an issue with our upstream provider. Users encountered elevated error rates when using Kimi K3. No other models were impacted. <br /><br />The issue was resolved by a mitigation put in place by our provider. GitHub is working with our provider to further improve the resiliency of the service to prevent similar incidents in the future.",
+          "created_at": "2026-08-27T12:12:58.387Z",
+          "display_at": "2026-08-27T12:12:58.387Z"
+        },
+        {
+          "id": "qn9w0wfnls69",
+          "status": "investigating",
+          "body": "The issues with our upstream model provider have been mitigated, and Kimi K3 is once again available in Copilot products and IDE surfaces.<br />We will continue monitoring to ensure stability.",
+          "created_at": "2026-08-27T12:12:47.566Z",
+          "display_at": "2026-08-27T12:12:47.566Z"
+        },
+        {
+          "id": "tz79ymzk9ym4",
+          "status": "investigating",
+          "body": "Copilot AI Model Providers is experiencing degraded performance. We are continuing to investigate.",
+          "created_at": "2026-08-27T11:58:04.976Z",
+          "display_at": "2026-08-27T11:58:04.976Z"
+        }
+      ],
+      "components": [],
+      "reminder_intervals": null,
+      "body": null
+    },
+    {
+      "id": "wms44hv62t3p",
+      "name": "Degraded Git Operations over SSH",
+      "status": "resolved",
+      "created_at": "2026-08-21T14:00:00.000Z",
+      "updated_at": "2026-08-24T07:19:23.053Z",
+      "monitoring_at": null,
+      "resolved_at": "2026-08-21T14:00:00.000Z",
+      "impact": "none",
+      "shortlink": "https://stspg.io/9nls6g9ln8p4",
+      "started_at": "2026-08-24T07:19:22.991Z",
+      "page_id": "kctbh9vrtdwd",
+      "incident_updates": [
+        {
+          "id": "jhq44wgl2nff",
+          "status": "resolved",
+          "body": "On August 21, 2026, between 14:00 and 14:07 UTC, dotcom Git operations over SSH were degraded. Successful Git operations over SSH fell by more than 95% for during the peak impact window, making clone, fetch, or push over SSH effectively unavailable to most users for approximately four minutes. Git operations over HTTPS were not affected.  \n\nThe incident was caused by a software defect in our load-balancing infrastructure that was triggered by a configuration change. The defect only occurred when connections passed through multiple layers of load balancers running the new configuration, which meant it was not detected during canary testing. \n\nWe mitigated the incident by rolling back the configuration change.  \n\nWe are adding regression coverage for multi-layer load-balancer configurations and improving monitoring and alerting for Git operations over SSH to reduce our time to detection and mitigation of similar issues in the future.",
+          "created_at": "2026-08-24T07:19:23.042Z",
+          "display_at": "2026-08-21T14:00:00.000Z"
+        }
+      ],
+      "components": [],
+      "reminder_intervals": null,
+      "body": null
+    },
+    {
+      "id": "ktdr5t0xwnhp",
+      "name": "Incident with Grok Copilot AI Model Provider",
+      "status": "resolved",
+      "created_at": "2026-09-03T14:17:27.485Z",
+      "updated_at": "2026-09-03T17:11:47.877Z",
+      "monitoring_at": null,
+      "resolved_at": "2026-09-03T17:11:47.860Z",
+      "impact": "minor",
+      "shortlink": "https://stspg.io/p217h6l54208",
+      "started_at": "2026-09-03T14:17:27.478Z",
+      "page_id": "kctbh9vrtdwd",
+      "incident_updates": [
+        {
+          "id": "s3yq1d9xcdn4",
+          "status": "resolved",
+          "body": "This incident has been resolved. Thank you for your patience and understanding as we addressed this issue. A detailed root cause analysis will be shared as soon as it is available.",
+          "created_at": "2026-09-03T17:11:47.860Z",
+          "display_at": "2026-09-03T17:11:47.860Z"
+        },
+        {
+          "id": "9gzmjbr9vkyl",
+          "status": "investigating",
+          "body": "The issues with our upstream model provider have been resolved, and Grok models are once again available in Copilot products and IDE surfaces.<br />We will continue monitoring to ensure stability, but mitigation is complete.",
+          "created_at": "2026-09-03T17:11:39.081Z",
+          "display_at": "2026-09-03T17:11:39.081Z"
+        },
+        {
+          "id": "w807g3y7xw2h",
+          "status": "investigating",
+          "body": "The Grok 4.5 model has degraded availability as well. We are working with the upstream provider to resolve the issue.",
+          "created_at": "2026-09-03T14:22:44.366Z",
+          "display_at": "2026-09-03T14:22:44.366Z"
+        }
+      ],
+      "components": [],
+      "reminder_intervals": null,
+      "body": null
+    }
+  ]
+}

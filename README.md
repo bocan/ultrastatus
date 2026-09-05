@@ -22,3 +22,7 @@ Path comes from `STATUSBOARD_DB`, default `./statusboard.sqlite3`. Three tables:
 ## Deviations from the ADRs
 
 None yet. Record any here so later sessions see them.
+
+## Notes from implementation
+
+- ADR-0002: the Statuspage docs do not state the order of `incident_updates`. The live GitHub feed, checked on 2026-09-05 across 12 incidents, is newest first. The provider reads index 0.

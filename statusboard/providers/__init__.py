@@ -10,5 +10,4 @@ def register(provider: Provider) -> None:
 
 
 # Provider modules are imported here explicitly, one line per provider.
-# ADR-0002 onwards add lines such as:
-#   import statusboard.providers.github  # noqa: E402,F401
+import statusboard.providers.github  # noqa: E402,F401
