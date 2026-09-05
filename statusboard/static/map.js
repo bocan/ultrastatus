@@ -129,6 +129,7 @@
 
   /* Wheel zoom at the cursor. */
   svg.addEventListener("wheel", function (e) {
+    if (onCard(e.target)) return;  /* let a long card scroll the page instead of zooming */
     e.preventDefault();
     var p = toCanvas(e.clientX, e.clientY);
     state = zoomAt(state, e.deltaY < 0 ? 1.2 : 1 / 1.2, p.x, p.y, view);
@@ -140,8 +141,13 @@
 
   function pointerList() { return Object.keys(pointers).map(function (k) { return pointers[k]; }); }
 
+  /* Cards are HTML inside the SVG. Pointer capture would redirect the click
+     away from a link in a card, so leave anything that starts on a card alone. */
+  function onCard(target) { return !!(target && target.closest && target.closest(".card")); }
+
   svg.addEventListener("pointerdown", function (e) {
     if (e.button !== 0 && e.pointerType === "mouse") return;
+    if (onCard(e.target)) return;
     pointers[e.pointerId] = { x: e.clientX, y: e.clientY };
     svg.setPointerCapture(e.pointerId);
     var list = pointerList();
@@ -198,6 +204,7 @@
   svg.addEventListener("pointercancel", endPointer);
 
   svg.addEventListener("dblclick", function (e) {
+    if (onCard(e.target)) return;
     e.preventDefault();
     var p = toCanvas(e.clientX, e.clientY);
     state = zoomAt(state, 2, p.x, p.y, view);

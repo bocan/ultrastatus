@@ -111,7 +111,7 @@ The card edge sits 4 units from the marker centre, inside a radius 6 marker and 
 | head | cloud label, code, name | `AWS eu-west-2` bold, then the name muted |
 | level chip | `Marker.level` | same classes as the tiles |
 | Your region | `Marker.mine` | only when the filter is active and the marker is mine |
-| incident list | `Marker.incidents` | up to five, newest first, each with a severity chip and the title linked to `url` when present |
+| incident list | `Marker.incidents` | up to five, newest first, the title linked to `url` when present. A severity chip per line only when the card lists more than one incident. With one incident the chip would repeat the level chip above it. |
 | overflow | count beyond five | one line, `and N more` |
 | quiet | no incidents | one muted line, `No open incidents` |
 

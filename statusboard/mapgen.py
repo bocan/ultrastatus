@@ -210,12 +210,16 @@ def card_html(m: Marker, filter_active: bool) -> str:
         parts.append('<span class="mine-tag">Your region</span>')
     parts.append("</div>")
     if m.incidents:
+        # With one incident its severity is the region level already shown above,
+        # so the per-incident chip only appears when there is more than one.
+        show_chips = len(m.incidents) > 1
         parts.append("<ul>")
         for inc in m.incidents[:CARD_MAX_INCIDENTS]:
             title = e(inc.get("title", ""))
             url = inc.get("url")
             link = f'<a href="{e(url, quote=True)}">{title}</a>' if url else title
-            parts.append(f"<li>{_chip(inc.get('severity', 'major'))} {link}</li>")
+            chip = _chip(inc.get("severity", "major")) + " " if show_chips else ""
+            parts.append(f"<li>{chip}{link}</li>")
         parts.append("</ul>")
         extra = len(m.incidents) - CARD_MAX_INCIDENTS
         if extra > 0:

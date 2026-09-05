@@ -73,6 +73,20 @@ def test_card_lists_five_and_counts_the_rest():
     assert "No open incidents" not in html
 
 
+def test_single_incident_has_no_repeated_severity_chip():
+    one = card_html(_marker(level="critical", incidents=[{"title": "Only one", "url": None, "severity": "critical"}]), False)
+    assert one.count("chip level-critical") == 1  # the region level in the head only
+    two = card_html(
+        _marker(level="critical", incidents=[
+            {"title": "First", "url": None, "severity": "critical"},
+            {"title": "Second", "url": None, "severity": "minor"},
+        ]),
+        False,
+    )
+    assert two.count("chip level-critical") == 2
+    assert two.count("chip level-minor") == 1
+
+
 def test_card_with_no_incidents_says_so():
     html = card_html(_marker(), filter_active=False)
     assert "No open incidents" in html
