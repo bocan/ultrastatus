@@ -1,0 +1,77 @@
+{
+  "result": {
+    "status_overall": {
+      "updated": "2026-09-05T10:05:00.000Z",
+      "status": "Service Disruption",
+      "status_code": 500
+    },
+    "status": [
+      {
+        "id": "64b119ff19df69053df79084",
+        "name": "Compute",
+        "status": "Service Disruption",
+        "status_code": 500,
+        "containers": [
+          {
+            "id": "5d02c7a3bd48a405c3b69cf7",
+            "name": "US East 1",
+            "updated": "2026-09-05T10:05:00.000Z",
+            "status": "Service Disruption",
+            "status_code": 500
+          },
+          {
+            "id": "5d02c781bd48a405c3b69cf5",
+            "name": "EU West 1",
+            "updated": "2026-09-05T10:05:00.000Z",
+            "status": "Service Disruption",
+            "status_code": 500
+          }
+        ],
+        "updated": "2026-09-05T10:05:00.000Z"
+      }
+    ],
+    "incidents": [
+      {
+        "_id": "6afd0c1e2b3c4d5e6f708192",
+        "name": "Elevated error rates on job launches",
+        "datetime_open": "2026-09-05T10:00:00.000Z",
+        "components_affected": [
+          {
+            "_id": "64b119ff19df69053df79084",
+            "name": "Compute"
+          }
+        ],
+        "containers_affected": [
+          {
+            "_id": "5d02c7a3bd48a405c3b69cf7",
+            "name": "US East 1"
+          },
+          {
+            "_id": "5d02c781bd48a405c3b69cf5",
+            "name": "EU West 1"
+          }
+        ],
+        "messages": [
+          {
+            "details": "We are actively investigating an issue with the Databricks service.",
+            "state": 100,
+            "status": 500,
+            "datetime": "2026-09-05T10:00:30.000Z"
+          },
+          {
+            "details": "Starting at 09:52 UTC, customers using Databricks on AWS in US East 1 and EU West 1 may experience failed job launches.",
+            "state": 200,
+            "status": 500,
+            "datetime": "2026-09-05T10:05:00.000Z"
+          }
+        ],
+        "current_status": 500,
+        "current_state": 200
+      }
+    ],
+    "maintenance": {
+      "active": [],
+      "upcoming": []
+    }
+  }
+}

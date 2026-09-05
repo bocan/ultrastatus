@@ -52,12 +52,16 @@ def normalise(cloud: str, text: str) -> str:
 
     aws:   "US East 1"      -> "us-east-1"
     gcp:   "US-Central1"    -> "us-central1"
+    gcp:   "EU-West1"       -> "europe-west1"   (Databricks writes EU, GCP says europe)
     azure: "Australia East" -> "australiaeast"
     """
     lowered = text.strip().lower()
     if cloud == "azure":
         return _WHITESPACE.sub("", lowered)
-    return _WHITESPACE.sub("-", lowered)
+    code = _WHITESPACE.sub("-", lowered)
+    if cloud == "gcp" and code.startswith("eu-"):
+        code = "europe-" + code[len("eu-"):]
+    return code
 
 
 @lru_cache(maxsize=1)

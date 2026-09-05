@@ -13,3 +13,4 @@ def register(provider: Provider) -> None:
 import statusboard.providers.statuspage  # noqa: E402,F401
 import statusboard.providers.gcp  # noqa: E402,F401
 import statusboard.providers.aws  # noqa: E402,F401
+import statusboard.providers.databricks  # noqa: E402,F401

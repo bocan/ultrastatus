@@ -53,6 +53,8 @@ def test_lookup():
         ("aws", "  EU   West 2 ", "eu-west-2"),
         ("gcp", "US-Central1", "us-central1"),
         ("gcp", "US Central1", "us-central1"),
+        ("gcp", "EU-West1", "europe-west1"),
+        ("gcp", "ME-Central2", "me-central2"),
         ("azure", "Australia East", "australiaeast"),
         ("azure", "East US 2", "eastus2"),
     ],
