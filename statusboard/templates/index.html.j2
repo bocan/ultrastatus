@@ -55,6 +55,25 @@ details.elsewhere-block { margin: 0.5rem 0 2rem; }
 details.elsewhere-block summary { cursor: pointer; color: var(--ink-2); font-weight: 600; padding: 0.25rem 0; }
 details.elsewhere-block .table-wrap { margin-top: 0.5rem; margin-bottom: 0; }
 .legend .swatch-big { width: 0.9rem; height: 0.9rem; background: var(--ok-fg); }
+.chip { display: inline-block; padding: 0.05rem 0.45rem; border-radius: 5px; font-weight: 600; font-size: 0.8em; text-transform: uppercase; }
+svg.map .marker { cursor: pointer; outline: none; }
+svg.map .marker:focus-visible { stroke: var(--link); stroke-width: 2; }
+svg.map .cards-layer { pointer-events: none; overflow: visible; }
+svg.map .cards { position: relative; width: 100%; height: 100%; font: 11px/1.35 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; color: var(--ink); }
+svg.map .card { position: absolute; width: 22%; box-sizing: border-box; padding: 8px; border: 1px solid var(--border);
+  border-radius: 6px; background: var(--surface); opacity: 0; pointer-events: none;
+  transition: opacity 0s linear 0.15s; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12); }
+@media (prefers-color-scheme: dark) { svg.map .card { box-shadow: none; } }
+svg.map .card:hover { opacity: 1; pointer-events: auto; transition-delay: 0s; }
+svg.map .card-head { margin-bottom: 4px; }
+svg.map .card-tags { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; margin-bottom: 4px; }
+svg.map .card .chip { padding: 1px 5px; border-radius: 4px; font-size: 9px; }
+svg.map .card ul { list-style: none; margin: 0; padding: 0; }
+svg.map .card li { margin: 3px 0; }
+svg.map .card a { color: var(--link); }
+svg.map .card .muted { color: var(--ink-2); }
+svg.map .card .mine-tag { color: var(--ok-fg); font-weight: 600; font-size: 9px; }
+{{ map_css | safe }}
 .global-list { list-style: none; padding: 0; margin: 0 0 0.75rem; display: flex; flex-direction: column; gap: 0.25rem; }
 .global-list li { font-size: 0.9rem; }
 .global-list .level { display: inline-block; padding: 0.05rem 0.45rem; border-radius: 5px; font-weight: 600; font-size: 0.8rem; text-transform: uppercase; margin-right: 0.35rem; }

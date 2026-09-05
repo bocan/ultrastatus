@@ -1,4 +1,4 @@
-"""World map as inline SVG: equirectangular projection, land path, region markers."""
+"""World map as inline SVG: equirectangular projection, land path, region markers, hover cards."""
 
 import html
 import json
@@ -24,9 +24,21 @@ LEVEL_RANK: dict[str, int] = {"ok": 0, "stale": 0, "minor": 1, "major": 2, "crit
 GEOJSON_NAME = "world-110m.geojson"
 LAND_PATH_NAME = "world-land.svgpath"
 
+# Hover card placement, in canvas units on the cropped canvas.
+CARD_WIDTH = 220
+CARD_GAP = 8            # marker centre to card edge; overlaps the marker by 2 units
+CARD_FLIP_X = 700       # past this, the card opens to the left
+CARD_FLIP_Y = 260       # past this many units below the crop top, the card opens upward
+CARD_MAX_INCIDENTS = 5
+
 
 def project(lon: float, lat: float, width: int = WIDTH, height: int = HEIGHT) -> tuple[float, float]:
     return (lon + 180.0) / 360.0 * width, (90.0 - lat) / 180.0 * height
+
+
+def crop_bounds(width: int = WIDTH, height: int = HEIGHT) -> tuple[float, float]:
+    """(top, bottom) canvas y of the visible band."""
+    return project(0, LAT_MAX, width, height)[1], project(0, LAT_MIN, width, height)[1]
 
 
 def _ring_to_path(ring: list, width: int, height: int) -> str:
@@ -79,6 +91,11 @@ class Marker:
     level: str
     titles: list[str] = field(default_factory=list)
     mine: bool = True
+    incidents: list[dict] = field(default_factory=list)   # {title, url, severity, provider_label}
+
+    @property
+    def key(self) -> str:
+        return f"{self.cloud}:{self.code}"
 
     @property
     def tooltip(self) -> str:
@@ -94,6 +111,7 @@ def marker_layout(
     titles: dict[tuple[str, str], list[str]] | None = None,
     stale_clouds: set[str] | frozenset[str] = frozenset(),
     my_regions: set[tuple[str, str]] | frozenset[tuple[str, str]] = frozenset(),
+    incidents: dict[tuple[str, str], list[dict]] | None = None,
 ) -> list[Marker]:
     """One marker per region row.
 
@@ -101,6 +119,7 @@ def marker_layout(
     those, mine after elsewhere. An empty my_regions means every marker is mine.
     """
     titles = titles or {}
+    incidents = incidents or {}
     markers = []
     for region in regions:
         key = (region.cloud, region.code)
@@ -111,15 +130,83 @@ def marker_layout(
         dx, dy = OFFSETS.get(region.cloud, (0, 0))
         mine = not my_regions or key in my_regions
         markers.append(
-            Marker(region.cloud, region.code, region.name, x + dx, y + dy, level, list(titles.get(key, [])), mine)
+            Marker(
+                region.cloud, region.code, region.name, x + dx, y + dy, level,
+                list(titles.get(key, [])), mine, list(incidents.get(key, [])),
+            )
         )
     markers.sort(key=lambda m: (LEVEL_RANK.get(m.level, 0), m.mine))
     return markers
 
 
-def render_svg(markers: list[Marker], land: str, width: int = WIDTH, height: int = HEIGHT) -> str:
-    top = project(0, LAT_MAX, width, height)[1]
-    bottom = project(0, LAT_MIN, width, height)[1]
+def card_style(m: Marker, width: int = WIDTH, height: int = HEIGHT) -> str:
+    """Absolute position for the card, as percentages of the cropped canvas."""
+    top, bottom = crop_bounds(width, height)
+    band = bottom - top
+    if m.x <= CARD_FLIP_X:
+        horizontal = f"left: {(m.x + CARD_GAP) / width * 100:.1f}%"
+    else:
+        horizontal = f"right: {(width - m.x + CARD_GAP) / width * 100:.1f}%"
+    if m.y - top <= CARD_FLIP_Y:
+        vertical = f"top: {(m.y - 10 - top) / band * 100:.1f}%"
+    else:
+        vertical = f"bottom: {(bottom - m.y - 10) / band * 100:.1f}%"
+    return f"{horizontal}; {vertical}"
+
+
+def _chip(level: str) -> str:
+    return f'<span class="chip level-{html.escape(level)}">{html.escape(level)}</span>'
+
+
+def card_html(m: Marker, filter_active: bool) -> str:
+    e = html.escape
+    parts = [
+        f'<div class="card" data-key="{e(m.key)}" style="{card_style(m)}">',
+        f'<div class="card-head"><b>{e(CLOUD_LABELS.get(m.cloud, m.cloud))} {e(m.code)}</b> '
+        f'<span class="muted">{e(m.name)}</span></div>',
+        f'<div class="card-tags">{_chip(m.level)}',
+    ]
+    if filter_active and m.mine:
+        parts.append('<span class="mine-tag">Your region</span>')
+    parts.append("</div>")
+    if m.incidents:
+        parts.append("<ul>")
+        for inc in m.incidents[:CARD_MAX_INCIDENTS]:
+            title = e(inc.get("title", ""))
+            url = inc.get("url")
+            link = f'<a href="{e(url, quote=True)}">{title}</a>' if url else title
+            parts.append(f"<li>{_chip(inc.get('severity', 'major'))} {link}</li>")
+        parts.append("</ul>")
+        extra = len(m.incidents) - CARD_MAX_INCIDENTS
+        if extra > 0:
+            parts.append(f'<div class="muted">and {extra} more</div>')
+    else:
+        parts.append('<div class="muted">No open incidents</div>')
+    parts.append("</div>")
+    return "".join(parts)
+
+
+def hover_css(markers: list[Marker]) -> str:
+    """One rule per marker: hover or focus on the circle reveals the matching card."""
+    rules = []
+    for m in markers:
+        key = html.escape(m.key, quote=True)
+        rules.append(
+            f'svg.map:has([data-key="{key}"]:hover) .card[data-key="{key}"],'
+            f'svg.map:has([data-key="{key}"]:focus-visible) .card[data-key="{key}"]'
+            "{opacity:1;pointer-events:auto;transition-delay:0s}"
+        )
+    return "\n".join(rules)
+
+
+def render_svg(
+    markers: list[Marker],
+    land: str,
+    width: int = WIDTH,
+    height: int = HEIGHT,
+    filter_active: bool = False,
+) -> str:
+    top, bottom = crop_bounds(width, height)
     parts = [
         f'<svg class="map" viewBox="0 {top:.1f} {width} {bottom - top:.1f}" width="100%" '
         'preserveAspectRatio="xMidYMid meet" role="img" aria-label="World map of cloud region status">',
@@ -129,8 +216,17 @@ def render_svg(markers: list[Marker], land: str, width: int = WIDTH, height: int
         classes = f"marker marker-{m.level}" + ("" if m.mine else " marker-other")
         radius = RADIUS_MINE if m.mine else RADIUS_OTHER
         parts.append(
-            f'<circle class="{classes}" cx="{m.x:.1f}" cy="{m.y:.1f}" r="{radius}">'
+            f'<circle class="{classes}" data-key="{html.escape(m.key, quote=True)}" tabindex="0" '
+            f'cx="{m.x:.1f}" cy="{m.y:.1f}" r="{radius}">'
             f"<title>{html.escape(m.tooltip)}</title></circle>"
         )
-    parts.append("</svg>")
+    # Cards live in one layer after every marker. SVG has no z-index, so this is
+    # the only way a card can sit above markers drawn later than its own.
+    parts.append(
+        f'<foreignObject class="cards-layer" x="0" y="{top:.1f}" width="{width}" height="{bottom - top:.1f}">'
+        '<div xmlns="http://www.w3.org/1999/xhtml" class="cards">'
+    )
+    for m in markers:
+        parts.append(card_html(m, filter_active))
+    parts.append("</div></foreignObject></svg>")
     return "".join(parts)
