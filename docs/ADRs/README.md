@@ -20,12 +20,15 @@ Each ADR is one session of work for a model. Run them in order. Each one lists w
 | [0014](ADR-0014-tile-groups.md) | Tile groups | Named tile groups with a status chip, and a guard that every provider has a group |
 | [0015](ADR-0015-google-workspace-provider.md) | Google Workspace provider | GCP adapter refactored into one class with two instances |
 | [0016](ADR-0016-slack-provider.md) | Slack provider | Slack's own status API, history endpoint |
+| [0017](ADR-0017-statuspage-additions.md) | Statuspage additions | dbt Cloud, OpenAI, Atlassian, PyPI as four more instances |
+| [0018](ADR-0018-snowflake-provider.md) | Snowflake provider | Statuspage subclass that maps component groups to regions |
+| [0019](ADR-0019-airbyte-provider.md) | Airbyte provider | Instatus RSS history with the timeline parsed from the description |
 
 ADR-0010 is out of numeric order on purpose. Run it after ADR-0004 and before ADR-0005, so the dashboard in ADR-0008 sees every provider.
 
 ADR-0013 is also out of order. Run ADR-0011, then ADR-0013, then ADR-0012. The zoomable map builds on the cards.
 
-ADR-0001 to ADR-0013 are built. ADR-0014, ADR-0015, and ADR-0016 are next, in that order. ADR-0014 must go first: it adds the guard that the two providers rely on.
+ADR-0001 to ADR-0016 are built. ADR-0017, ADR-0018, and ADR-0019 are next, in that order. ADR-0017 goes first so the group order inside Data platforms comes out as Databricks, dbt, Snowflake, Airbyte.
 
 ## How to run one
 
