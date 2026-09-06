@@ -13,19 +13,17 @@ from statusboard.mapgen import hover_css, land_path, marker_layout, render_svg
 from statusboard.model import Incident
 from statusboard.providers import PROVIDERS
 
-# Fixed tile order and default labels. Statuspage providers also carry a label
-# on the object; that wins when present.
-PROVIDER_ORDER: list[tuple[str, str]] = [
-    ("aws", "AWS"),
-    ("gcp", "GCP"),
-    ("azure", "Azure"),
-    ("github", "GitHub"),
-    ("databricks", "Databricks"),
-    ("cloudflare", "Cloudflare"),
-    ("claude", "Claude"),
-    ("npm", "npm"),
-    ("docker", "Docker"),
+# Tile groups, in display order, with default labels. Statuspage providers also
+# carry a label on the object; that wins when present. Every registered provider
+# must appear in exactly one group; tests/test_groups.py enforces it.
+GROUPS: list[tuple[str, list[tuple[str, str]]]] = [
+    ("Clouds", [("aws", "AWS"), ("gcp", "GCP"), ("azure", "Azure")]),
+    ("Data platforms", [("databricks", "Databricks")]),
+    ("AI", [("claude", "Claude")]),
+    ("Developer tooling", [("github", "GitHub"), ("cloudflare", "Cloudflare"), ("npm", "npm"), ("docker", "Docker")]),
+    ("Workplace", []),
 ]
+PROVIDER_ORDER: list[tuple[str, str]] = [pair for _, pairs in GROUPS for pair in pairs]
 
 CLOUD_PROVIDERS = ("aws", "gcp", "azure")
 # Providers whose incidents carry regions, so the filter can split them.
@@ -105,6 +103,35 @@ def _open_sort_key(inc: Incident):
     return (-SEVERITY_RANK[inc.severity], -inc.updated_at.timestamp())
 
 
+def group_level(levels: list[str]) -> str:
+    """Worst incident level wins. Stale only when every member is stale. Else ok."""
+    incident_levels = [lv for lv in levels if lv in SEVERITY_RANK]
+    if incident_levels:
+        return max(incident_levels, key=lambda lv: SEVERITY_RANK[lv])
+    if levels and all(lv == "stale" for lv in levels):
+        return "stale"
+    return "ok"
+
+
+def build_groups(providers: list[dict]) -> list[dict]:
+    by_name = {p["name"]: p for p in providers}
+    groups = []
+    for label, pairs in GROUPS:
+        members = [by_name[name] for name, _ in pairs if name in by_name]
+        if not members:
+            continue
+        groups.append(
+            {
+                "label": label,
+                "level": group_level([m["level"] for m in members]),
+                "open_count": sum(m["open_count"] for m in members),
+                "has_regions": any(m["has_regions"] for m in members),
+                "providers": members,
+            }
+        )
+    return groups
+
+
 def build_context(conn: sqlite3.Connection, now: datetime) -> dict:
     config = load_config()
     labels = {name: _label(name, default) for name, default in PROVIDER_ORDER}
@@ -153,6 +180,7 @@ def build_context(conn: sqlite3.Connection, now: datetime) -> dict:
     return {
         "generated_at": db.to_iso(now),
         "providers": providers,
+        "groups": build_groups(providers),
         "filter_active": config.active,
         "my_region_labels": sorted(f"{cloud} {code}" for cloud, code in config.my_regions),
         "all_clear": not open_mine,

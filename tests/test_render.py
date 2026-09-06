@@ -22,7 +22,7 @@ def config(monkeypatch):
     return activate
 
 NOW = utc(2026, 9, 5, 20, 10, 0)
-EXPECTED_NAMES = ["aws", "gcp", "azure", "github", "databricks", "cloudflare", "claude", "npm", "docker"]
+EXPECTED_NAMES = ["aws", "gcp", "azure", "databricks", "claude", "github", "cloudflare", "npm", "docker"]
 
 
 def _fresh_polls(conn, names=EXPECTED_NAMES, at=None):
@@ -209,6 +209,58 @@ def test_rendered_html_banner_and_details(conn, config, tmp_path):
     assert "<details" in html
     assert "0 open in your regions" in html
     assert "1 elsewhere" in html
+
+
+# ADR-0014: tile groups.
+
+
+def _group(ctx, label):
+    return next(g for g in ctx["groups"] if g["label"] == label)
+
+
+def test_groups_follow_the_declared_order_and_skip_empty_ones(conn):
+    ctx = build_context(conn, NOW)
+    assert [g["label"] for g in ctx["groups"]] == ["Clouds", "Data platforms", "AI", "Developer tooling"]
+    assert [p["name"] for p in _group(ctx, "Clouds")["providers"]] == ["aws", "gcp", "azure"]
+    assert [p["name"] for p in _group(ctx, "Developer tooling")["providers"]] == ["github", "cloudflare", "npm", "docker"]
+    assert [p["name"] for g in ctx["groups"] for p in g["providers"]] == EXPECTED_NAMES
+
+
+def test_group_level_is_worst_incident_level(conn):
+    _fresh_polls(conn)
+    db.upsert_incident(conn, make_incident(provider="aws", external_id="a", severity="critical"))
+    db.upsert_incident(conn, make_incident(provider="gcp", external_id="b", severity="minor"))
+    clouds = _group(build_context(conn, NOW), "Clouds")
+    assert clouds["level"] == "critical"
+    assert clouds["open_count"] == 2
+    assert clouds["has_regions"] is True
+
+
+def test_group_is_stale_only_when_every_member_is_stale(conn):
+    _fresh_polls(conn, names=["gcp", "azure"])  # aws never polled, so stale
+    ctx = build_context(conn, NOW)
+    assert _group(ctx, "Clouds")["level"] == "ok"
+    assert _group(ctx, "Developer tooling")["level"] == "stale"  # none of its members polled
+    assert _group(ctx, "AI")["level"] == "stale"
+
+
+def test_rendered_groups_have_headings_in_order_and_nine_tiles(conn, tmp_path):
+    _fresh_polls(conn)
+    html = render(conn, tmp_path / "site", now=NOW).read_text()
+    assert html.count('<section class="group">') == 4
+    positions = [html.find(f"\n    {label}\n") for label in ("Clouds", "Data platforms", "AI", "Developer tooling")]
+    assert all(p >= 0 for p in positions) and positions == sorted(positions)
+    assert html.count('class="tile level-') == 9
+    assert "Workplace" not in html.split("</style>")[1]
+
+
+def test_group_heading_counts_open_in_your_regions(conn, config, tmp_path):
+    config({("aws", "eu-west-2")})
+    _fresh_polls(conn)
+    db.upsert_incident(conn, make_incident(provider="aws", external_id="a", regions=[Region("aws", "eu-west-2")]))
+    html = render(conn, tmp_path / "site", now=NOW).read_text()
+    assert "1 open in your regions" in html
+    assert _group(build_context(conn, NOW), "Clouds")["open_count"] == 1
 
 
 def test_rendered_html_without_config_is_unchanged(conn, tmp_path):

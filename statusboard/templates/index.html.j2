@@ -113,7 +113,17 @@ a { color: var(--link); }
 header { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.5rem 1.5rem; margin-bottom: 1.25rem; }
 header h1 { font-size: 1.5rem; margin: 0; }
 header .meta { color: var(--ink-2); font-size: 0.9rem; }
-.tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr)); gap: 0.75rem; margin-bottom: 2rem; }
+/* Groups flow left to right and wrap, so one-tile groups share a row. */
+.groups { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 1.5rem 2rem; margin-bottom: 2rem; }
+/* A group keeps its natural width and wraps as a whole. Only a group wider
+   than the viewport lets its own tiles wrap. */
+section.group { flex: 0 0 auto; max-width: 100%; }
+section.group h2 { font-size: 1.15rem; margin: 0 0 0.5rem; display: flex; align-items: center; gap: 0.5rem; }
+section.group h2 .muted { color: var(--ink-2); font-weight: 400; font-size: 0.9rem; }
+.tiles { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+/* A fixed width, not a flex basis: only a width counts toward the group's
+   intrinsic size, so the group grows to fit its tiles in one row. */
+.tile { flex: 0 0 auto; width: 11.5rem; }
 .tile { border: 1px solid var(--border); border-radius: 8px; padding: 0.75rem 0.9rem; background: var(--surface); }
 .tile h2 { font-size: 1rem; margin: 0 0 0.35rem; font-weight: 600; }
 .tile .level { display: inline-block; font-size: 1.15rem; font-weight: 700; text-transform: uppercase;
@@ -212,8 +222,18 @@ footer ul { list-style: none; padding: 0; margin: 0.25rem 0 0; display: flex; fl
   {% endif %}
 </div>
 
+<div class="groups">
+{% for g in groups %}
+<section class="group">
+  <h2>
+    {{ g.label }}
+    <span class="chip level-{{ g.level }}">{{ g.level }}</span>
+    {% if g.open_count %}
+    <span class="muted">{{ g.open_count }} open{% if filter_active and g.has_regions %} in your regions{% endif %}</span>
+    {% endif %}
+  </h2>
 <div class="tiles">
-{% for p in providers %}
+{% for p in g.providers %}
   <div class="tile level-{{ p.level }}">
     <h2>{{ p.label }}</h2>
     <span class="level level-{{ p.level }}">{{ p.level }}</span>
@@ -233,6 +253,9 @@ footer ul { list-style: none; padding: 0; margin: 0.25rem 0 0; display: flex; fl
     <div class="polled">never polled</div>
     {% endif %}
   </div>
+{% endfor %}
+</div>
+</section>
 {% endfor %}
 </div>
 

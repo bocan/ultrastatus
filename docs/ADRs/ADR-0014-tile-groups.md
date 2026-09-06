@@ -92,7 +92,7 @@ Between the legend and the tables, one section per non-empty group:
 
 - The `open` word follows ADR-0011: `2 open in your regions` when the filter is active and the group has regional providers, else `2 open`. When the count is zero, omit the muted text.
 - Tiles keep their exact markup from ADR-0008 and ADR-0011.
-- Group headings use the same font size as the table headings. Tiles stay the same size. Groups stack vertically with a 1.5 rem gap.
+- Group headings use the same font size as the table headings. Tiles stay the same size. Groups flow left to right and wrap onto new rows, with a 1.5 by 2 rem gap, so a one-tile group shares a row with its neighbours. The first draft stacked groups vertically, which wasted a full row on each one-tile group.
 - On a narrow screen tiles wrap within their group as before.
 
 ### Order
