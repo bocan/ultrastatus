@@ -1,0 +1,64 @@
+{
+ "page": {"id": "x", "name": "Snowflake"},
+ "incidents": [
+  {
+   "id": "9p16kxkml7v2",
+   "name": "INC20000150",
+   "status": "identified",
+   "impact": "minor",
+   "shortlink": "https://stspg.io/2tmfhlrz2yz5",
+   "started_at": "2026-08-28T00:07:42.664Z",
+   "created_at": "2026-08-28T00:07:42.677Z",
+   "updated_at": "2026-08-31T23:36:34.525Z",
+   "resolved_at": null,
+   "incident_updates": [
+    {"id": "tnm5yqyvdzh5", "status": "identified", "body": "Current status: We have taken additional steps to preserve available compute resources in the specified region, including adjusting compute pool scaling to redu", "created_at": "2026-08-31T23:36:34.522Z"},
+    {"id": "1y6l75d0dy4l", "status": "identified", "body": "Current status: We're continuing to coordinate with our third-party cloud platform provider to restore the compute capacity needed for Snowpark Container Servic", "created_at": "2026-08-28T23:16:26.460Z"}
+   ],
+   "components": [
+    {"id": "y7bf7vvk2s4w", "name": "Snowpark Container Services", "group_id": "03zr33bv0l8v", "group": false}
+   ]
+  },
+  {
+   "id": "fl9tkpj8d7hk",
+   "name": "INC20000199",
+   "status": "resolved",
+   "impact": "critical",
+   "shortlink": "https://stspg.io/7h1x6766b1r4",
+   "started_at": "2026-09-04T07:34:27.736Z",
+   "created_at": "2026-09-04T07:34:27.747Z",
+   "updated_at": "2026-09-04T10:10:48.382Z",
+   "resolved_at": "2026-09-04T10:10:48.367Z",
+   "incident_updates": [
+    {"id": "kn0n8x4fw7gn", "status": "resolved", "body": "Current status: We've implemented the fix for this issue and monitored the environment to confirm that service was restored. If you experience additional issues", "created_at": "2026-09-04T10:10:48.367Z"},
+    {"id": "lqhry415grhg", "status": "monitoring", "body": "Current status: We've implemented the fix for this issue by rolling back a configuration update to the underlying infrastructure. Our telemetry and internal val", "created_at": "2026-09-04T09:04:51.135Z"}
+   ],
+   "components": [
+    {"id": "hvclwvgfptsy", "name": "Databases, Tables, and Views", "group_id": "mfj8w1cvpgp9", "group": false},
+    {"id": "7ftgzt1vjwht", "name": "Applications", "group_id": "mfj8w1cvpgp9", "group": false},
+    {"id": "45rmymv1xmxp", "name": "Developer Tools", "group_id": "mfj8w1cvpgp9", "group": false}
+   ]
+  },
+  {
+   "id": "847dlygl25yb",
+   "name": "INC20000190",
+   "status": "resolved",
+   "impact": "major",
+   "shortlink": "https://stspg.io/5css9pgmdpnq",
+   "started_at": "2026-09-01T09:58:33.000Z",
+   "created_at": "2026-09-01T09:58:33.000Z",
+   "updated_at": "2026-09-01T13:50:34.646Z",
+   "resolved_at": "2026-09-01T13:50:34.623Z",
+   "incident_updates": [
+    {"id": "jhm48tzmqnqt", "status": "resolved", "body": "Current status: We've implemented the fix for this issue and monitored the environment to confirm that service was restored. If you experience additional issues", "created_at": "2026-09-01T13:50:34.623Z"},
+    {"id": "yp1d4sc73qx9", "status": "monitoring", "body": "Current status: We've implemented the fix for this issue, and we'll continue to monitor the environment until we're confident all services are functioning prope", "created_at": "2026-09-01T12:44:17.649Z"}
+   ],
+   "components": [
+    {"id": "4yr5ymtm3ct6", "name": "AI and ML", "group_id": "l8zmwsrmltjd", "group": false},
+    {"id": "ggzrs4lbyr2c", "name": "AI and ML", "group_id": "zgz4kl6sbzgw", "group": false},
+    {"id": "sthddryly8w5", "name": "AI and ML", "group_id": "fkg0fj3whwk2", "group": false},
+    {"id": "x5v6mspt03bl", "name": "AI and ML", "group_id": "63nmdv9rczl2", "group": false}
+   ]
+  }
+ ]
+}

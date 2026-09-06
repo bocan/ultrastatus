@@ -24,7 +24,7 @@ def config(monkeypatch):
 NOW = utc(2026, 9, 5, 20, 10, 0)
 EXPECTED_NAMES = [
     "aws", "gcp", "azure",
-    "databricks", "dbt",
+    "databricks", "dbt", "snowflake",
     "claude", "openai",
     "github", "cloudflare", "npm", "docker", "pypi",
     "google-workspace", "slack", "atlassian",
@@ -191,6 +191,16 @@ def test_databricks_on_my_host_region_is_mine(conn, config):
     ctx = build_context(conn, NOW)
     assert [i["provider"] for i in ctx["open"]] == ["databricks"]
     assert {p["name"]: p["level"] for p in ctx["providers"]}["databricks"] == "major"
+    assert "London): major. Something broke" in ctx["map_svg"]
+
+
+def test_snowflake_on_my_host_region_is_mine_and_colours_the_marker(conn, config):
+    config({("aws", "eu-west-2")})
+    _fresh_polls(conn)
+    db.upsert_incident(conn, make_incident(provider="snowflake", external_id="s", severity="major", regions=[Region("aws", "eu-west-2")]))
+    ctx = build_context(conn, NOW)
+    assert [i["provider"] for i in ctx["open"]] == ["snowflake"]
+    assert {p["name"]: p["level"] for p in ctx["providers"]}["snowflake"] == "major"
     assert "London): major. Something broke" in ctx["map_svg"]
 
 

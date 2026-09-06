@@ -18,7 +18,7 @@ from statusboard.providers import PROVIDERS
 # must appear in exactly one group; tests/test_groups.py enforces it.
 GROUPS: list[tuple[str, list[tuple[str, str]]]] = [
     ("Clouds", [("aws", "AWS"), ("gcp", "GCP"), ("azure", "Azure")]),
-    ("Data platforms", [("databricks", "Databricks"), ("dbt", "dbt Cloud")]),
+    ("Data platforms", [("databricks", "Databricks"), ("dbt", "dbt Cloud"), ("snowflake", "Snowflake")]),
     ("AI", [("claude", "Claude"), ("openai", "OpenAI")]),
     ("Developer tooling", [("github", "GitHub"), ("cloudflare", "Cloudflare"), ("npm", "npm"), ("docker", "Docker"), ("pypi", "PyPI")]),
     ("Workplace", [("google-workspace", "Google Workspace"), ("slack", "Slack"), ("atlassian", "Atlassian")]),
@@ -27,7 +27,7 @@ PROVIDER_ORDER: list[tuple[str, str]] = [pair for _, pairs in GROUPS for pair in
 
 CLOUD_PROVIDERS = ("aws", "gcp", "azure")
 # Providers whose incidents carry regions, so the filter can split them.
-REGIONAL_PROVIDERS = ("aws", "gcp", "azure", "databricks")
+REGIONAL_PROVIDERS = ("aws", "gcp", "azure", "databricks", "snowflake")
 
 SOURCE_URLS: dict[str, str] = {
     "aws": "https://health.aws.amazon.com/health/status",
@@ -45,6 +45,7 @@ SOURCE_URLS: dict[str, str] = {
     "openai": "https://status.openai.com/",
     "atlassian": "https://status.atlassian.com/",
     "pypi": "https://status.python.org/",
+    "snowflake": "https://status.snowflake.com/",
 }
 
 STALE_AFTER = timedelta(minutes=15)
