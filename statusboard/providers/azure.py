@@ -100,6 +100,7 @@ def _to_incident(item: ET.Element, now: datetime) -> Incident:
 
 class AzureProvider:
     name = "azure"
+    label = "Azure"
     lists_resolved = False
 
     def fetch(self) -> list[Incident]:

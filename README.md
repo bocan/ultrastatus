@@ -35,6 +35,8 @@ make install        # create the virtualenv with uv
 make refresh        # poll every feed, then write site/index.html
 open site/index.html
 make test           # 200+ tests, none touch the network
+make check          # type-check with uv check, verify formatting
+make lint           # format in place with uv format
 ```
 
 `make help` lists every target. `make poll` and `make render` are the two halves of `refresh`.

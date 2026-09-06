@@ -2,6 +2,7 @@ import copy
 import io
 import json
 from pathlib import Path
+from typing import Any
 
 import pytest
 
@@ -24,7 +25,7 @@ INCIDENTS = json.loads((FIXTURES / "snowflake_incidents.json").read_text())
 
 @pytest.fixture
 def feeds(monkeypatch):
-    state = {
+    state: dict[str, Any] = {
         "payloads": {
             COMPONENTS_URL: copy.deepcopy(COMPONENTS),
             INCIDENTS_URL: copy.deepcopy(INCIDENTS),

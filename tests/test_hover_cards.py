@@ -42,8 +42,9 @@ def test_every_circle_has_key_and_tabindex():
     keys = set()
     for c in circles:
         assert 'tabindex="0"' in c
-        key = re.search(r'data-key="([^"]+)"', c).group(1)
-        keys.add(key)
+        match = re.search(r'data-key="([^"]+)"', c)
+        assert match is not None
+        keys.add(match.group(1))
     assert keys == {f"{m.cloud}:{m.code}" for m in markers}
 
 

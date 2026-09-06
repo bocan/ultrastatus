@@ -63,6 +63,7 @@ def _to_incident(item: dict) -> Incident:
 
 class AwsProvider:
     name = "aws"
+    label = "AWS"
     lists_resolved = False
 
     def fetch(self) -> list[Incident]:

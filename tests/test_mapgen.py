@@ -198,8 +198,9 @@ def test_mine_preset_frames_mine_markers_with_margin():
 def test_svg_data_presets_round_trips():
     markers = marker_layout(regions.all_regions(), {})
     svg = render_svg(markers, "M0 0Z")
-    raw = re.search(r'data-presets="([^"]+)"', svg).group(1)
-    parsed = json.loads(raw.replace("&quot;", '"'))
+    match = re.search(r'data-presets="([^"]+)"', svg)
+    assert match is not None
+    parsed = json.loads(match.group(1).replace("&quot;", '"'))
     assert {k: tuple(v) for k, v in parsed.items()} == preset_boxes(markers)
 
 

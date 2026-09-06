@@ -5,6 +5,7 @@ so it is not in the database.
 """
 
 import csv
+import io
 import re
 from dataclasses import dataclass
 from functools import lru_cache
@@ -25,17 +26,17 @@ class RegionInfo:
 @lru_cache(maxsize=1)
 def all_regions() -> list[RegionInfo]:
     path = resources.files("statusboard").joinpath("data/regions.csv")
-    with path.open(encoding="utf-8", newline="") as handle:
-        return [
-            RegionInfo(
-                cloud=row["cloud"],
-                code=row["code"],
-                name=row["name"],
-                lat=float(row["lat"]),
-                lon=float(row["lon"]),
-            )
-            for row in csv.DictReader(handle)
-        ]
+    handle = io.StringIO(path.read_text(encoding="utf-8"), newline="")
+    return [
+        RegionInfo(
+            cloud=row["cloud"],
+            code=row["code"],
+            name=row["name"],
+            lat=float(row["lat"]),
+            lon=float(row["lon"]),
+        )
+        for row in csv.DictReader(handle)
+    ]
 
 
 @lru_cache(maxsize=1)

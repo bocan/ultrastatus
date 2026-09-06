@@ -2,6 +2,7 @@ import copy
 import io
 import json
 from pathlib import Path
+from typing import Any
 
 import pytest
 
@@ -22,7 +23,7 @@ AWS_ID, AZURE_ID, GCP_ID = (page_id for _, page_id, _ in PAGES)
 @pytest.fixture
 def feeds(monkeypatch):
     """One payload per page id. Tests swap payloads in, or set one to raise."""
-    state = {
+    state: dict[str, Any] = {
         "payloads": {
             AWS_ID: copy.deepcopy(QUIET),
             AZURE_ID: copy.deepcopy(QUIET),
@@ -90,7 +91,7 @@ def test_azure_page_normalises_display_names(feeds):
     inc = DatabricksProvider().fetch()[0]
     assert inc.external_id.startswith("azure:")
     assert inc.regions == [Region("azure", "australiaeast"), Region("azure", "eastus2")]
-    assert inc.url.startswith(
+    assert inc.url and inc.url.startswith(
         f"https://status.azuredatabricks.net/pages/incident/{AZURE_ID}/"
     )
 
@@ -99,7 +100,7 @@ def test_gcp_page_normalises_hyphenated_names(feeds):
     feeds["payloads"][GCP_ID] = _with_container_names(["US-Central1", "EU-West1"])
     inc = DatabricksProvider().fetch()[0]
     assert inc.regions == [Region("gcp", "us-central1"), Region("gcp", "europe-west1")]
-    assert inc.url.startswith(
+    assert inc.url and inc.url.startswith(
         f"https://status.gcp.databricks.com/pages/incident/{GCP_ID}/"
     )
 

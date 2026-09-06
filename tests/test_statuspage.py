@@ -1,6 +1,7 @@
 import io
 import json
 from pathlib import Path
+from typing import Any
 
 import pytest
 
@@ -20,7 +21,7 @@ DOCKER = StatuspageProvider("docker", "www.dockerstatus.com", "Docker")
 @pytest.fixture
 def feeds(monkeypatch):
     """Serve a fixture per host, and record every URL requested."""
-    state = {
+    state: dict[str, Any] = {
         "payloads": {
             "www.githubstatus.com": json.loads(
                 (FIXTURES / "github_incidents.json").read_text()

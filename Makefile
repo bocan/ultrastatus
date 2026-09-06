@@ -1,7 +1,7 @@
 .DEFAULT_GOAL := help
 UV ?= uv
 
-.PHONY: help install test init-db poll render refresh world-svg og-image
+.PHONY: help install test check lint init-db poll render refresh world-svg og-image
 CHROME ?= /Applications/Google Chrome.app/Contents/MacOS/Google Chrome
 
 help: ## Show this help
@@ -12,6 +12,13 @@ install: ## Create the virtualenv and install dev dependencies
 
 test: ## Run the test suite
 	$(UV) run pytest -q
+
+check: ## Type-check with uv check and verify formatting, without changing files
+	$(UV) format --check
+	$(UV) check --preview-features check-command
+
+lint: ## Format the code in place with uv format (ruff)
+	$(UV) format
 
 init-db: ## Create the SQLite database and schema
 	$(UV) run python -m statusboard init-db

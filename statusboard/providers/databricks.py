@@ -4,13 +4,13 @@ import json
 from datetime import datetime
 
 from statusboard import http, regions
-from statusboard.model import Incident, Region, Severity
+from statusboard.model import Cloud, Incident, Region, Severity
 from statusboard.providers import register
 
 MESSAGE_LIMIT = 2000
 
 # (page key, status.io page id, public host). Ids verified 2026-09-05.
-PAGES: list[tuple[str, str, str]] = [
+PAGES: list[tuple[Cloud, str, str]] = [
     ("aws", "5cf02dde58a00904bda41926", "status.databricks.com"),
     ("azure", "5d49ec10226b9e13cb6a422e", "status.azuredatabricks.net"),
     ("gcp", "60087ab5608daf0535dc8e23", "status.gcp.databricks.com"),
@@ -46,13 +46,15 @@ def _severity(item: dict, newest: dict | None) -> Severity:
     code = item.get("current_status")
     if code is None and newest is not None:
         code = newest.get("status")
+    if code is None:
+        return "major"
     try:
         return STATUS_CODE_TO_SEVERITY.get(int(code), "major")
     except (TypeError, ValueError):
         return "major"
 
 
-def _regions(page_key: str, item: dict) -> list[Region]:
+def _regions(page_key: Cloud, item: dict) -> list[Region]:
     out: list[Region] = []
     for container in item.get("containers_affected") or []:
         code = regions.normalise(page_key, container.get("name", ""))
@@ -62,7 +64,7 @@ def _regions(page_key: str, item: dict) -> list[Region]:
     return out
 
 
-def _to_incident(page_key: str, page_id: str, host: str, item: dict) -> Incident:
+def _to_incident(page_key: Cloud, page_id: str, host: str, item: dict) -> Incident:
     started_at = _parse_ts(item["datetime_open"])
     newest = _newest_message(item.get("messages") or [])
     if newest is not None and newest.get("datetime"):
@@ -85,6 +87,7 @@ def _to_incident(page_key: str, page_id: str, host: str, item: dict) -> Incident
 
 class DatabricksProvider:
     name = "databricks"
+    label = "Databricks"
     lists_resolved = False
 
     def fetch(self) -> list[Incident]:

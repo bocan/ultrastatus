@@ -3,6 +3,7 @@
 import os
 import socket
 import urllib.request
+from typing import Any, cast
 
 USER_AGENT = "statusboard/0.1 (+https://github.com/bocan/ultrastatus)"
 
@@ -26,7 +27,10 @@ def prefer_ipv4(enabled: bool = True) -> None:
     the full timeout on the v6 address before falling back. Twenty fetches a
     poll turns that into minutes. Set STATUSBOARD_IPV6=1 to leave lookups alone.
     """
-    socket.getaddrinfo = _getaddrinfo_ipv4_first if enabled else _original_getaddrinfo
+    # The wrapper takes *args, which is looser than the stdlib signature, so
+    # tell the type checker to trust it.
+    replacement = _getaddrinfo_ipv4_first if enabled else _original_getaddrinfo
+    socket.getaddrinfo = cast(Any, replacement)
 
 
 def prefer_ipv4_from_env() -> None:

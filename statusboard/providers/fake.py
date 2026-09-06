@@ -8,6 +8,7 @@ class FakeProvider:
 
     def __init__(self, name: str, lists_resolved: bool, batches: list[list[Incident]]):
         self.name = name
+        self.label = name.title()
         self.lists_resolved = lists_resolved
         self._batches = batches
         self.calls = 0
@@ -21,6 +22,7 @@ class FakeProvider:
 class RaisingProvider:
     def __init__(self, name: str, message: str = "boom", lists_resolved: bool = False):
         self.name = name
+        self.label = name.title()
         self.lists_resolved = lists_resolved
         self._message = message
 

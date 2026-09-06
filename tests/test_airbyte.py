@@ -1,5 +1,6 @@
 import io
 from pathlib import Path
+from typing import Any
 
 import pytest
 
@@ -20,7 +21,7 @@ ITEM = """<?xml version="1.0"?><rss version="2.0"><channel><item>
 
 @pytest.fixture
 def feed(monkeypatch):
-    state = {"body": FIXTURE, "requested": []}
+    state: dict[str, Any] = {"body": FIXTURE, "requested": []}
 
     def fake_fetch(url, timeout=20.0):
         state["requested"].append(url)

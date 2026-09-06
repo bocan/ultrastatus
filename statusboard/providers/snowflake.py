@@ -9,13 +9,13 @@ same way Databricks incidents do.
 import json
 
 from statusboard import http, regions
-from statusboard.model import Incident, Region
+from statusboard.model import Cloud, Incident, Region
 from statusboard.providers import register
 from statusboard.providers.statuspage import StatuspageProvider
 
 # Exact Snowflake group name -> (cloud, canonical code). Verified live 2026-09-06.
 # "AWS GovCloud - DoD" has no public region and is left out on purpose.
-REGION_GROUPS: dict[str, tuple[str, str]] = {
+REGION_GROUPS: dict[str, tuple[Cloud, str]] = {
     "AWS - Africa (Cape Town)": ("aws", "af-south-1"),
     "AWS - Asia Pacific (Jakarta)": ("aws", "ap-southeast-3"),
     "AWS - Asia Pacific (Malaysia)": ("aws", "ap-southeast-5"),

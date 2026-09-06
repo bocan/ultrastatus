@@ -1,6 +1,7 @@
 import io
 import json
 from pathlib import Path
+from typing import Any
 
 import pytest
 
@@ -27,7 +28,7 @@ WORKSPACE = GoogleStatusProvider(
 
 @pytest.fixture
 def feeds(monkeypatch):
-    state = {
+    state: dict[str, Any] = {
         "payloads": {
             GCP_URL: json.loads((FIXTURES / "gcp_incidents.json").read_text()),
             WORKSPACE_URL: json.loads(
@@ -118,7 +119,9 @@ def test_workspace_fixture_parses_with_no_regions(feeds):
     assert all(i.provider == "google-workspace" for i in incidents)
     assert all(i.regions == [] for i in incidents)
     assert all(
-        i.url.startswith("https://www.google.com/appsstatus/dashboard/incidents/")
+        (i.url or "").startswith(
+            "https://www.google.com/appsstatus/dashboard/incidents/"
+        )
         for i in incidents
     )
     assert all(i.resolved_at is not None for i in incidents)
@@ -146,9 +149,12 @@ def test_title_helper_edge_cases():
 
 
 def test_both_instances_are_registered_and_request_their_own_url(feeds):
-    assert PROVIDERS["gcp"].feed_url == GCP_URL
-    assert PROVIDERS["google-workspace"].feed_url == WORKSPACE_URL
-    assert PROVIDERS["google-workspace"].label == "Google Workspace"
+    gcp, workspace = PROVIDERS["gcp"], PROVIDERS["google-workspace"]
+    assert isinstance(gcp, GoogleStatusProvider)
+    assert isinstance(workspace, GoogleStatusProvider)
+    assert gcp.feed_url == GCP_URL
+    assert workspace.feed_url == WORKSPACE_URL
+    assert workspace.label == "Google Workspace"
     PROVIDERS["gcp"].fetch()
     PROVIDERS["google-workspace"].fetch()
     assert feeds["requested"] == [GCP_URL, WORKSPACE_URL]
