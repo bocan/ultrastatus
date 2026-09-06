@@ -2,6 +2,10 @@
 
 What each ADR session found that the spec did not say, and where the code deviates from the spec. Newest ADR first. Follow-ups found by the user sit under the ADR they touch.
 
+## Content Security Policy
+
+- Asked for by the user. The policy is a `<meta http-equiv>` in the page rather than a server header, so it travels with the file. `default-src 'none'`, `script-src` with the SHA-256 hash of the embedded script computed at render time, `style-src 'unsafe-inline'` because the hover cards carry style attributes, `img-src data:` for the favicon, `base-uri 'none'`, `form-action 'none'`. The script sets styles only through the CSSOM, which CSP permits. `frame-ancestors` cannot be set from a meta tag and stays on nginx, where `X-Frame-Options` already is. Verified under headless Chrome with the log domain open: zero violations, script ran, presets worked. Jinja autoescape turned the policy's single quotes into `&#39;`, which browsers decode but which the test caught; the value is emitted with `| safe`.
+
 ## Marker offsets under zoom
 
 - Found by the user: at the Europe preset the GCP europe-west2 dot sat in France. `regions.csv` has it at London; the culprit was the per-cloud nudge of 7 by 5 canvas units that keeps three clouds apart in one city. Canvas units scale with the map, and 7 of them is 2.5 degrees of longitude. The script now recovers each marker's true position from its cloud and re-applies the nudge divided by the scale, the same treatment the radius and labels already had, so the dots converge on the city as you zoom and stay 7 by 5 screen pixels apart. Cards follow the moved marker. The no-script map is unchanged at 1x.

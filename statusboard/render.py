@@ -1,5 +1,7 @@
 """Build the dashboard context from SQLite and write one self-contained HTML page."""
 
+import base64
+import hashlib
 import shutil
 import sqlite3
 from datetime import datetime, timedelta, timezone
@@ -216,6 +218,7 @@ def build_context(conn: sqlite3.Connection, now: datetime) -> dict:
             }
         )
 
+    script = map_js()
     stale_clouds = {
         p["name"]
         for p in providers
@@ -238,7 +241,8 @@ def build_context(conn: sqlite3.Connection, now: datetime) -> dict:
         "resolved_elsewhere": [_incident_dict(i, labels) for i in resolved_elsewhere],
         "map_svg": map_svg,
         "map_css": map_css,
-        "map_js": map_js(),
+        "map_js": script,
+        "csp": content_security_policy(script),
         "favicon_svg": icon.svg_data_uri(),
         "favicon_png": icon.png_data_uri(),
         "site_url": config.site_url,
@@ -302,6 +306,32 @@ def map_js() -> str:
         resources.files("statusboard")
         .joinpath("static/map.js")
         .read_text(encoding="utf-8")
+    )
+
+
+def script_hash(script: str) -> str:
+    """CSP source expression for one inline script: sha256 of its exact bytes."""
+    digest = hashlib.sha256(script.encode("utf-8")).digest()
+    return "'sha256-" + base64.b64encode(digest).decode("ascii") + "'"
+
+
+def content_security_policy(script: str) -> str:
+    """Everything is inline or a data URI, so nothing may load from anywhere.
+
+    script-src allows only the embedded script, by hash. style-src needs
+    'unsafe-inline' because the hover cards carry style attributes; the
+    script only ever sets styles through the CSSOM, which CSP permits.
+    frame-ancestors cannot be set from a meta tag; that belongs on the server.
+    """
+    return "; ".join(
+        [
+            "default-src 'none'",
+            f"script-src {script_hash(script)}",
+            "style-src 'unsafe-inline'",
+            "img-src data:",
+            "base-uri 'none'",
+            "form-action 'none'",
+        ]
     )
 
 
