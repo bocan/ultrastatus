@@ -22,7 +22,7 @@ def config(monkeypatch):
     return activate
 
 NOW = utc(2026, 9, 5, 20, 10, 0)
-EXPECTED_NAMES = ["aws", "gcp", "azure", "databricks", "claude", "github", "cloudflare", "npm", "docker", "google-workspace"]
+EXPECTED_NAMES = ["aws", "gcp", "azure", "databricks", "claude", "github", "cloudflare", "npm", "docker", "google-workspace", "slack"]
 TILE_COUNT = len(EXPECTED_NAMES)
 
 
@@ -222,7 +222,7 @@ def _group(ctx, label):
 def test_groups_follow_the_declared_order_and_skip_empty_ones(conn):
     ctx = build_context(conn, NOW)
     assert [g["label"] for g in ctx["groups"]] == ["Clouds", "Data platforms", "AI", "Developer tooling", "Workplace"]
-    assert [p["name"] for p in _group(ctx, "Workplace")["providers"]] == ["google-workspace"]
+    assert [p["name"] for p in _group(ctx, "Workplace")["providers"]] == ["google-workspace", "slack"]
     assert [p["name"] for p in _group(ctx, "Clouds")["providers"]] == ["aws", "gcp", "azure"]
     assert [p["name"] for p in _group(ctx, "Developer tooling")["providers"]] == ["github", "cloudflare", "npm", "docker"]
     assert [p["name"] for g in ctx["groups"] for p in g["providers"]] == EXPECTED_NAMES

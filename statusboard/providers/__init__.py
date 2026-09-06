@@ -15,3 +15,4 @@ import statusboard.providers.google  # noqa: E402,F401
 import statusboard.providers.aws  # noqa: E402,F401
 import statusboard.providers.databricks  # noqa: E402,F401
 import statusboard.providers.azure  # noqa: E402,F401
+import statusboard.providers.slack  # noqa: E402,F401

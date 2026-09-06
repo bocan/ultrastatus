@@ -48,7 +48,7 @@ Verified live on 2026-09-06. History returned 37 incidents, 97 KB. Shape:
     "id": 1576,
     "title": "Trouble Accessing Historical Messages With Custom Data Retention Policies Enabled",
     "type": "incident",                        // incident | outage | notice, per Slack's docs
-    "status": "active",                        // active | resolved
+    "status": "active",                        // ok | active | resolved | scheduled | completed | cancelled
     "url": "https://slack-status.com/2026-08/e07b9271f0346c3b",
     "date_created": "2026-08-13T14:21:41-07:00",
     "date_updated": "2026-09-04T10:00:57-07:00",
@@ -73,7 +73,7 @@ Field mapping:
 | severity | `type`: `outage` to `critical`, `incident` to `major`, `notice` to `minor`. Anything else to `major`. |
 | started_at | `date_created` |
 | updated_at | `date_updated` |
-| resolved_at | `date_updated` when `status == "resolved"`, else `None`. Slack gives no separate resolve time. The last update is the best estimate. |
+| resolved_at | `date_updated` when `status` is terminal, else `None`. Slack's docs list `ok`, `active`, `resolved`, `scheduled`, `completed`, and `cancelled`; the last three belong to maintenance windows. Terminal means `resolved`, `completed`, `cancelled`, or `ok`. `active` and `scheduled` stay open. Slack gives no separate resolve time, so the last update is the best estimate. |
 | url | `url` |
 | last_message | body of the note with the newest `date_created`, HTML stripped, entities unescaped, whitespace collapsed, first 2000 characters. Empty when there are no notes. If `services` is non-empty, prefix the message with `Services: Messaging, Workspace/Org Administration. ` |
 | regions | `[]` |
