@@ -1,5 +1,6 @@
 """Build the dashboard context from SQLite and write one self-contained HTML page."""
 
+import shutil
 import sqlite3
 from datetime import datetime, timedelta, timezone
 from importlib import resources
@@ -48,6 +49,9 @@ SOURCE_URLS: dict[str, str] = {
     "snowflake": "https://status.snowflake.com/",
     "airbyte": "https://status.airbyte.com/",
 }
+
+OG_DESCRIPTION = "Live status of the clouds and services your work runs on, on one page and one map."
+OG_IMAGE_NAME = "og.png"
 
 STALE_AFTER = timedelta(minutes=15)
 RESOLVED_WINDOW = timedelta(days=7)
@@ -201,6 +205,8 @@ def build_context(conn: sqlite3.Connection, now: datetime) -> dict:
         "map_js": map_js(),
         "favicon_svg": icon.svg_data_uri(),
         "favicon_png": icon.png_data_uri(),
+        "site_url": config.site_url,
+        "og_description": OG_DESCRIPTION,
         "global_incidents": [d for d, i in zip(open_dicts, open_incidents) if not _on_map(i)],
     }
 
@@ -272,4 +278,10 @@ def render(conn: sqlite3.Connection, out_dir: str | Path, now: datetime | None =
     # Browsers ask for /favicon.ico on their own. The page links inline data
     # URIs, but writing the file too keeps a plain directory serve free of 404s.
     (out / "favicon.ico").write_bytes(icon.ico_icon())
+    # The Open Graph board image is committed as a PNG; crawlers cannot use
+    # SVG or data URIs. Copy it beside the page when it exists.
+    og_png = resources.files("statusboard").joinpath(f"static/{OG_IMAGE_NAME}")
+    if og_png.is_file():
+        with og_png.open("rb") as source, (out / OG_IMAGE_NAME).open("wb") as dest:
+            shutil.copyfileobj(source, dest)
     return target

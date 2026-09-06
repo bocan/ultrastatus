@@ -1,7 +1,8 @@
 .DEFAULT_GOAL := help
 UV ?= uv
 
-.PHONY: help install test init-db poll render refresh world-svg
+.PHONY: help install test init-db poll render refresh world-svg og-image
+CHROME ?= /Applications/Google Chrome.app/Contents/MacOS/Google Chrome
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  %-12s %s\n", $$1, $$2}'
@@ -23,6 +24,12 @@ render: ## Write site/index.html from SQLite
 
 world-svg: ## Regenerate statusboard/data/world-land.svgpath from the vendored GeoJSON
 	$(UV) run python -c "from statusboard.mapgen import write_land_path; print(write_land_path())"
+
+og-image: ## Regenerate statusboard/static/og.png from the provider groups (needs Chrome; dev only)
+	$(UV) run python -m statusboard og-svg --out /tmp/ultrastatus-og.svg
+	"$(CHROME)" --headless=new --disable-gpu --hide-scrollbars --window-size=1200,630 \
+		--screenshot=statusboard/static/og.png "file:///tmp/ultrastatus-og.svg" 2>/dev/null
+	@ls -la statusboard/static/og.png
 
 refresh: ## Poll then render; render runs even if a provider failed; exits with poll's code
 	@$(UV) run python -m statusboard poll; code=$$?; \

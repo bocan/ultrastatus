@@ -2,6 +2,11 @@
 
 What each ADR session found that the spec did not say, and where the code deviates from the spec. Newest ADR first. Follow-ups found by the user sit under the ADR they touch.
 
+## Open Graph board image
+
+- Asked for by the user, no ADR. `statusboard/og.py` builds a 1200 by 630 SVG from `render.GROUPS`, and `make og-image` renders it to `statusboard/static/og.png` with headless Chrome on the dev machine, since crawlers accept neither SVG nor data URIs. `render` copies the PNG beside the page. The tags appear only when `[site] url` is set in `statusboard.toml`, because the page cannot know its own address. Column widths follow the longest text per column; equal widths made "DEVELOPER TOOLING" collide with "WORKPLACE".
+- The IPv4 preference in `http.py` came from the same deployment day: the Debian EC2 host has a routed IPv6 address but TCP over v6 black-holes, which is still to be diagnosed.
+
 ## ADR-0019: Airbyte provider
 
 - Airbyte runs on Instatus. Its Statuspage-style `api/v2/summary.json` returns only the page name and there is no incidents JSON, so the provider parses `history.rss`.

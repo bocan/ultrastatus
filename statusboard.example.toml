@@ -1,4 +1,14 @@
-# Copy to statusboard.toml and list the regions you run in.
+# Copy to statusboard.toml.
+#
+# [site] url is the public address of the page. With it set, the page carries
+# Open Graph and Twitter card tags pointing at og.png, so a link posted on
+# Slack, LinkedIn, or Mastodon shows the board image. Leave it out and the
+# tags are omitted.
+
+[site]
+url = "https://ultrastatus.cloudcauldron.io"
+
+# List the regions you run in.
 # Codes are the canonical ones from statusboard/data/regions.csv:
 #   aws   us-east-1, eu-west-2, ...
 #   gcp   us-central1, europe-west2, ...

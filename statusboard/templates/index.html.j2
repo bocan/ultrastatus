@@ -7,6 +7,19 @@
 <title>Ultra Status</title>
 <link rel="icon" type="image/svg+xml" href="{{ favicon_svg }}">
 <link rel="icon" type="image/png" sizes="32x32" href="{{ favicon_png }}">
+{% if site_url %}
+<meta property="og:type" content="website">
+<meta property="og:title" content="Ultra Status">
+<meta property="og:description" content="{{ og_description }}">
+<meta property="og:url" content="{{ site_url }}/">
+<meta property="og:image" content="{{ site_url }}/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Ultra Status">
+<meta name="twitter:description" content="{{ og_description }}">
+<meta name="twitter:image" content="{{ site_url }}/og.png">
+{% endif %}
 <style>
 :root {
   color-scheme: light dark;

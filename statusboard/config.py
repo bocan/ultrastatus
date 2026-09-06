@@ -18,6 +18,7 @@ class ConfigError(Exception):
 @dataclass(frozen=True)
 class Config:
     my_regions: frozenset[tuple[str, str]]
+    site_url: str | None = None   # public address of the page, for Open Graph tags
 
     @property
     def active(self) -> bool:
@@ -61,6 +62,15 @@ def load_config(path: str | None = None) -> Config:
     except tomllib.TOMLDecodeError as exc:
         raise ConfigError(f"{file}: not valid TOML: {exc}") from exc
 
+    site = data.get("site", {})
+    if not isinstance(site, dict):
+        raise ConfigError(f"{file}: [site] must be a table")
+    site_url = site.get("url")
+    if site_url is not None:
+        if not isinstance(site_url, str) or not site_url.startswith(("http://", "https://")):
+            raise ConfigError(f"{file}: [site] url must be an absolute http(s) URL")
+        site_url = site_url.rstrip("/")
+
     table = data.get("regions", {})
     if not isinstance(table, dict):
         raise ConfigError(f"{file}: [regions] must be a table")
@@ -79,4 +89,4 @@ def load_config(path: str | None = None) -> Config:
                     message += f". Did you mean: {', '.join(near)}"
                 raise ConfigError(message)
             mine.add((cloud, code))
-    return Config(frozenset(mine))
+    return Config(frozenset(mine), site_url)

@@ -71,6 +71,20 @@ def _cmd_render(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_og_svg(args: argparse.Namespace) -> int:
+    from statusboard.og import og_svg
+    from statusboard.render import GROUPS
+
+    svg = og_svg(GROUPS)
+    if args.out:
+        with open(args.out, "w", encoding="utf-8") as handle:
+            handle.write(svg)
+        print(f"wrote {args.out}")
+    else:
+        print(svg)
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="statusboard")
     parser.add_argument("--db", default=None, help="SQLite path (default: $STATUSBOARD_DB or ./statusboard.sqlite3)")
@@ -86,6 +100,10 @@ def build_parser() -> argparse.ArgumentParser:
     p_render = sub.add_parser("render", help="write the static dashboard from the database")
     p_render.add_argument("--out", default="site", help="output directory (default: site)")
     p_render.set_defaults(func=_cmd_render)
+
+    p_og = sub.add_parser("og-svg", help="write the Open Graph board image as SVG")
+    p_og.add_argument("--out", default=None, help="output path (default: stdout)")
+    p_og.set_defaults(func=_cmd_og_svg)
     return parser
 
 

@@ -54,6 +54,17 @@ With the file present the page puts your regions first. A banner says whether yo
 
 Without the file every region is treated equally. The filter applies at render time only, so the database keeps every incident and a config change applies to history. A typo in a region code stops `make render` with a suggestion. The path can be changed with `STATUSBOARD_CONFIG`.
 
+## Link previews
+
+Add the public address to `statusboard.toml`:
+
+```toml
+[site]
+url = "https://ultrastatus.cloudcauldron.io"
+```
+
+The page then carries Open Graph and Twitter card tags, so a link posted on Slack, LinkedIn, or Mastodon shows a board image listing every provider by group. The image is `statusboard/static/og.png`, generated once from the provider groups by `make og-image`, which needs Chrome, and copied to `site/og.png` on every render. Re-run `make og-image` after adding a provider. Without a site URL the tags are omitted.
+
 ## Running it from cron
 
 ```
