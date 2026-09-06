@@ -79,7 +79,7 @@ def test_viewport_group_wraps_land_and_markers():
 def test_label_follows_each_circle_with_the_region_code():
     markers = marker_layout(regions.all_regions(), {})
     svg = render_svg(markers, "M0 0Z")
-    labels = re.findall(r'<text class="label" x="[\d.]+" y="[\d.]+">([^<]+)</text>', svg)
+    labels = re.findall(r'<text class="label"[^>]* x="[\d.]+" y="[\d.]+">([^<]+)</text>', svg)
     assert labels == [m.code for m in markers]
     assert svg.count("<text") == svg.count("<circle")
 

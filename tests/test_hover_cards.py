@@ -30,6 +30,23 @@ def test_every_circle_has_key_and_tabindex():
     assert keys == {f"{m.cloud}:{m.code}" for m in markers}
 
 
+def test_every_marker_label_and_card_carries_its_cloud():
+    markers = marker_layout(regions.all_regions(), {})
+    svg = render_svg(markers, "M0 0Z")
+    for tag in ("<circle ", '<text class="label" ', '<div class="card" '):
+        found = re.findall(re.escape(tag) + r'[^>]*data-cloud="(aws|gcp|azure)"', svg)
+        assert len(found) == len(markers), tag
+    assert sorted(re.findall(r'<circle [^>]*data-cloud="(\w+)"', svg)) == sorted(m.cloud for m in markers)
+
+
+def test_cloud_toggle_rules_are_in_the_page(conn, tmp_path):
+    html = render(conn, tmp_path / "site", now=NOW).read_text()
+    for cloud in ("aws", "gcp", "azure"):
+        assert f'id="toggle-{cloud}" checked' in html
+        assert f'.map-wrap:has(#toggle-{cloud}:not(:checked))' in html
+        assert f'svg.map [data-cloud="{cloud}"]' in html
+
+
 def test_cards_layer_comes_after_last_circle_with_one_card_per_marker():
     markers = marker_layout(regions.all_regions(), {})
     svg = render_svg(markers, "M0 0Z")

@@ -201,7 +201,8 @@ def _chip(level: str) -> str:
 def card_html(m: Marker, filter_active: bool) -> str:
     e = html.escape
     parts = [
-        f'<div class="card" data-key="{e(m.key)}" data-x="{m.x:.1f}" data-y="{m.y:.1f}" style="{card_style(m)}">',
+        f'<div class="card" data-key="{e(m.key)}" data-cloud="{e(m.cloud)}" data-x="{m.x:.1f}" data-y="{m.y:.1f}" '
+        f'style="{card_style(m)}">',
         f'<div class="card-head"><b>{e(CLOUD_LABELS.get(m.cloud, m.cloud))} {e(m.code)}</b> '
         f'<span class="muted">{e(m.name)}</span></div>',
         f'<div class="card-tags">{_chip(m.level)}',
@@ -264,13 +265,14 @@ def render_svg(
     for m in markers:
         classes = f"marker marker-{m.level}" + ("" if m.mine else " marker-other")
         radius = RADIUS_MINE if m.mine else RADIUS_OTHER
+        cloud = html.escape(m.cloud, quote=True)
         parts.append(
-            f'<circle class="{classes}" data-key="{html.escape(m.key, quote=True)}" tabindex="0" '
+            f'<circle class="{classes}" data-key="{html.escape(m.key, quote=True)}" data-cloud="{cloud}" tabindex="0" '
             f'cx="{m.x:.1f}" cy="{m.y:.1f}" r="{radius}">'
             f"<title>{html.escape(m.tooltip)}</title></circle>"
         )
         parts.append(
-            f'<text class="label" x="{m.x + LABEL_OFFSET[0]:.1f}" y="{m.y + LABEL_OFFSET[1]:.1f}">'
+            f'<text class="label" data-cloud="{cloud}" x="{m.x + LABEL_OFFSET[0]:.1f}" y="{m.y + LABEL_OFFSET[1]:.1f}">'
             f"{html.escape(m.code)}</text>"
         )
     parts.append("</g>")

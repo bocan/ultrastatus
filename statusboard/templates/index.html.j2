@@ -90,6 +90,15 @@ svg.map.zoomed text.label { display: block; }
 .map-toolbar .zoom-buttons { margin-left: auto; display: flex; gap: 0.35rem; }
 .map-toolbar .zoom-buttons button { min-width: 2.2rem; font-weight: 700; }
 .map-toolbar .hint { color: var(--ink-2); font-size: 0.8rem; }
+/* Cloud toggles: pure CSS. An unchecked box hides that cloud's markers, labels, and cards. */
+.map-wrap { position: relative; }
+.cloud-toggles { position: absolute; top: 0.75rem; right: 0.75rem; z-index: 1; display: flex; flex-direction: column; gap: 0.2rem;
+  padding: 0.45rem 0.6rem; border: 1px solid var(--border); border-radius: 6px; background: var(--surface); font-size: 0.8rem; }
+.cloud-toggles label { display: flex; align-items: center; gap: 0.35rem; cursor: pointer; }
+.cloud-toggles .swatch { width: 0.6rem; height: 0.6rem; border-radius: 50%; border: 1px solid var(--map-stroke); background: var(--ok-fg); }
+.map-wrap:has(#toggle-aws:not(:checked))   svg.map [data-cloud="aws"]   { display: none; }
+.map-wrap:has(#toggle-gcp:not(:checked))   svg.map [data-cloud="gcp"]   { display: none; }
+.map-wrap:has(#toggle-azure:not(:checked)) svg.map [data-cloud="azure"] { display: none; }
 {{ map_css | safe }}
 .global-list { list-style: none; padding: 0; margin: 0 0 0.75rem; display: flex; flex-direction: column; gap: 0.25rem; }
 .global-list li { font-size: 0.9rem; }
@@ -176,6 +185,11 @@ footer ul { list-style: none; padding: 0; margin: 0.25rem 0 0; display: flex; fl
 </div>
 
 <div class="map-wrap">
+<form class="cloud-toggles" aria-label="Show clouds on the map">
+  <label><input type="checkbox" id="toggle-aws" checked> <span class="swatch"></span>AWS</label>
+  <label><input type="checkbox" id="toggle-gcp" checked> <span class="swatch"></span>GCP</label>
+  <label><input type="checkbox" id="toggle-azure" checked> <span class="swatch"></span>Azure</label>
+</form>
 {{ map_svg | safe }}
 </div>
 

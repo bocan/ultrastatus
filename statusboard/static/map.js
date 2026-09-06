@@ -266,6 +266,21 @@
     });
   }
 
+  /* Cloud toggles are pure CSS. The script only remembers them across reloads. */
+  var toggles = Array.prototype.slice.call(document.querySelectorAll(".cloud-toggles input[type=checkbox]"));
+  if (toggles.length) {
+    try {
+      var hidden = JSON.parse(localStorage.getItem("statusboard.hiddenClouds") || "[]");
+      toggles.forEach(function (box) { if (hidden.indexOf(box.id) >= 0) box.checked = false; });
+    } catch (e) { /* ignore */ }
+    toggles.forEach(function (box) {
+      box.addEventListener("change", function () {
+        var off = toggles.filter(function (b) { return !b.checked; }).map(function (b) { return b.id; });
+        try { localStorage.setItem("statusboard.hiddenClouds", JSON.stringify(off)); } catch (e) { /* ignore */ }
+      });
+    });
+  }
+
   /* Initial view: hash, then saved state, then world. */
   var hash = (location.hash.match(/view=([a-z-]+)/) || [])[1];
   if (hash && toBox(hash)) {
