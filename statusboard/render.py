@@ -18,7 +18,7 @@ from statusboard.providers import PROVIDERS
 # must appear in exactly one group; tests/test_groups.py enforces it.
 GROUPS: list[tuple[str, list[tuple[str, str]]]] = [
     ("Clouds", [("aws", "AWS"), ("gcp", "GCP"), ("azure", "Azure")]),
-    ("Data platforms", [("databricks", "Databricks"), ("dbt", "dbt Cloud"), ("snowflake", "Snowflake")]),
+    ("Data platforms", [("databricks", "Databricks"), ("dbt", "dbt Cloud"), ("snowflake", "Snowflake"), ("airbyte", "Airbyte")]),
     ("AI", [("claude", "Claude"), ("openai", "OpenAI")]),
     ("Developer tooling", [("github", "GitHub"), ("cloudflare", "Cloudflare"), ("npm", "npm"), ("docker", "Docker"), ("pypi", "PyPI")]),
     ("Workplace", [("google-workspace", "Google Workspace"), ("slack", "Slack"), ("atlassian", "Atlassian")]),
@@ -46,6 +46,7 @@ SOURCE_URLS: dict[str, str] = {
     "atlassian": "https://status.atlassian.com/",
     "pypi": "https://status.python.org/",
     "snowflake": "https://status.snowflake.com/",
+    "airbyte": "https://status.airbyte.com/",
 }
 
 STALE_AFTER = timedelta(minutes=15)

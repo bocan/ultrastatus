@@ -64,7 +64,8 @@ Split into a header and a timeline.
 
 - Header lines match `^(Type|Duration|Affected Components):\s*(.*)$`. Collect them into a dict.
 - The timeline is everything after the header. Entries match `(\w{3} \d{1,2}, \d{2}:\d{2}:\d{2}) GMT\+0 - (\w+) - (.*?)(?=\s+\w{3} \d{1,2}, \d{2}:\d{2}:\d{2} GMT\+0 - |\s*$)` with `re.DOTALL`. Each gives a timestamp text, a state word, and a message.
-- Timeline timestamps have no year. Use the year from `pubDate`. If the resulting datetime is earlier than `started_at`, add one year. This handles a December incident resolved in January.
+- Timeline timestamps have no year. Use the year from `pubDate`. If the resulting datetime is more than seven days earlier than `started_at`, add one year. This handles a December incident resolved in January. The gap matters: live maintenance items have entries stamped a few minutes before `pubDate`, and a plain "earlier than" test threw those a year forward.
+- Timeline entries are not always in time order. Maintenance items list the `Completed` entry first. Sort entries by timestamp, and on equal timestamps put a terminal entry last, because some items stamp every entry with the same minute. "Newest entry" below means the last one after that sort, never the last one in the text.
 - Do not use `Duration`. The live value `1 day, 8 hours and 32 minutes` did not match the 32 minute timeline. It is unreliable.
 
 ### Field mapping
@@ -76,10 +77,10 @@ Split into a header and a timeline.
 | title | `title` |
 | severity | header `Type`: `Incident` to `major`, `Maintenance` to `minor`. Anything else to `major`. |
 | started_at | `pubDate` |
-| updated_at | timestamp of the last timeline entry, else `started_at` |
-| resolved_at | timestamp of the last timeline entry when its state is `Resolved` or `Completed`, else `None` |
+| updated_at | timestamp of the newest timeline entry, else `started_at` |
+| resolved_at | timestamp of the newest entry whose state is `Resolved` or `Completed`, else `None`. Any terminal entry resolves the item, even when a later note follows it. Seen live: a maintenance window completed at 12:00 with an `Identified` note added at 20:00, which Instatus still shows as completed. |
 | url | `link`, else the default page URL |
-| last_message | last timeline entry's message, first 2000 characters. If `Affected Components` is non-empty, prefix `Components: Data Sync. ` |
+| last_message | newest timeline entry's message, first 2000 characters. If `Affected Components` is non-empty, prefix `Components: Data Sync. ` |
 | regions | `[]` |
 
 State words seen live: `Investigating`, `Identified`, `Monitoring`, `Resolved`. Maintenance items use `Scheduled`, `In progress`, `Completed`. Match case-insensitively.

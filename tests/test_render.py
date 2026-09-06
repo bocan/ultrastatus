@@ -24,7 +24,7 @@ def config(monkeypatch):
 NOW = utc(2026, 9, 5, 20, 10, 0)
 EXPECTED_NAMES = [
     "aws", "gcp", "azure",
-    "databricks", "dbt", "snowflake",
+    "databricks", "dbt", "snowflake", "airbyte",
     "claude", "openai",
     "github", "cloudflare", "npm", "docker", "pypi",
     "google-workspace", "slack", "atlassian",

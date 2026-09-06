@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Airbyte Status - Incident history</title>
+    <link>https://status.airbyte.com</link>
+    <description>Incident history</description>
+    <item>
+      <title>Jobs are failing to launch in US-Central region.</title>
+      <description>
+    Type: Incident
+    Duration: 1 day, 8 hours and 32 minutes
+
+    Affected Components: Data Sync
+    Sep 1, 15:30:00 GMT+0 - Investigating - We are currently investigating this incident. Sep 1, 15:50:00 GMT+0 - Monitoring - We implemented a fix and are currently monitoring the result. Sep 1, 16:02:31 GMT+0 - Resolved - This incident has been resolved.
+  </description>
+      <pubDate>Tue, 1 Sep 2026 15:30:00 +0000</pubDate>
+      <link>https://status.airbyte.com/incident/cmtiukc5l0m7k1ao1dcpz87yt</link>
+      <guid>https://status.airbyte.com/incident/cmtiukc5l0m7k1ao1dcpz87yt</guid>
+    </item>
+    <item>
+      <title>Maintenance Window</title>
+      <description>
+    Type: Maintenance
+    Duration: 2 hours
+
+    Affected Components: WebApp, Connector Builder, Airbyte API, Data Sync
+    May 1, 15:00:00 GMT+0 - Completed - Maintenance has completed successfully May 1, 13:00:00 GMT+0 - Identified - We are planning for a scheduled maintenance during that time. May 1, 13:00:01 GMT+0 - Identified - Maintenance is now in progress
+  </description>
+      <pubDate>Thu, 1 May 2025 13:00:00 +0000</pubDate>
+      <link>https://status.airbyte.com/maintenance/cma1j631b003h13zj4jvzzpdk</link>
+      <guid>https://status.airbyte.com/maintenance/cma1j631b003h13zj4jvzzpdk</guid>
+    </item>
+    <item>
+      <title>Elevated sync failures for Postgres sources (hand-edited: still open)</title>
+      <description>
+    Type: Incident
+    Duration: 20 minutes
+
+    Affected Components: Data Sync, Postgres Source
+    Sep 5, 09:00:00 GMT+0 - Investigating - We are looking into elevated failures. Sep 5, 09:20:00 GMT+0 - Monitoring - A fix is rolling out &amp; we are watching results.
+  </description>
+      <pubDate>Sat, 5 Sep 2026 09:00:00 +0000</pubDate>
+      <link>https://status.airbyte.com/incident/handedited000000000000001</link>
+      <guid>https://status.airbyte.com/incident/handedited000000000000001</guid>
+    </item>
+  </channel>
+</rss>

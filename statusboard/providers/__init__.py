@@ -17,3 +17,4 @@ import statusboard.providers.databricks  # noqa: E402,F401
 import statusboard.providers.azure  # noqa: E402,F401
 import statusboard.providers.slack  # noqa: E402,F401
 import statusboard.providers.snowflake  # noqa: E402,F401
+import statusboard.providers.airbyte  # noqa: E402,F401
