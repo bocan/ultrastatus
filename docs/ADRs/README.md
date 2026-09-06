@@ -17,12 +17,15 @@ Each ADR is one session of work for a model. Run them in order. Each one lists w
 | [0011](ADR-0011-region-filter.md) | Region filter | `statusboard.toml` names your regions; tiles, tables, and map put them first |
 | [0012](ADR-0012-zoomable-map.md) | Zoomable map | Pan, zoom, click-to-pin, and continent presets with one inline script |
 | [0013](ADR-0013-css-hover-cards.md) | CSS hover cards | Real hover cards on the map with no JavaScript |
+| [0014](ADR-0014-tile-groups.md) | Tile groups | Named tile groups with a status chip, and a guard that every provider has a group |
+| [0015](ADR-0015-google-workspace-provider.md) | Google Workspace provider | GCP adapter refactored into one class with two instances |
+| [0016](ADR-0016-slack-provider.md) | Slack provider | Slack's own status API, history endpoint |
 
 ADR-0010 is out of numeric order on purpose. Run it after ADR-0004 and before ADR-0005, so the dashboard in ADR-0008 sees every provider.
 
 ADR-0013 is also out of order. Run ADR-0011, then ADR-0013, then ADR-0012. The zoomable map builds on the cards.
 
-ADR-0001 to ADR-0010 are built. ADR-0011, ADR-0013, and ADR-0012 are next, in that order.
+ADR-0001 to ADR-0013 are built. ADR-0014, ADR-0015, and ADR-0016 are next, in that order. ADR-0014 must go first: it adds the guard that the two providers rely on.
 
 ## How to run one
 
