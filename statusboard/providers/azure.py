@@ -80,7 +80,9 @@ def _to_incident(item: ET.Element, now: datetime) -> Incident:
     started_at = _parse_pubdate(pubdate_text, now)
     description = _strip_html(_text(item, "description") or "")
     categories = [c.text or "" for c in item.findall("category")]
-    found = _regions_from_categories(categories) or _regions_from_text(f"{title} {description}")
+    found = _regions_from_categories(categories) or _regions_from_text(
+        f"{title} {description}"
+    )
     resolved = _RESOLVED_WORDS.search(f"{title} {description}") is not None
     return Incident(
         provider="azure",

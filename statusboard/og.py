@@ -19,7 +19,9 @@ RED = "#f85149"
 BORDER = "#30363d"
 
 FONT = "system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
-TAGLINE = "Live status of the clouds and services your work runs on, on one page and one map."
+TAGLINE = (
+    "Live status of the clouds and services your work runs on, on one page and one map."
+)
 
 
 def _icon(x: float, y: float, size: float) -> str:
@@ -47,13 +49,18 @@ def og_svg(groups: list[tuple[str, list[tuple[str, str]]]]) -> str:
     ]
 
     shown = [(label, pairs) for label, pairs in groups if pairs]
+
     # Column widths follow the longest text in each column, heading or name,
     # so "DEVELOPER TOOLING" does not run into its neighbour. Widths are
     # estimated from character counts and then scaled to fill the row.
     def natural_width(label: str, pairs: list) -> float:
         heading = len(label) * 12.5
-        names = max((len(provider_label) for _, provider_label in pairs), default=0) * 14 + 26
+        names = (
+            max((len(provider_label) for _, provider_label in pairs), default=0) * 14
+            + 26
+        )
         return max(heading, names) + 36
+
     widths = [natural_width(label, pairs) for label, pairs in shown]
     scale = (WIDTH - 2 * MARGIN) / sum(widths) if widths else 1.0
     widths = [w * scale for w in widths]
@@ -68,7 +75,9 @@ def og_svg(groups: list[tuple[str, list[tuple[str, str]]]]) -> str:
         )
         for row, (_name, provider_label) in enumerate(pairs):
             y = top + 44 + row * 40
-            parts.append(f'<circle cx="{x + 8:.0f}" cy="{y - 8}" r="6" fill="{GREEN}"/>')
+            parts.append(
+                f'<circle cx="{x + 8:.0f}" cy="{y - 8}" r="6" fill="{GREEN}"/>'
+            )
             parts.append(
                 f'<text x="{x + 26:.0f}" y="{y}" font-family="{FONT}" font-size="26" fill="{INK}">{e(provider_label)}</text>'
             )

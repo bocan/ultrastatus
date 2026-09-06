@@ -29,7 +29,10 @@ def poll_providers(
                 seen = {inc.external_id for inc in incidents}
                 newly_resolved = db.mark_missing_resolved(conn, name, seen, polled_at)
             db.record_poll(conn, name, polled_at, None)
-            print(f"{name}: {len(incidents)} incidents, {newly_resolved} newly resolved", file=out)
+            print(
+                f"{name}: {len(incidents)} incidents, {newly_resolved} newly resolved",
+                file=out,
+            )
         except Exception as exc:  # one provider must not stop the others
             db.record_poll(conn, name, polled_at, f"{type(exc).__name__}: {exc}")
             print(f"{name}: ERROR {exc}", file=out)
@@ -48,7 +51,10 @@ def _cmd_poll(args: argparse.Namespace) -> int:
     providers = dict(PROVIDERS)
     if args.only:
         if args.only not in providers:
-            print(f"unknown provider '{args.only}'. Known: {', '.join(sorted(providers)) or 'none'}", file=sys.stderr)
+            print(
+                f"unknown provider '{args.only}'. Known: {', '.join(sorted(providers)) or 'none'}",
+                file=sys.stderr,
+            )
             return 2
         providers = {args.only: providers[args.only]}
     conn = db.connect(args.db)
@@ -87,7 +93,11 @@ def _cmd_og_svg(args: argparse.Namespace) -> int:
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="statusboard")
-    parser.add_argument("--db", default=None, help="SQLite path (default: $STATUSBOARD_DB or ./statusboard.sqlite3)")
+    parser.add_argument(
+        "--db",
+        default=None,
+        help="SQLite path (default: $STATUSBOARD_DB or ./statusboard.sqlite3)",
+    )
     sub = parser.add_subparsers(dest="command", required=True)
 
     p_init = sub.add_parser("init-db", help="create the database and schema")
@@ -97,8 +107,12 @@ def build_parser() -> argparse.ArgumentParser:
     p_poll.add_argument("--only", default=None, help="poll a single provider by name")
     p_poll.set_defaults(func=_cmd_poll)
 
-    p_render = sub.add_parser("render", help="write the static dashboard from the database")
-    p_render.add_argument("--out", default="site", help="output directory (default: site)")
+    p_render = sub.add_parser(
+        "render", help="write the static dashboard from the database"
+    )
+    p_render.add_argument(
+        "--out", default="site", help="output directory (default: site)"
+    )
     p_render.set_defaults(func=_cmd_render)
 
     p_og = sub.add_parser("og-svg", help="write the Open Graph board image as SVG")

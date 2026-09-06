@@ -22,8 +22,12 @@ def feeds(monkeypatch):
     """Serve a fixture per host, and record every URL requested."""
     state = {
         "payloads": {
-            "www.githubstatus.com": json.loads((FIXTURES / "github_incidents.json").read_text()),
-            "www.dockerstatus.com": json.loads((FIXTURES / "docker_incidents.json").read_text()),
+            "www.githubstatus.com": json.loads(
+                (FIXTURES / "github_incidents.json").read_text()
+            ),
+            "www.dockerstatus.com": json.loads(
+                (FIXTURES / "docker_incidents.json").read_text()
+            ),
         },
         "requested": [],
     }
@@ -96,7 +100,9 @@ def test_docker_falls_back_to_created_at_and_incident_url(feeds):
     inc = incidents[0]
     assert "started_at" not in feeds["payloads"]["www.dockerstatus.com"]["incidents"][0]
     assert inc.started_at == utc(2026, 8, 24, 19, 13, 56)
-    assert inc.url == "https://www.dockerstatus.com/incidents/01M0TK349Z8VCJ3ERNSAAW7YKA"
+    assert (
+        inc.url == "https://www.dockerstatus.com/incidents/01M0TK349Z8VCJ3ERNSAAW7YKA"
+    )
     assert inc.resolved_at == utc(2026, 7, 31, 20, 48, 37)
     assert inc.last_message == "Resolved"
     assert inc.severity == "major"
@@ -130,7 +136,10 @@ def test_statuspage_providers_are_registered_with_hosts_and_labels():
 def test_each_instance_requests_its_own_host(feeds):
     for name in EXPECTED_STATUSPAGE:
         PROVIDERS[name].fetch()
-    assert feeds["requested"] == [f"https://{host}/api/v2/incidents.json" for host, _ in EXPECTED_STATUSPAGE.values()]
+    assert feeds["requested"] == [
+        f"https://{host}/api/v2/incidents.json"
+        for host, _ in EXPECTED_STATUSPAGE.values()
+    ]
 
 
 def test_incident_io_shaped_feed_on_dbt_uses_the_fallbacks(feeds):

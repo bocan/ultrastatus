@@ -13,17 +13,26 @@ def test_open_only_feed_resolves_vanished_incidents(conn):
     provider = FakeProvider("fake", lists_resolved=False, batches=[[a, b], [a]])
     out = io.StringIO()
 
-    assert poll_providers(conn, {"fake": provider}, out=out, now=utc(2026, 9, 5, 10, 0)) == 0
+    assert (
+        poll_providers(conn, {"fake": provider}, out=out, now=utc(2026, 9, 5, 10, 0))
+        == 0
+    )
     assert {i.external_id for i in db.open_incidents(conn)} == {"a", "b"}
 
-    assert poll_providers(conn, {"fake": provider}, out=out, now=utc(2026, 9, 5, 10, 2)) == 0
+    assert (
+        poll_providers(conn, {"fake": provider}, out=out, now=utc(2026, 9, 5, 10, 2))
+        == 0
+    )
     assert {i.external_id for i in db.open_incidents(conn)} == {"a"}
     resolved = db.recent_resolved(conn, utc(2000, 1, 1))
     assert [i.external_id for i in resolved] == ["b"]
     assert resolved[0].resolved_at == utc(2026, 9, 5, 10, 2)
 
     lines = out.getvalue().splitlines()
-    assert lines == ["fake: 2 incidents, 0 newly resolved", "fake: 1 incidents, 1 newly resolved"]
+    assert lines == [
+        "fake: 2 incidents, 0 newly resolved",
+        "fake: 1 incidents, 1 newly resolved",
+    ]
 
 
 def test_feed_that_lists_resolved_is_not_auto_resolved(conn):
@@ -38,7 +47,11 @@ def test_feed_that_lists_resolved_is_not_auto_resolved(conn):
 
 def test_raising_provider_is_recorded_and_others_still_run(conn):
     bad = RaisingProvider("bad", "feed exploded")
-    good = FakeProvider("good", lists_resolved=False, batches=[[make_incident(provider="good", external_id="g")]])
+    good = FakeProvider(
+        "good",
+        lists_resolved=False,
+        batches=[[make_incident(provider="good", external_id="g")]],
+    )
     out = io.StringIO()
     now = utc(2026, 9, 5, 10, 0)
 

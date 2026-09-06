@@ -6,7 +6,11 @@ import pytest
 from statusboard import db, http
 from statusboard.cli import poll_providers
 from statusboard.model import Region
-from statusboard.providers.azure import AzureProvider, _parse_pubdate, _regions_from_text
+from statusboard.providers.azure import (
+    AzureProvider,
+    _parse_pubdate,
+    _regions_from_text,
+)
 
 from conftest import utc
 
@@ -42,7 +46,11 @@ def test_item_with_guid_and_categories(feed):
     assert inc.external_id == "awareness-virtual-machines"
     assert inc.severity == "major"
     assert inc.resolved_at is None  # "mitigation" is not "mitigated"
-    assert inc.regions == [Region("azure", "westeurope"), Region("azure", "northeurope"), Region("azure", "eastus2")]
+    assert inc.regions == [
+        Region("azure", "westeurope"),
+        Region("azure", "northeurope"),
+        Region("azure", "eastus2"),
+    ]
     assert inc.started_at == utc(2024, 7, 18, 4, 9, 0)
     assert inc.updated_at == inc.started_at
     assert inc.url == "https://status.azure.com/en-us/status/"
@@ -59,7 +67,9 @@ def test_item_without_guid_falls_back_to_text_and_hash(feed):
 
 
 def test_non_region_categories_are_ignored(feed):
-    inc = _by_title(AzureProvider().fetch())["Network Infrastructure - Issues accessing a subset of Microsoft services"]
+    inc = _by_title(AzureProvider().fetch())[
+        "Network Infrastructure - Issues accessing a subset of Microsoft services"
+    ]
     assert inc.regions == [Region("azure", "uksouth")]
     assert inc.resolved_at is None
 
@@ -93,13 +103,23 @@ def test_pubdate_with_trailing_z_parses_to_utc():
 
 def test_end_to_end_items_then_empty_resolves(feed, conn):
     out = io.StringIO()
-    assert poll_providers(conn, {"azure": AzureProvider()}, out=out, now=utc(2026, 9, 5, 10, 0)) == 0
+    assert (
+        poll_providers(
+            conn, {"azure": AzureProvider()}, out=out, now=utc(2026, 9, 5, 10, 0)
+        )
+        == 0
+    )
     open_ids = {i.external_id for i in db.open_incidents(conn)}
     assert "awareness-virtual-machines" in open_ids
     assert len(open_ids) == 2
 
     feed["body"] = EMPTY
-    assert poll_providers(conn, {"azure": AzureProvider()}, out=out, now=utc(2026, 9, 5, 10, 2)) == 0
+    assert (
+        poll_providers(
+            conn, {"azure": AzureProvider()}, out=out, now=utc(2026, 9, 5, 10, 2)
+        )
+        == 0
+    )
     assert db.open_incidents(conn) == []
     by_id = {i.external_id: i for i in db.recent_resolved(conn, utc(2000, 1, 1))}
     assert by_id["awareness-virtual-machines"].resolved_at == utc(2026, 9, 5, 10, 2)

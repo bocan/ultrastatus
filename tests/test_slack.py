@@ -13,7 +13,9 @@ from statusboard.providers.slack import FEED_URL, SlackProvider
 
 from conftest import utc
 
-FIXTURE = json.loads((Path(__file__).parent / "fixtures" / "slack_history.json").read_text())
+FIXTURE = json.loads(
+    (Path(__file__).parent / "fixtures" / "slack_history.json").read_text()
+)
 
 
 @pytest.fixture
@@ -48,12 +50,20 @@ def test_active_is_open_and_resolved_uses_date_updated_in_utc(feed):
     assert resolved.resolved_at == resolved.updated_at
     # 2026-08-06T18:08:09-07:00 is 01:08:09 UTC the next day.
     assert resolved.resolved_at.astimezone(timezone.utc) == utc(2026, 8, 7, 1, 8, 9)
-    assert by_id["1576"].started_at.astimezone(timezone.utc) == utc(2026, 8, 13, 21, 21, 41)
+    assert by_id["1576"].started_at.astimezone(timezone.utc) == utc(
+        2026, 8, 13, 21, 21, 41
+    )
 
 
 @pytest.mark.parametrize(
     "status,open_expected",
-    [("active", True), ("scheduled", True), ("resolved", False), ("completed", False), ("cancelled", False)],
+    [
+        ("active", True),
+        ("scheduled", True),
+        ("resolved", False),
+        ("completed", False),
+        ("cancelled", False),
+    ],
 )
 def test_status_decides_open_or_resolved(feed, status, open_expected):
     feed["payload"][0]["status"] = status
@@ -61,7 +71,15 @@ def test_status_decides_open_or_resolved(feed, status, open_expected):
     assert (inc.resolved_at is None) is open_expected
 
 
-@pytest.mark.parametrize("kind,expected", [("outage", "critical"), ("incident", "major"), ("notice", "minor"), ("weird", "major")])
+@pytest.mark.parametrize(
+    "kind,expected",
+    [
+        ("outage", "critical"),
+        ("incident", "major"),
+        ("notice", "minor"),
+        ("weird", "major"),
+    ],
+)
 def test_type_mapping(feed, kind, expected):
     feed["payload"][0]["type"] = kind
     assert SlackProvider().fetch()[0].severity == expected
@@ -76,7 +94,9 @@ def test_newest_note_wins_regardless_of_order(feed):
 
 def test_message_is_plain_text_with_services_prefix(feed):
     by_id = _by_id(SlackProvider().fetch())
-    assert by_id["1576"].last_message.startswith("Services: Messaging, Workspace/Org Administration. We're continuing to investigate")
+    assert by_id["1576"].last_message.startswith(
+        "Services: Messaging, Workspace/Org Administration. We're continuing to investigate"
+    )
     assert "<p>" not in by_id["1576"].last_message
     assert "&nbsp;" not in by_id["1575"].last_message
     assert by_id["1575"].last_message.endswith("problematic change.")
@@ -84,7 +104,10 @@ def test_message_is_plain_text_with_services_prefix(feed):
 
 def test_no_notes_gives_only_the_services_prefix_or_empty(feed):
     feed["payload"][0]["notes"] = []
-    assert SlackProvider().fetch()[0].last_message == "Services: Messaging, Workspace/Org Administration."
+    assert (
+        SlackProvider().fetch()[0].last_message
+        == "Services: Messaging, Workspace/Org Administration."
+    )
     feed["payload"][0]["services"] = []
     assert SlackProvider().fetch()[0].last_message == ""
 

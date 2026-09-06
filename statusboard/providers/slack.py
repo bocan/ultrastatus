@@ -59,7 +59,9 @@ def _to_incident(item: dict) -> Incident:
         severity=TYPE_TO_SEVERITY.get(str(item.get("type", "")).lower(), "major"),
         started_at=_parse_ts(item["date_created"]),
         updated_at=updated_at,
-        resolved_at=updated_at if str(item.get("status", "")).lower() in TERMINAL_STATUSES else None,
+        resolved_at=updated_at
+        if str(item.get("status", "")).lower() in TERMINAL_STATUSES
+        else None,
         url=item.get("url"),
         last_message=message[:MESSAGE_LIMIT],
         regions=[],

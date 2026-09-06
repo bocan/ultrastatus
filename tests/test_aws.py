@@ -44,7 +44,9 @@ def test_fixture_parses_with_arn_as_id(feed):
 
 
 def test_region_from_arn():
-    assert _region_from_arn("arn:aws:health:me-central-1::event/X/Y/Z") == [Region("aws", "me-central-1")]
+    assert _region_from_arn("arn:aws:health:me-central-1::event/X/Y/Z") == [
+        Region("aws", "me-central-1")
+    ]
     assert _region_from_arn("arn:aws:health:::event/X/Y/Z") == []
 
 
@@ -70,7 +72,9 @@ def test_field_mapping(feed):
     assert inc.updated_at == utc(2026, 4, 30, 7, 25, 54)
     assert inc.resolved_at is None
     assert inc.url == "https://health.aws.amazon.com/health/status"
-    assert inc.last_message.startswith("We are providing an update on the ongoing service disruption.")
+    assert inc.last_message.startswith(
+        "We are providing an update on the ongoing service disruption."
+    )
     assert inc.regions == [Region("aws", "me-central-1")]
 
 
@@ -83,11 +87,21 @@ def test_empty_event_log_falls_back(feed):
 
 def test_end_to_end_resolves_vanished_event(feed, conn):
     out = io.StringIO()
-    assert poll_providers(conn, {"aws": AwsProvider()}, out=out, now=utc(2026, 9, 5, 10, 0)) == 0
+    assert (
+        poll_providers(
+            conn, {"aws": AwsProvider()}, out=out, now=utc(2026, 9, 5, 10, 0)
+        )
+        == 0
+    )
     assert len(db.open_incidents(conn)) == 2
 
     dropped = feed["payload"].pop(1)
-    assert poll_providers(conn, {"aws": AwsProvider()}, out=out, now=utc(2026, 9, 5, 10, 2)) == 0
+    assert (
+        poll_providers(
+            conn, {"aws": AwsProvider()}, out=out, now=utc(2026, 9, 5, 10, 2)
+        )
+        == 0
+    )
 
     open_ids = [i.external_id for i in db.open_incidents(conn)]
     assert open_ids == [feed["payload"][0]["arn"]]

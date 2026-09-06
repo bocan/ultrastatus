@@ -7,7 +7,9 @@ from conftest import make_incident, utc
 
 
 def test_upsert_then_select_round_trips(conn):
-    inc = make_incident(regions=[Region("aws", "us-east-1"), Region("gcp", "us-central1")])
+    inc = make_incident(
+        regions=[Region("aws", "us-east-1"), Region("gcp", "us-central1")]
+    )
     db.upsert_incident(conn, inc)
 
     rows = db.open_incidents(conn)
@@ -35,7 +37,10 @@ def test_upsert_twice_updates_in_place(conn):
 
 
 def test_upsert_replaces_regions(conn):
-    db.upsert_incident(conn, make_incident(regions=[Region("aws", "us-east-1"), Region("aws", "eu-west-1")]))
+    db.upsert_incident(
+        conn,
+        make_incident(regions=[Region("aws", "us-east-1"), Region("aws", "eu-west-1")]),
+    )
     db.upsert_incident(conn, make_incident(regions=[Region("azure", "eastus")]))
 
     assert db.open_incidents(conn)[0].regions == [Region("azure", "eastus")]
@@ -54,7 +59,9 @@ def test_mark_missing_resolved_only_touches_unseen_open_rows(conn):
     now = utc(2026, 9, 5, 12, 0, 0)
     db.upsert_incident(conn, make_incident(external_id="a"))
     db.upsert_incident(conn, make_incident(external_id="b"))
-    db.upsert_incident(conn, make_incident(external_id="c", resolved_at=utc(2026, 9, 1)))
+    db.upsert_incident(
+        conn, make_incident(external_id="c", resolved_at=utc(2026, 9, 1))
+    )
     db.upsert_incident(conn, make_incident(provider="other", external_id="d"))
 
     count = db.mark_missing_resolved(conn, "fake", {"a"}, now)
@@ -77,8 +84,12 @@ def test_mark_missing_resolved_with_empty_seen_set(conn):
 
 
 def test_recent_resolved_respects_since(conn):
-    db.upsert_incident(conn, make_incident(external_id="old", resolved_at=utc(2026, 8, 1)))
-    db.upsert_incident(conn, make_incident(external_id="new", resolved_at=utc(2026, 9, 4)))
+    db.upsert_incident(
+        conn, make_incident(external_id="old", resolved_at=utc(2026, 8, 1))
+    )
+    db.upsert_incident(
+        conn, make_incident(external_id="new", resolved_at=utc(2026, 9, 4))
+    )
 
     since = utc(2026, 9, 5) - timedelta(days=7)
     ids = [i.external_id for i in db.recent_resolved(conn, since)]
@@ -96,5 +107,7 @@ def test_last_polls_returns_newest_per_provider(conn):
 
 
 def test_schema_has_exactly_three_tables(conn):
-    names = {r[0] for r in conn.execute("SELECT name FROM sqlite_master WHERE type='table'")}
+    names = {
+        r[0] for r in conn.execute("SELECT name FROM sqlite_master WHERE type='table'")
+    }
     assert names == {"incident", "incident_region", "poll_run"}

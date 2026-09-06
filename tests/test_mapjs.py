@@ -41,7 +41,9 @@ def results(tmp_path_factory):
         pytest.skip("node is not installed")
     harness = tmp_path_factory.mktemp("mapjs") / "harness.js"
     harness.write_text(HARNESS)
-    proc = subprocess.run([node, str(harness), str(MAP_JS)], capture_output=True, text=True, timeout=30)
+    proc = subprocess.run(
+        [node, str(harness), str(MAP_JS)], capture_output=True, text=True, timeout=30
+    )
     assert proc.returncode == 0, proc.stderr
     return json.loads(proc.stdout)
 
@@ -51,7 +53,12 @@ def _covers(state, view):
     s, tx, ty = state["scale"], state["tx"], state["ty"]
     left, right = view["x"] * s + tx, (view["x"] + view["w"]) * s + tx
     top, bottom = view["y"] * s + ty, (view["y"] + view["h"]) * s + ty
-    return left <= view["x"] + 1e-6 and right >= view["x"] + view["w"] - 1e-6 and top <= view["y"] + 1e-6 and bottom >= view["y"] + view["h"] - 1e-6
+    return (
+        left <= view["x"] + 1e-6
+        and right >= view["x"] + view["w"] - 1e-6
+        and top <= view["y"] + 1e-6
+        and bottom >= view["y"] + view["h"] - 1e-6
+    )
 
 
 def test_clamp_scale(results):

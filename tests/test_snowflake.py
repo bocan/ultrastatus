@@ -9,7 +9,11 @@ from statusboard import db, http, regions
 from statusboard.cli import poll_providers
 from statusboard.model import Region
 from statusboard.providers import PROVIDERS
-from statusboard.providers.snowflake import REGION_GROUPS, UNMAPPED_GROUPS, SnowflakeProvider
+from statusboard.providers.snowflake import (
+    REGION_GROUPS,
+    UNMAPPED_GROUPS,
+    SnowflakeProvider,
+)
 
 FIXTURES = Path(__file__).parent / "fixtures"
 COMPONENTS_URL = "https://status.snowflake.com/api/v2/components.json"
@@ -21,7 +25,10 @@ INCIDENTS = json.loads((FIXTURES / "snowflake_incidents.json").read_text())
 @pytest.fixture
 def feeds(monkeypatch):
     state = {
-        "payloads": {COMPONENTS_URL: copy.deepcopy(COMPONENTS), INCIDENTS_URL: copy.deepcopy(INCIDENTS)},
+        "payloads": {
+            COMPONENTS_URL: copy.deepcopy(COMPONENTS),
+            INCIDENTS_URL: copy.deepcopy(INCIDENTS),
+        },
         "raise_for": set(),
         "requested": [],
     }
@@ -59,7 +66,9 @@ def test_every_mapped_code_exists_in_the_region_table():
 def test_regions_come_from_component_groups(feeds):
     by_id = _by_id(SnowflakeProvider().fetch())
     assert by_id["9p16kxkml7v2"].regions == [Region("gcp", "us-central1")]
-    assert by_id["fl9tkpj8d7hk"].regions == [Region("aws", "eu-central-1")]  # three components, one group
+    assert by_id["fl9tkpj8d7hk"].regions == [
+        Region("aws", "eu-central-1")
+    ]  # three components, one group
     assert by_id["847dlygl25yb"].regions == [
         Region("aws", "us-west-2"),
         Region("aws", "us-gov-west-1"),
@@ -71,10 +80,30 @@ def test_two_clouds_in_one_incident(feeds):
     ids = _group_name_to_id()
     item = feeds["payloads"][INCIDENTS_URL]["incidents"][0]
     item["components"] = [
-        {"id": "a", "name": "Applications", "group_id": ids["AWS - Europe (London)"], "group": False},
-        {"id": "b", "name": "Applications", "group_id": ids["Azure - UK South (London)"], "group": False},
-        {"id": "c", "name": "Developer Tools", "group_id": ids["AWS - Europe (London)"], "group": False},
-        {"id": "d", "name": "Applications", "group_id": "no-such-group", "group": False},
+        {
+            "id": "a",
+            "name": "Applications",
+            "group_id": ids["AWS - Europe (London)"],
+            "group": False,
+        },
+        {
+            "id": "b",
+            "name": "Applications",
+            "group_id": ids["Azure - UK South (London)"],
+            "group": False,
+        },
+        {
+            "id": "c",
+            "name": "Developer Tools",
+            "group_id": ids["AWS - Europe (London)"],
+            "group": False,
+        },
+        {
+            "id": "d",
+            "name": "Applications",
+            "group_id": "no-such-group",
+            "group": False,
+        },
     ]
     inc = _by_id(SnowflakeProvider().fetch())["9p16kxkml7v2"]
     assert inc.regions == [Region("aws", "eu-west-2"), Region("azure", "uksouth")]

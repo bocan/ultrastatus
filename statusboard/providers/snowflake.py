@@ -83,7 +83,11 @@ class SnowflakeProvider(StatuspageProvider):
 
     def _group_names(self) -> dict[str, str]:
         payload = json.loads(http.fetch_bytes(self.components_url))
-        return {c["id"]: c.get("name", "").strip() for c in payload.get("components", []) if c.get("group")}
+        return {
+            c["id"]: c.get("name", "").strip()
+            for c in payload.get("components", [])
+            if c.get("group")
+        }
 
     @staticmethod
     def regions_for(item: dict, group_names: dict[str, str]) -> list[Region]:

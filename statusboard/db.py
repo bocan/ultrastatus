@@ -44,7 +44,11 @@ def to_iso(dt: datetime) -> str:
     """UTC, ISO 8601, seconds precision, trailing Z."""
     if dt.tzinfo is None:
         raise ValueError("timestamps must be timezone-aware")
-    return dt.astimezone(timezone.utc).replace(microsecond=0).strftime("%Y-%m-%dT%H:%M:%SZ")
+    return (
+        dt.astimezone(timezone.utc)
+        .replace(microsecond=0)
+        .strftime("%Y-%m-%dT%H:%M:%SZ")
+    )
 
 
 def from_iso(text: str) -> datetime:
@@ -152,8 +156,12 @@ def _row_to_incident(row: sqlite3.Row, regions: list[Region]) -> Incident:
     )
 
 
-def _load_incidents(conn: sqlite3.Connection, where: str, params: tuple, order: str) -> list[Incident]:
-    rows = conn.execute(f"SELECT * FROM incident WHERE {where} ORDER BY {order}", params).fetchall()
+def _load_incidents(
+    conn: sqlite3.Connection, where: str, params: tuple, order: str
+) -> list[Incident]:
+    rows = conn.execute(
+        f"SELECT * FROM incident WHERE {where} ORDER BY {order}", params
+    ).fetchall()
     if not rows:
         return []
     region_rows = conn.execute(
@@ -165,16 +173,26 @@ def _load_incidents(conn: sqlite3.Connection, where: str, params: tuple, order: 
         regions_by_key.setdefault((r["provider"], r["external_id"]), []).append(
             Region(cloud=r["cloud"], code=r["region_code"])
         )
-    return [_row_to_incident(row, regions_by_key.get((row["provider"], row["external_id"]), [])) for row in rows]
+    return [
+        _row_to_incident(
+            row, regions_by_key.get((row["provider"], row["external_id"]), [])
+        )
+        for row in rows
+    ]
 
 
 def open_incidents(conn: sqlite3.Connection) -> list[Incident]:
-    return _load_incidents(conn, "resolved_at IS NULL", (), "started_at DESC, provider, external_id")
+    return _load_incidents(
+        conn, "resolved_at IS NULL", (), "started_at DESC, provider, external_id"
+    )
 
 
 def recent_resolved(conn: sqlite3.Connection, since: datetime) -> list[Incident]:
     return _load_incidents(
-        conn, "resolved_at IS NOT NULL AND resolved_at >= ?", (to_iso(since),), "resolved_at DESC, provider, external_id"
+        conn,
+        "resolved_at IS NOT NULL AND resolved_at >= ?",
+        (to_iso(since),),
+        "resolved_at DESC, provider, external_id",
     )
 
 

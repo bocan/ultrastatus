@@ -60,7 +60,7 @@ def normalise(cloud: str, text: str) -> str:
         return _WHITESPACE.sub("", lowered)
     code = _WHITESPACE.sub("-", lowered)
     if cloud == "gcp" and code.startswith("eu-"):
-        code = "europe-" + code[len("eu-"):]
+        code = "europe-" + code[len("eu-") :]
     return code
 
 

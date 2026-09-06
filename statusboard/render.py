@@ -19,10 +19,34 @@ from statusboard.providers import PROVIDERS
 # must appear in exactly one group; tests/test_groups.py enforces it.
 GROUPS: list[tuple[str, list[tuple[str, str]]]] = [
     ("Clouds", [("aws", "AWS"), ("gcp", "GCP"), ("azure", "Azure")]),
-    ("Data platforms", [("databricks", "Databricks"), ("dbt", "dbt Cloud"), ("snowflake", "Snowflake"), ("airbyte", "Airbyte")]),
+    (
+        "Data platforms",
+        [
+            ("databricks", "Databricks"),
+            ("dbt", "dbt Cloud"),
+            ("snowflake", "Snowflake"),
+            ("airbyte", "Airbyte"),
+        ],
+    ),
     ("AI", [("claude", "Claude"), ("openai", "OpenAI")]),
-    ("Developer tooling", [("github", "GitHub"), ("cloudflare", "Cloudflare"), ("npm", "npm"), ("docker", "Docker"), ("pypi", "PyPI")]),
-    ("Workplace", [("google-workspace", "Google Workspace"), ("slack", "Slack"), ("atlassian", "Atlassian")]),
+    (
+        "Developer tooling",
+        [
+            ("github", "GitHub"),
+            ("cloudflare", "Cloudflare"),
+            ("npm", "npm"),
+            ("docker", "Docker"),
+            ("pypi", "PyPI"),
+        ],
+    ),
+    (
+        "Workplace",
+        [
+            ("google-workspace", "Google Workspace"),
+            ("slack", "Slack"),
+            ("atlassian", "Atlassian"),
+        ],
+    ),
 ]
 PROVIDER_ORDER: list[tuple[str, str]] = [pair for _, pairs in GROUPS for pair in pairs]
 
@@ -50,7 +74,9 @@ SOURCE_URLS: dict[str, str] = {
     "airbyte": "https://status.airbyte.com/",
 }
 
-OG_DESCRIPTION = "Live status of the clouds and services your work runs on, on one page and one map."
+OG_DESCRIPTION = (
+    "Live status of the clouds and services your work runs on, on one page and one map."
+)
 OG_IMAGE_NAME = "og.png"
 
 STALE_AFTER = timedelta(minutes=15)
@@ -84,7 +110,11 @@ def _ago(then: datetime, now: datetime) -> str:
 
 def _incident_dict(inc: Incident, labels: dict[str, str]) -> dict:
     message = inc.last_message or ""
-    preview = message if len(message) <= MESSAGE_PREVIEW else message[: MESSAGE_PREVIEW - 1].rstrip() + "…"
+    preview = (
+        message
+        if len(message) <= MESSAGE_PREVIEW
+        else message[: MESSAGE_PREVIEW - 1].rstrip() + "…"
+    )
     return {
         "provider": inc.provider,
         "provider_label": labels.get(inc.provider, inc.provider),
@@ -186,7 +216,11 @@ def build_context(conn: sqlite3.Connection, now: datetime) -> dict:
             }
         )
 
-    stale_clouds = {p["name"] for p in providers if p["level"] == "stale" and p["name"] in CLOUD_PROVIDERS}
+    stale_clouds = {
+        p["name"]
+        for p in providers
+        if p["level"] == "stale" and p["name"] in CLOUD_PROVIDERS
+    }
     open_dicts = [_incident_dict(i, labels) for i in open_incidents]
     map_svg, map_css = build_map(open_incidents, stale_clouds, config, labels)
     return {
@@ -194,7 +228,9 @@ def build_context(conn: sqlite3.Connection, now: datetime) -> dict:
         "providers": providers,
         "groups": build_groups(providers),
         "filter_active": config.active,
-        "my_region_labels": sorted(f"{cloud} {code}" for cloud, code in config.my_regions),
+        "my_region_labels": sorted(
+            f"{cloud} {code}" for cloud, code in config.my_regions
+        ),
         "all_clear": not open_mine,
         "open": [_incident_dict(i, labels) for i in open_mine],
         "open_elsewhere": [_incident_dict(i, labels) for i in open_elsewhere],
@@ -207,7 +243,9 @@ def build_context(conn: sqlite3.Connection, now: datetime) -> dict:
         "favicon_png": icon.png_data_uri(),
         "site_url": config.site_url,
         "og_description": OG_DESCRIPTION,
-        "global_incidents": [d for d, i in zip(open_dicts, open_incidents) if not _on_map(i)],
+        "global_incidents": [
+            d for d, i in zip(open_dicts, open_incidents) if not _on_map(i)
+        ],
     }
 
 
@@ -237,17 +275,34 @@ def build_map(
                     "provider_label": labels.get(inc.provider, inc.provider),
                 }
             )
-    markers = marker_layout(regions.all_regions(), levels, titles, stale_clouds, config.my_regions, incidents)
-    return render_svg(markers, land_path(), filter_active=config.active), hover_css(markers)
+    markers = marker_layout(
+        regions.all_regions(),
+        levels,
+        titles,
+        stale_clouds,
+        config.my_regions,
+        incidents,
+    )
+    return render_svg(markers, land_path(), filter_active=config.active), hover_css(
+        markers
+    )
 
 
-def build_map_svg(open_incidents: list[Incident], stale_clouds: set[str], config: Config = Config(frozenset())) -> str:
+def build_map_svg(
+    open_incidents: list[Incident],
+    stale_clouds: set[str],
+    config: Config = Config(frozenset()),
+) -> str:
     return build_map(open_incidents, stale_clouds, config)[0]
 
 
 def map_js() -> str:
     """The pan and zoom script, inlined into the page so it makes no request."""
-    return resources.files("statusboard").joinpath("static/map.js").read_text(encoding="utf-8")
+    return (
+        resources.files("statusboard")
+        .joinpath("static/map.js")
+        .read_text(encoding="utf-8")
+    )
 
 
 def _format_ts(value: str | None) -> str:
@@ -267,7 +322,9 @@ def environment() -> Environment:
     return env
 
 
-def render(conn: sqlite3.Connection, out_dir: str | Path, now: datetime | None = None) -> Path:
+def render(
+    conn: sqlite3.Connection, out_dir: str | Path, now: datetime | None = None
+) -> Path:
     now = now or datetime.now(timezone.utc)
     context = build_context(conn, now)
     html = environment().get_template("index.html.j2").render(**context)

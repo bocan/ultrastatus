@@ -41,13 +41,17 @@ _WHITESPACE = re.compile(r"\s+")
 
 def _parse_stamp(text: str, year: int, not_before: datetime) -> datetime:
     """'Sep 1, 16:02:31' with the year from pubDate. Roll into the next year if it lands before the start."""
-    stamp = datetime.strptime(f"{text} {year}", "%b %d, %H:%M:%S %Y").replace(tzinfo=timezone.utc)
+    stamp = datetime.strptime(f"{text} {year}", "%b %d, %H:%M:%S %Y").replace(
+        tzinfo=timezone.utc
+    )
     if stamp < not_before - ROLLOVER_GAP:
         stamp = stamp.replace(year=year + 1)
     return stamp
 
 
-def parse_description(text: str, started_at: datetime) -> tuple[dict[str, str], list[dict]]:
+def parse_description(
+    text: str, started_at: datetime
+) -> tuple[dict[str, str], list[dict]]:
     """Returns (header, entries). Entries are sorted oldest first by timestamp."""
     header: dict[str, str] = {}
     body_lines = []

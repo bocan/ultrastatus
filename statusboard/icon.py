@@ -52,19 +52,38 @@ def png_icon(size: int = 32) -> bytes:
             x, y = px + 0.5, py + 0.5
             bg_alpha = _coverage_rounded_square(x, y, size, 7 * scale)
             colour = BG
-            colour = _blend(colour, GREEN, _coverage_circle(x, y, 15 * scale, 17.5 * scale, 9 * scale))
-            colour = _blend(colour, BG, _coverage_circle(x, y, 24.5 * scale, 8 * scale, 5.5 * scale))
-            colour = _blend(colour, RED, _coverage_circle(x, y, 24.5 * scale, 8 * scale, 4.2 * scale))
+            colour = _blend(
+                colour,
+                GREEN,
+                _coverage_circle(x, y, 15 * scale, 17.5 * scale, 9 * scale),
+            )
+            colour = _blend(
+                colour, BG, _coverage_circle(x, y, 24.5 * scale, 8 * scale, 5.5 * scale)
+            )
+            colour = _blend(
+                colour,
+                RED,
+                _coverage_circle(x, y, 24.5 * scale, 8 * scale, 4.2 * scale),
+            )
             row += bytes([*colour, round(255 * bg_alpha)])
         rows.append(bytes(row))
     raw = b"".join(rows)
 
     def chunk(kind: bytes, data: bytes) -> bytes:
         body = kind + data
-        return struct.pack(">I", len(data)) + body + struct.pack(">I", zlib.crc32(body) & 0xFFFFFFFF)
+        return (
+            struct.pack(">I", len(data))
+            + body
+            + struct.pack(">I", zlib.crc32(body) & 0xFFFFFFFF)
+        )
 
     ihdr = struct.pack(">IIBBBBB", size, size, 8, 6, 0, 0, 0)  # 8-bit RGBA
-    return b"\x89PNG\r\n\x1a\n" + chunk(b"IHDR", ihdr) + chunk(b"IDAT", zlib.compress(raw, 9)) + chunk(b"IEND", b"")
+    return (
+        b"\x89PNG\r\n\x1a\n"
+        + chunk(b"IHDR", ihdr)
+        + chunk(b"IDAT", zlib.compress(raw, 9))
+        + chunk(b"IEND", b"")
+    )
 
 
 def ico_icon(size: int = 32) -> bytes:
@@ -76,7 +95,13 @@ def ico_icon(size: int = 32) -> bytes:
 
 
 def svg_data_uri() -> str:
-    svg = svg_icon().replace('"', "'").replace("#", "%23").replace("<", "%3C").replace(">", "%3E")
+    svg = (
+        svg_icon()
+        .replace('"', "'")
+        .replace("#", "%23")
+        .replace("<", "%3C")
+        .replace(">", "%3E")
+    )
     return "data:image/svg+xml," + svg
 
 

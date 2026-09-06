@@ -3,7 +3,13 @@ import socket
 from statusboard import http
 
 V4 = (socket.AF_INET, socket.SOCK_STREAM, 6, "", ("93.184.216.34", 443))
-V6 = (socket.AF_INET6, socket.SOCK_STREAM, 6, "", ("2606:2800:220:1:248:1893:25c8:1946", 443, 0, 0))
+V6 = (
+    socket.AF_INET6,
+    socket.SOCK_STREAM,
+    6,
+    "",
+    ("2606:2800:220:1:248:1893:25c8:1946", 443, 0, 0),
+)
 
 
 def test_ipv4_first_drops_v6_when_v4_exists():

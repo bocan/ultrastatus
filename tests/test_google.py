@@ -18,7 +18,10 @@ WORKSPACE_URL = "https://www.google.com/appsstatus/dashboard/incidents.json"
 
 GCP = GoogleStatusProvider("gcp", GCP_URL, "https://status.cloud.google.com/", "GCP")
 WORKSPACE = GoogleStatusProvider(
-    "google-workspace", WORKSPACE_URL, "https://www.google.com/appsstatus/dashboard/", "Google Workspace"
+    "google-workspace",
+    WORKSPACE_URL,
+    "https://www.google.com/appsstatus/dashboard/",
+    "Google Workspace",
 )
 
 
@@ -27,7 +30,9 @@ def feeds(monkeypatch):
     state = {
         "payloads": {
             GCP_URL: json.loads((FIXTURES / "gcp_incidents.json").read_text()),
-            WORKSPACE_URL: json.loads((FIXTURES / "workspace_incidents.json").read_text()),
+            WORKSPACE_URL: json.loads(
+                (FIXTURES / "workspace_incidents.json").read_text()
+            ),
         },
         "requested": [],
     }
@@ -68,12 +73,20 @@ def test_unknown_status_impact_maps_to_major(feeds):
 def test_region_union_keeps_order_and_dedupes(feeds):
     inc = _by_id(GCP.fetch())["J5ia5t9p3g9Q5Wi7r8Ev"]
     assert inc.regions == [Region("gcp", "us-east1"), Region("gcp", "us-central1")]
-    feeds["payloads"][GCP_URL][0]["previously_affected_locations"].append({"title": "dup", "id": "us-east1"})
-    assert _by_id(GCP.fetch())["J5ia5t9p3g9Q5Wi7r8Ev"].regions == [Region("gcp", "us-east1"), Region("gcp", "us-central1")]
+    feeds["payloads"][GCP_URL][0]["previously_affected_locations"].append(
+        {"title": "dup", "id": "us-east1"}
+    )
+    assert _by_id(GCP.fetch())["J5ia5t9p3g9Q5Wi7r8Ev"].regions == [
+        Region("gcp", "us-east1"),
+        Region("gcp", "us-central1"),
+    ]
 
 
 def test_global_location_passes_through(feeds):
-    assert _by_id(GCP.fetch())["utF3FMFdQfwBzJcGG6vf"].regions == [Region("gcp", "global"), Region("gcp", "us-west1")]
+    assert _by_id(GCP.fetch())["utF3FMFdQfwBzJcGG6vf"].regions == [
+        Region("gcp", "global"),
+        Region("gcp", "us-west1"),
+    ]
 
 
 def test_gcp_open_and_resolved(feeds):
@@ -104,16 +117,24 @@ def test_workspace_fixture_parses_with_no_regions(feeds):
     assert len(incidents) == 4
     assert all(i.provider == "google-workspace" for i in incidents)
     assert all(i.regions == [] for i in incidents)
-    assert all(i.url.startswith("https://www.google.com/appsstatus/dashboard/incidents/") for i in incidents)
+    assert all(
+        i.url.startswith("https://www.google.com/appsstatus/dashboard/incidents/")
+        for i in incidents
+    )
     assert all(i.resolved_at is not None for i in incidents)
 
 
 def test_workspace_title_is_first_line_without_summary_prefix(feeds):
     by_id = _by_id(WORKSPACE.fetch())
-    assert by_id["y2ufhCB886p7rveYNnko"].title.startswith("Google Chat users are experiencing an issue")
+    assert by_id["y2ufhCB886p7rveYNnko"].title.startswith(
+        "Google Chat users are experiencing an issue"
+    )
     assert "**" not in by_id["y2ufhCB886p7rveYNnko"].title
     assert "\n" not in by_id["y2ufhCB886p7rveYNnko"].title
-    assert by_id["sjDiph2NXGAfkYYLfK7T"].title == "Some customers may experience slowness while using Google Drive."
+    assert (
+        by_id["sjDiph2NXGAfkYYLfK7T"].title
+        == "Some customers may experience slowness while using Google Drive."
+    )
 
 
 def test_title_helper_edge_cases():
@@ -135,13 +156,19 @@ def test_both_instances_are_registered_and_request_their_own_url(feeds):
 
 def test_end_to_end_poll_writes_gcp_regions_and_workspace_rows(feeds, conn):
     out = io.StringIO()
-    assert poll_providers(conn, {"gcp": GCP, "google-workspace": WORKSPACE}, out=out) == 0
+    assert (
+        poll_providers(conn, {"gcp": GCP, "google-workspace": WORKSPACE}, out=out) == 0
+    )
     assert out.getvalue().splitlines() == [
         "gcp: 6 incidents, 0 newly resolved",
         "google-workspace: 4 incidents, 0 newly resolved",
     ]
     assert [i.external_id for i in db.open_incidents(conn)] == ["J5ia5t9p3g9Q5Wi7r8Ev"]
-    rows = conn.execute("SELECT count(*) FROM incident_region WHERE provider='gcp'").fetchone()[0]
+    rows = conn.execute(
+        "SELECT count(*) FROM incident_region WHERE provider='gcp'"
+    ).fetchone()[0]
     assert rows > 0
-    ws_rows = conn.execute("SELECT count(*) FROM incident WHERE provider='google-workspace'").fetchone()[0]
+    ws_rows = conn.execute(
+        "SELECT count(*) FROM incident WHERE provider='google-workspace'"
+    ).fetchone()[0]
     assert ws_rows == 4

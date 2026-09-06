@@ -18,7 +18,7 @@ class ConfigError(Exception):
 @dataclass(frozen=True)
 class Config:
     my_regions: frozenset[tuple[str, str]]
-    site_url: str | None = None   # public address of the page, for Open Graph tags
+    site_url: str | None = None  # public address of the page, for Open Graph tags
 
     @property
     def active(self) -> bool:
@@ -67,7 +67,9 @@ def load_config(path: str | None = None) -> Config:
         raise ConfigError(f"{file}: [site] must be a table")
     site_url = site.get("url")
     if site_url is not None:
-        if not isinstance(site_url, str) or not site_url.startswith(("http://", "https://")):
+        if not isinstance(site_url, str) or not site_url.startswith(
+            ("http://", "https://")
+        ):
             raise ConfigError(f"{file}: [site] url must be an absolute http(s) URL")
         site_url = site_url.rstrip("/")
 
@@ -78,7 +80,9 @@ def load_config(path: str | None = None) -> Config:
     mine: set[tuple[str, str]] = set()
     for cloud, codes in table.items():
         if cloud not in CLOUDS:
-            raise ConfigError(f"{file}: unknown cloud '{cloud}' in [regions]. Use one of: {', '.join(CLOUDS)}")
+            raise ConfigError(
+                f"{file}: unknown cloud '{cloud}' in [regions]. Use one of: {', '.join(CLOUDS)}"
+            )
         if not isinstance(codes, list) or not all(isinstance(c, str) for c in codes):
             raise ConfigError(f"{file}: [regions] {cloud} must be a list of strings")
         for code in codes:

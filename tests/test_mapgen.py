@@ -4,7 +4,15 @@ import json
 import re
 
 from statusboard import db, regions
-from statusboard.mapgen import Marker, geojson_to_path, land_path, marker_layout, preset_boxes, project, render_svg
+from statusboard.mapgen import (
+    Marker,
+    geojson_to_path,
+    land_path,
+    marker_layout,
+    preset_boxes,
+    project,
+    render_svg,
+)
 from statusboard.model import Region
 from statusboard.render import build_context
 
@@ -22,13 +30,21 @@ def test_project_corners_and_origin():
 def test_geojson_to_path_counts_rings():
     geojson = {
         "features": [
-            {"geometry": {"type": "Polygon", "coordinates": [[[0, 0], [10, 0], [10, 10], [0, 0]]]}},
+            {
+                "geometry": {
+                    "type": "Polygon",
+                    "coordinates": [[[0, 0], [10, 0], [10, 10], [0, 0]]],
+                }
+            },
             {
                 "geometry": {
                     "type": "MultiPolygon",
                     "coordinates": [
                         [[[20, 20], [30, 20], [30, 30], [20, 20]]],
-                        [[[40, 40], [50, 40], [50, 50], [40, 40]], [[42, 42], [44, 42], [44, 44], [42, 42]]],
+                        [
+                            [[40, 40], [50, 40], [50, 50], [40, 40]],
+                            [[42, 42], [44, 42], [44, 44], [42, 42]],
+                        ],
                     ],
                 }
             },
@@ -45,18 +61,60 @@ def test_land_path_is_generated_and_within_budget():
     land = land_path()
     assert land.startswith("M")
     assert land.endswith("Z")
-    assert len(land.encode()) < 1_300_000  # ADR-0012: 1:50m coastline, page budget 1.5 MB
+    assert (
+        len(land.encode()) < 1_300_000
+    )  # ADR-0012: 1:50m coastline, page budget 1.5 MB
 
 
 # ADR-0012: viewport group, labels, presets.
 
 CONTINENT_SAMPLES = {
-    "north-america": ["us-east-1", "us-west-2", "ca-central-1", "mx-central-1", "us-central1", "westus3", "canadaeast"],
+    "north-america": [
+        "us-east-1",
+        "us-west-2",
+        "ca-central-1",
+        "mx-central-1",
+        "us-central1",
+        "westus3",
+        "canadaeast",
+    ],
     "south-america": ["sa-east-1", "southamerica-west1", "brazilsouth", "chilecentral"],
-    "europe": ["eu-west-1", "eu-north-1", "eu-south-2", "europe-north1", "europe-west12", "uksouth", "norwaywest", "polandcentral"],
-    "middle-east-africa": ["af-south-1", "me-central-1", "il-central-1", "africa-south1", "qatarcentral", "southafricawest"],
-    "asia": ["ap-south-1", "ap-northeast-1", "ap-southeast-3", "asia-east1", "asia-south2", "japanwest", "indonesiacentral", "jioindiawest"],
-    "oceania": ["ap-southeast-2", "ap-southeast-4", "ap-southeast-6", "australia-southeast1", "newzealandnorth", "australiacentral"],
+    "europe": [
+        "eu-west-1",
+        "eu-north-1",
+        "eu-south-2",
+        "europe-north1",
+        "europe-west12",
+        "uksouth",
+        "norwaywest",
+        "polandcentral",
+    ],
+    "middle-east-africa": [
+        "af-south-1",
+        "me-central-1",
+        "il-central-1",
+        "africa-south1",
+        "qatarcentral",
+        "southafricawest",
+    ],
+    "asia": [
+        "ap-south-1",
+        "ap-northeast-1",
+        "ap-southeast-3",
+        "asia-east1",
+        "asia-south2",
+        "japanwest",
+        "indonesiacentral",
+        "jioindiawest",
+    ],
+    "oceania": [
+        "ap-southeast-2",
+        "ap-southeast-4",
+        "ap-southeast-6",
+        "australia-southeast1",
+        "newzealandnorth",
+        "australiacentral",
+    ],
 }
 
 
@@ -72,21 +130,38 @@ def _inside(m, box):
 def test_viewport_group_wraps_land_and_markers():
     svg = render_svg(marker_layout(regions.all_regions(), {}), "M0 0Z")
     assert svg.count('<g class="viewport">') == 1
-    assert svg.find('<g class="viewport">') < svg.find("<path") < svg.find("<circle") < svg.find("</g>") < svg.find("<foreignObject")
+    assert (
+        svg.find('<g class="viewport">')
+        < svg.find("<path")
+        < svg.find("<circle")
+        < svg.find("</g>")
+        < svg.find("<foreignObject")
+    )
     assert 'tabindex="0" data-presets="' in svg
 
 
 def test_label_follows_each_circle_with_the_region_code():
     markers = marker_layout(regions.all_regions(), {})
     svg = render_svg(markers, "M0 0Z")
-    labels = re.findall(r'<text class="label"[^>]* x="[\d.]+" y="[\d.]+">([^<]+)</text>', svg)
+    labels = re.findall(
+        r'<text class="label"[^>]* x="[\d.]+" y="[\d.]+">([^<]+)</text>', svg
+    )
     assert labels == [m.code for m in markers]
     assert svg.count("<text") == svg.count("<circle")
 
 
 def test_preset_boxes_have_all_keys_and_contain_their_markers():
     boxes = preset_boxes(marker_layout(regions.all_regions(), {}))
-    assert set(boxes) == {"world", "north-america", "south-america", "europe", "middle-east-africa", "asia", "oceania", "mine"}
+    assert set(boxes) == {
+        "world",
+        "north-america",
+        "south-america",
+        "europe",
+        "middle-east-africa",
+        "asia",
+        "oceania",
+        "mine",
+    }
     by_code = _markers_by_code()
     for name, codes in CONTINENT_SAMPLES.items():
         for code in codes:
@@ -94,11 +169,20 @@ def test_preset_boxes_have_all_keys_and_contain_their_markers():
     x, y, w, h = boxes["world"]
     assert (x, w) == (0.0, 1000.0) and round(y, 1) == 13.9 and round(h, 1) == 402.8
     for box in boxes.values():
-        assert box[0] >= 0 and box[0] + box[2] <= 1000 and box[1] >= 13.9 and box[1] + box[3] <= 416.7 + 0.05
+        assert (
+            box[0] >= 0
+            and box[0] + box[2] <= 1000
+            and box[1] >= 13.9
+            and box[1] + box[3] <= 416.7 + 0.05
+        )
 
 
 def test_mine_preset_frames_mine_markers_with_margin():
-    markers = marker_layout(regions.all_regions(), {}, my_regions={("aws", "eu-west-2"), ("aws", "ap-southeast-2")})
+    markers = marker_layout(
+        regions.all_regions(),
+        {},
+        my_regions={("aws", "eu-west-2"), ("aws", "ap-southeast-2")},
+    )
     boxes = preset_boxes(markers, filter_active=True)
     mine = [m for m in markers if m.mine]
     assert all(_inside(m, boxes["mine"]) for m in mine)
@@ -128,8 +212,15 @@ def test_marker_layout_defaults_to_ok_per_region():
 
 
 def test_marker_layout_applies_level_and_offsets():
-    rows = [r for r in regions.all_regions() if (r.cloud, r.code) in {("aws", "us-east-1"), ("gcp", "us-east4")}]
-    markers = {(m.cloud, m.code): m for m in marker_layout(rows, {("aws", "us-east-1"): "critical"})}
+    rows = [
+        r
+        for r in regions.all_regions()
+        if (r.cloud, r.code) in {("aws", "us-east-1"), ("gcp", "us-east4")}
+    ]
+    markers = {
+        (m.cloud, m.code): m
+        for m in marker_layout(rows, {("aws", "us-east-1"): "critical"})
+    }
     aws, gcp = markers[("aws", "us-east-1")], markers[("gcp", "us-east4")]
     assert aws.level == "critical"
     assert gcp.level == "ok"
@@ -182,26 +273,68 @@ def test_elsewhere_incident_draws_before_my_incident():
 
 def test_render_svg_shape_and_tooltip():
     markers = [
-        Marker("aws", "us-east-1", "N. Virginia (Ashburn)", 284.7, 141.7, "critical", ["A <b>bad</b> day", "Two", "Three", "Four"]),
+        Marker(
+            "aws",
+            "us-east-1",
+            "N. Virginia (Ashburn)",
+            284.7,
+            141.7,
+            "critical",
+            ["A <b>bad</b> day", "Two", "Three", "Four"],
+        ),
         Marker("gcp", "us-central1", "Iowa", 233.6, 135.3, "ok"),
     ]
     svg = render_svg(markers, "M0 0L1 1Z")
     assert svg.startswith("<svg")
     assert svg.count("<path") == 1
     assert svg.count("<circle") == 2
-    assert "<title>AWS us-east-1 (N. Virginia (Ashburn)): critical. A &lt;b&gt;bad&lt;/b&gt; day; Two; Three</title>" in svg
+    assert (
+        "<title>AWS us-east-1 (N. Virginia (Ashburn)): critical. A &lt;b&gt;bad&lt;/b&gt; day; Two; Three</title>"
+        in svg
+    )
     assert "Four" not in svg
     assert 'viewBox="0 13.9 1000 402.8"' in svg
 
 
 def test_build_context_includes_map_and_global_incidents(conn):
-    for name in ("aws", "gcp", "azure", "github", "databricks", "cloudflare", "claude", "npm", "docker"):
+    for name in (
+        "aws",
+        "gcp",
+        "azure",
+        "github",
+        "databricks",
+        "cloudflare",
+        "claude",
+        "npm",
+        "docker",
+    ):
         db.record_poll(conn, name, NOW - timedelta(minutes=1), None)
-    db.upsert_incident(conn, make_incident(provider="aws", external_id="r", regions=[Region("aws", "eu-west-2")]))
-    db.upsert_incident(conn, make_incident(provider="github", external_id="g", title="Global thing", regions=[]))
-    db.upsert_incident(conn, make_incident(provider="gcp", external_id="x", title="Only global loc", regions=[Region("gcp", "global")]))
+    db.upsert_incident(
+        conn,
+        make_incident(
+            provider="aws", external_id="r", regions=[Region("aws", "eu-west-2")]
+        ),
+    )
+    db.upsert_incident(
+        conn,
+        make_incident(
+            provider="github", external_id="g", title="Global thing", regions=[]
+        ),
+    )
+    db.upsert_incident(
+        conn,
+        make_incident(
+            provider="gcp",
+            external_id="x",
+            title="Only global loc",
+            regions=[Region("gcp", "global")],
+        ),
+    )
 
     ctx = build_context(conn, NOW)
     assert ctx["map_svg"].startswith("<svg")
     assert "London): major. Something broke" in ctx["map_svg"]
-    assert {g["title"] for g in ctx["global_incidents"]} == {"Global thing", "Only global loc"}
+    assert {g["title"] for g in ctx["global_incidents"]} == {
+        "Global thing",
+        "Only global loc",
+    }

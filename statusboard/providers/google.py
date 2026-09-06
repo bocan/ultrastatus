@@ -65,7 +65,9 @@ class GoogleStatusProvider:
             provider=self.name,
             external_id=item["id"],
             title=_title(item.get("external_desc", "")),
-            severity=STATUS_IMPACT_TO_SEVERITY.get(item.get("status_impact", ""), "major"),
+            severity=STATUS_IMPACT_TO_SEVERITY.get(
+                item.get("status_impact", ""), "major"
+            ),
             started_at=_parse_ts(item["begin"]),
             updated_at=_parse_ts(item["modified"]),
             resolved_at=_parse_ts(end) if end else None,

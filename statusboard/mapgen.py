@@ -10,7 +10,7 @@ from statusboard.regions import RegionInfo
 
 WIDTH = 1000
 HEIGHT = 500
-LAT_MAX = 85.0   # crop the empty Arctic
+LAT_MAX = 85.0  # crop the empty Arctic
 LAT_MIN = -60.0  # crop Antarctica
 RADIUS_MINE = 6
 RADIUS_OTHER = 4
@@ -20,16 +20,24 @@ LABEL_OFFSET = (8, 4)
 OFFSETS: dict[str, tuple[int, int]] = {"aws": (0, 0), "gcp": (7, 5), "azure": (-7, 5)}
 CLOUD_LABELS: dict[str, str] = {"aws": "AWS", "gcp": "GCP", "azure": "Azure"}
 
-LEVEL_RANK: dict[str, int] = {"ok": 0, "stale": 0, "minor": 1, "major": 2, "critical": 3}
+LEVEL_RANK: dict[str, int] = {
+    "ok": 0,
+    "stale": 0,
+    "minor": 1,
+    "major": 2,
+    "critical": 3,
+}
 
 GEOJSON_NAME = "world-50m.geojson"
 LAND_PATH_NAME = "world-land.svgpath"
 
 # Hover card placement, in canvas units on the cropped canvas.
 CARD_WIDTH = 220
-CARD_GAP = 4            # marker centre to card edge; a radius 6 marker overlaps the card by 2 units
-CARD_FLIP_X = 700       # past this, the card opens to the left
-CARD_FLIP_Y = 260       # past this many units below the crop top, the card opens upward
+CARD_GAP = (
+    4  # marker centre to card edge; a radius 6 marker overlaps the card by 2 units
+)
+CARD_FLIP_X = 700  # past this, the card opens to the left
+CARD_FLIP_Y = 260  # past this many units below the crop top, the card opens upward
 CARD_MAX_INCIDENTS = 5
 
 # Continent presets in canvas units: every marker in the group plus a 30 unit margin,
@@ -45,7 +53,9 @@ CONTINENT_BOXES: dict[str, tuple[float, float, float, float]] = {
 MINE_MARGIN = 40
 
 
-def project(lon: float, lat: float, width: int = WIDTH, height: int = HEIGHT) -> tuple[float, float]:
+def project(
+    lon: float, lat: float, width: int = WIDTH, height: int = HEIGHT
+) -> tuple[float, float]:
     return (lon + 180.0) / 360.0 * width, (90.0 - lat) / 180.0 * height
 
 
@@ -70,7 +80,9 @@ def geojson_to_path(geojson: dict, width: int = WIDTH, height: int = HEIGHT) -> 
         geometry = feature.get("geometry") or {}
         kind = geometry.get("type")
         coords = geometry.get("coordinates") or []
-        polygons = [coords] if kind == "Polygon" else coords if kind == "MultiPolygon" else []
+        polygons = (
+            [coords] if kind == "Polygon" else coords if kind == "MultiPolygon" else []
+        )
         for polygon in polygons:
             for ring in polygon:
                 pieces.append(_ring_to_path(ring, width, height))
@@ -104,7 +116,9 @@ class Marker:
     level: str
     titles: list[str] = field(default_factory=list)
     mine: bool = True
-    incidents: list[dict] = field(default_factory=list)   # {title, url, severity, provider_label}
+    incidents: list[dict] = field(
+        default_factory=list
+    )  # {title, url, severity, provider_label}
 
     @property
     def key(self) -> str:
@@ -144,15 +158,24 @@ def marker_layout(
         mine = not my_regions or key in my_regions
         markers.append(
             Marker(
-                region.cloud, region.code, region.name, x + dx, y + dy, level,
-                list(titles.get(key, [])), mine, list(incidents.get(key, [])),
+                region.cloud,
+                region.code,
+                region.name,
+                x + dx,
+                y + dy,
+                level,
+                list(titles.get(key, [])),
+                mine,
+                list(incidents.get(key, [])),
             )
         )
     markers.sort(key=lambda m: (LEVEL_RANK.get(m.level, 0), m.mine))
     return markers
 
 
-def _clamp_box(box: tuple[float, float, float, float], width: int, top: float, bottom: float):
+def _clamp_box(
+    box: tuple[float, float, float, float], width: int, top: float, bottom: float
+):
     x, y, w, h = box
     x = max(0.0, x)
     y = max(top, y)
@@ -161,7 +184,12 @@ def _clamp_box(box: tuple[float, float, float, float], width: int, top: float, b
     return (round(x, 1), round(y, 1), round(w, 1), round(h, 1))
 
 
-def preset_boxes(markers: list[Marker], filter_active: bool = False, width: int = WIDTH, height: int = HEIGHT):
+def preset_boxes(
+    markers: list[Marker],
+    filter_active: bool = False,
+    width: int = WIDTH,
+    height: int = HEIGHT,
+):
     """Named view boxes (x, y, w, h) in canvas units. 'mine' frames the mine markers, else the world."""
     top, bottom = crop_bounds(width, height)
     world = (0.0, round(top, 1), float(width), round(bottom - top, 1))
@@ -172,7 +200,12 @@ def preset_boxes(markers: list[Marker], filter_active: bool = False, width: int 
     if mine:
         xs = [m.x for m in mine]
         ys = [m.y for m in mine]
-        box = (min(xs) - MINE_MARGIN, min(ys) - MINE_MARGIN, max(xs) - min(xs) + 2 * MINE_MARGIN, max(ys) - min(ys) + 2 * MINE_MARGIN)
+        box = (
+            min(xs) - MINE_MARGIN,
+            min(ys) - MINE_MARGIN,
+            max(xs) - min(xs) + 2 * MINE_MARGIN,
+            max(ys) - min(ys) + 2 * MINE_MARGIN,
+        )
         boxes["mine"] = _clamp_box(box, width, top, bottom)
     else:
         boxes["mine"] = world
@@ -253,7 +286,11 @@ def render_svg(
     presets: dict | None = None,
 ) -> str:
     top, bottom = crop_bounds(width, height)
-    presets = presets if presets is not None else preset_boxes(markers, filter_active, width, height)
+    presets = (
+        presets
+        if presets is not None
+        else preset_boxes(markers, filter_active, width, height)
+    )
     presets_attr = html.escape(json.dumps(presets, separators=(",", ":")), quote=True)
     parts = [
         f'<svg class="map" viewBox="0 {top:.1f} {width} {bottom - top:.1f}" width="100%" '

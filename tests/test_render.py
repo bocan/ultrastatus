@@ -17,17 +17,32 @@ def config(monkeypatch):
     """Call with a set of (cloud, code) pairs to activate the filter for one test."""
 
     def activate(my_regions):
-        monkeypatch.setattr(render_module, "load_config", lambda: Config(frozenset(my_regions)))
+        monkeypatch.setattr(
+            render_module, "load_config", lambda: Config(frozenset(my_regions))
+        )
 
     return activate
 
+
 NOW = utc(2026, 9, 5, 20, 10, 0)
 EXPECTED_NAMES = [
-    "aws", "gcp", "azure",
-    "databricks", "dbt", "snowflake", "airbyte",
-    "claude", "openai",
-    "github", "cloudflare", "npm", "docker", "pypi",
-    "google-workspace", "slack", "atlassian",
+    "aws",
+    "gcp",
+    "azure",
+    "databricks",
+    "dbt",
+    "snowflake",
+    "airbyte",
+    "claude",
+    "openai",
+    "github",
+    "cloudflare",
+    "npm",
+    "docker",
+    "pypi",
+    "google-workspace",
+    "slack",
+    "atlassian",
 ]
 TILE_COUNT = len(EXPECTED_NAMES)
 
@@ -49,9 +64,15 @@ def test_empty_database_gives_all_stale_providers(conn):
 
 def test_levels_follow_worst_open_severity(conn):
     _fresh_polls(conn)
-    db.upsert_incident(conn, make_incident(provider="aws", external_id="a", severity="minor"))
-    db.upsert_incident(conn, make_incident(provider="aws", external_id="b", severity="critical"))
-    db.upsert_incident(conn, make_incident(provider="gcp", external_id="c", severity="major"))
+    db.upsert_incident(
+        conn, make_incident(provider="aws", external_id="a", severity="minor")
+    )
+    db.upsert_incident(
+        conn, make_incident(provider="aws", external_id="b", severity="critical")
+    )
+    db.upsert_incident(
+        conn, make_incident(provider="gcp", external_id="c", severity="major")
+    )
 
     levels = {p["name"]: p["level"] for p in build_context(conn, NOW)["providers"]}
     assert levels["aws"] == "critical"
@@ -79,15 +100,27 @@ def test_poll_error_is_stale_and_carries_text(conn):
 
 
 def test_stale_provider_still_lists_its_open_incidents(conn):
-    db.upsert_incident(conn, make_incident(provider="aws", external_id="a", severity="critical"))
+    db.upsert_incident(
+        conn, make_incident(provider="aws", external_id="a", severity="critical")
+    )
     ctx = build_context(conn, NOW)
     assert [i["provider"] for i in ctx["open"]] == ["aws"]
     assert ctx["providers"][0]["level"] == "stale"
 
 
 def test_resolved_window_is_seven_days(conn):
-    db.upsert_incident(conn, make_incident(provider="gcp", external_id="old", resolved_at=NOW - timedelta(days=8)))
-    db.upsert_incident(conn, make_incident(provider="gcp", external_id="new", resolved_at=NOW - timedelta(days=6)))
+    db.upsert_incident(
+        conn,
+        make_incident(
+            provider="gcp", external_id="old", resolved_at=NOW - timedelta(days=8)
+        ),
+    )
+    db.upsert_incident(
+        conn,
+        make_incident(
+            provider="gcp", external_id="new", resolved_at=NOW - timedelta(days=6)
+        ),
+    )
     ctx = build_context(conn, NOW)
     assert [i["title"] for i in ctx["resolved"]] == ["Something broke"]
     assert ctx["resolved"][0]["resolved_at"] == db.to_iso(NOW - timedelta(days=6))
@@ -130,7 +163,12 @@ def test_render_includes_incident_title_and_link(conn, tmp_path):
     _fresh_polls(conn)
     db.upsert_incident(
         conn,
-        make_incident(provider="cloudflare", external_id="z", title="Edge <b>trouble</b>", url="https://example.test/z"),
+        make_incident(
+            provider="cloudflare",
+            external_id="z",
+            title="Edge <b>trouble</b>",
+            url="https://example.test/z",
+        ),
     )
     html = render(conn, tmp_path / "site", now=NOW).read_text()
     assert 'href="https://example.test/z"' in html
@@ -153,7 +191,15 @@ def test_inactive_config_matches_unfiltered_shape(conn):
 def test_elsewhere_incident_does_not_raise_tile_level(conn, config):
     config({("aws", "eu-west-2")})
     _fresh_polls(conn)
-    db.upsert_incident(conn, make_incident(provider="aws", external_id="a", severity="critical", regions=[Region("aws", "us-east-1")]))
+    db.upsert_incident(
+        conn,
+        make_incident(
+            provider="aws",
+            external_id="a",
+            severity="critical",
+            regions=[Region("aws", "us-east-1")],
+        ),
+    )
     ctx = build_context(conn, NOW)
     aws = {p["name"]: p for p in ctx["providers"]}["aws"]
     assert aws["level"] == "ok"
@@ -167,7 +213,15 @@ def test_elsewhere_incident_does_not_raise_tile_level(conn, config):
 def test_my_region_incident_sets_level_and_clears_all_clear(conn, config):
     config({("aws", "eu-west-2")})
     _fresh_polls(conn)
-    db.upsert_incident(conn, make_incident(provider="aws", external_id="a", severity="minor", regions=[Region("aws", "eu-west-2")]))
+    db.upsert_incident(
+        conn,
+        make_incident(
+            provider="aws",
+            external_id="a",
+            severity="minor",
+            regions=[Region("aws", "eu-west-2")],
+        ),
+    )
     ctx = build_context(conn, NOW)
     assert {p["name"]: p["level"] for p in ctx["providers"]}["aws"] == "minor"
     assert ctx["all_clear"] is False
@@ -177,8 +231,21 @@ def test_my_region_incident_sets_level_and_clears_all_clear(conn, config):
 
 def test_global_and_unmapped_incidents_are_always_mine(conn, config):
     config({("azure", "uksouth")})
-    db.upsert_incident(conn, make_incident(provider="github", external_id="g", title="GitHub thing", regions=[]))
-    db.upsert_incident(conn, make_incident(provider="gcp", external_id="x", title="GCP global", regions=[Region("gcp", "global")]))
+    db.upsert_incident(
+        conn,
+        make_incident(
+            provider="github", external_id="g", title="GitHub thing", regions=[]
+        ),
+    )
+    db.upsert_incident(
+        conn,
+        make_incident(
+            provider="gcp",
+            external_id="x",
+            title="GCP global",
+            regions=[Region("gcp", "global")],
+        ),
+    )
     ctx = build_context(conn, NOW)
     assert {i["title"] for i in ctx["open"]} == {"GitHub thing", "GCP global"}
     assert ctx["open_elsewhere"] == []
@@ -187,7 +254,15 @@ def test_global_and_unmapped_incidents_are_always_mine(conn, config):
 def test_databricks_on_my_host_region_is_mine(conn, config):
     config({("aws", "eu-west-2")})
     _fresh_polls(conn)
-    db.upsert_incident(conn, make_incident(provider="databricks", external_id="d", severity="major", regions=[Region("aws", "eu-west-2")]))
+    db.upsert_incident(
+        conn,
+        make_incident(
+            provider="databricks",
+            external_id="d",
+            severity="major",
+            regions=[Region("aws", "eu-west-2")],
+        ),
+    )
     ctx = build_context(conn, NOW)
     assert [i["provider"] for i in ctx["open"]] == ["databricks"]
     assert {p["name"]: p["level"] for p in ctx["providers"]}["databricks"] == "major"
@@ -197,7 +272,15 @@ def test_databricks_on_my_host_region_is_mine(conn, config):
 def test_snowflake_on_my_host_region_is_mine_and_colours_the_marker(conn, config):
     config({("aws", "eu-west-2")})
     _fresh_polls(conn)
-    db.upsert_incident(conn, make_incident(provider="snowflake", external_id="s", severity="major", regions=[Region("aws", "eu-west-2")]))
+    db.upsert_incident(
+        conn,
+        make_incident(
+            provider="snowflake",
+            external_id="s",
+            severity="major",
+            regions=[Region("aws", "eu-west-2")],
+        ),
+    )
     ctx = build_context(conn, NOW)
     assert [i["provider"] for i in ctx["open"]] == ["snowflake"]
     assert {p["name"]: p["level"] for p in ctx["providers"]}["snowflake"] == "major"
@@ -205,9 +288,36 @@ def test_snowflake_on_my_host_region_is_mine_and_colours_the_marker(conn, config
 
 
 def test_open_sorts_by_severity_then_updated(conn):
-    db.upsert_incident(conn, make_incident(provider="aws", external_id="old-minor", title="old minor", severity="minor", updated_at=NOW - timedelta(hours=5)))
-    db.upsert_incident(conn, make_incident(provider="aws", external_id="new-minor", title="new minor", severity="minor", updated_at=NOW - timedelta(hours=1)))
-    db.upsert_incident(conn, make_incident(provider="aws", external_id="crit", title="crit", severity="critical", updated_at=NOW - timedelta(hours=9)))
+    db.upsert_incident(
+        conn,
+        make_incident(
+            provider="aws",
+            external_id="old-minor",
+            title="old minor",
+            severity="minor",
+            updated_at=NOW - timedelta(hours=5),
+        ),
+    )
+    db.upsert_incident(
+        conn,
+        make_incident(
+            provider="aws",
+            external_id="new-minor",
+            title="new minor",
+            severity="minor",
+            updated_at=NOW - timedelta(hours=1),
+        ),
+    )
+    db.upsert_incident(
+        conn,
+        make_incident(
+            provider="aws",
+            external_id="crit",
+            title="crit",
+            severity="critical",
+            updated_at=NOW - timedelta(hours=9),
+        ),
+    )
     ctx = build_context(conn, NOW)
     assert [i["title"] for i in ctx["open"]] == ["crit", "new minor", "old minor"]
 
@@ -220,7 +330,12 @@ def test_rendered_html_banner_and_details(conn, config, tmp_path):
     assert "<details" not in html
     assert "Open in your regions" in html
 
-    db.upsert_incident(conn, make_incident(provider="aws", external_id="e", regions=[Region("aws", "us-east-1")]))
+    db.upsert_incident(
+        conn,
+        make_incident(
+            provider="aws", external_id="e", regions=[Region("aws", "us-east-1")]
+        ),
+    )
     html = render(conn, tmp_path / "b", now=NOW).read_text()
     assert "Open elsewhere (1)" in html
     assert "<details" in html
@@ -237,17 +352,41 @@ def _group(ctx, label):
 
 def test_groups_follow_the_declared_order_and_skip_empty_ones(conn):
     ctx = build_context(conn, NOW)
-    assert [g["label"] for g in ctx["groups"]] == ["Clouds", "Data platforms", "AI", "Developer tooling", "Workplace"]
-    assert [p["name"] for p in _group(ctx, "Workplace")["providers"]] == ["google-workspace", "slack", "atlassian"]
-    assert [p["name"] for p in _group(ctx, "Clouds")["providers"]] == ["aws", "gcp", "azure"]
-    assert [p["name"] for p in _group(ctx, "Developer tooling")["providers"]] == ["github", "cloudflare", "npm", "docker", "pypi"]
+    assert [g["label"] for g in ctx["groups"]] == [
+        "Clouds",
+        "Data platforms",
+        "AI",
+        "Developer tooling",
+        "Workplace",
+    ]
+    assert [p["name"] for p in _group(ctx, "Workplace")["providers"]] == [
+        "google-workspace",
+        "slack",
+        "atlassian",
+    ]
+    assert [p["name"] for p in _group(ctx, "Clouds")["providers"]] == [
+        "aws",
+        "gcp",
+        "azure",
+    ]
+    assert [p["name"] for p in _group(ctx, "Developer tooling")["providers"]] == [
+        "github",
+        "cloudflare",
+        "npm",
+        "docker",
+        "pypi",
+    ]
     assert [p["name"] for g in ctx["groups"] for p in g["providers"]] == EXPECTED_NAMES
 
 
 def test_group_level_is_worst_incident_level(conn):
     _fresh_polls(conn)
-    db.upsert_incident(conn, make_incident(provider="aws", external_id="a", severity="critical"))
-    db.upsert_incident(conn, make_incident(provider="gcp", external_id="b", severity="minor"))
+    db.upsert_incident(
+        conn, make_incident(provider="aws", external_id="a", severity="critical")
+    )
+    db.upsert_incident(
+        conn, make_incident(provider="gcp", external_id="b", severity="minor")
+    )
     clouds = _group(build_context(conn, NOW), "Clouds")
     assert clouds["level"] == "critical"
     assert clouds["open_count"] == 2
@@ -258,7 +397,9 @@ def test_group_is_stale_only_when_every_member_is_stale(conn):
     _fresh_polls(conn, names=["gcp", "azure"])  # aws never polled, so stale
     ctx = build_context(conn, NOW)
     assert _group(ctx, "Clouds")["level"] == "ok"
-    assert _group(ctx, "Developer tooling")["level"] == "stale"  # none of its members polled
+    assert (
+        _group(ctx, "Developer tooling")["level"] == "stale"
+    )  # none of its members polled
     assert _group(ctx, "AI")["level"] == "stale"
     assert _group(ctx, "Workplace")["level"] == "stale"
 
@@ -267,7 +408,16 @@ def test_rendered_groups_have_headings_in_order_and_all_tiles(conn, tmp_path):
     _fresh_polls(conn)
     html = render(conn, tmp_path / "site", now=NOW).read_text()
     assert html.count('<section class="group">') == 5
-    positions = [html.find(f"\n    {label}\n") for label in ("Clouds", "Data platforms", "AI", "Developer tooling", "Workplace")]
+    positions = [
+        html.find(f"\n    {label}\n")
+        for label in (
+            "Clouds",
+            "Data platforms",
+            "AI",
+            "Developer tooling",
+            "Workplace",
+        )
+    ]
     assert all(p >= 0 for p in positions) and positions == sorted(positions)
     assert html.count('class="tile level-') == TILE_COUNT
 
@@ -281,7 +431,12 @@ def test_empty_group_is_not_rendered(conn, monkeypatch):
 def test_group_heading_counts_open_in_your_regions(conn, config, tmp_path):
     config({("aws", "eu-west-2")})
     _fresh_polls(conn)
-    db.upsert_incident(conn, make_incident(provider="aws", external_id="a", regions=[Region("aws", "eu-west-2")]))
+    db.upsert_incident(
+        conn,
+        make_incident(
+            provider="aws", external_id="a", regions=[Region("aws", "eu-west-2")]
+        ),
+    )
     html = render(conn, tmp_path / "site", now=NOW).read_text()
     assert "1 open in your regions" in html
     assert _group(build_context(conn, NOW), "Clouds")["open_count"] == 1

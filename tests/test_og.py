@@ -57,9 +57,15 @@ def test_render_writes_og_png_and_tags_only_with_site_url(conn, tmp_path, monkey
     assert "og:image" not in html
     assert (tmp_path / "a" / "og.png").read_bytes()[:8] == b"\x89PNG\r\n\x1a\n"
 
-    monkeypatch.setattr(render_module, "load_config", lambda: Config(frozenset(), "https://status.example.com"))
+    monkeypatch.setattr(
+        render_module,
+        "load_config",
+        lambda: Config(frozenset(), "https://status.example.com"),
+    )
     html = render(conn, tmp_path / "b", now=NOW).read_text()
-    assert '<meta property="og:image" content="https://status.example.com/og.png">' in html
+    assert (
+        '<meta property="og:image" content="https://status.example.com/og.png">' in html
+    )
     assert '<meta property="og:url" content="https://status.example.com/">' in html
     assert '<meta name="twitter:card" content="summary_large_image">' in html
     assert build_context(conn, NOW)["site_url"] == "https://status.example.com"

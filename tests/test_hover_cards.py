@@ -4,7 +4,14 @@ import re
 from datetime import timedelta
 
 from statusboard import db, regions
-from statusboard.mapgen import Marker, card_html, card_style, hover_css, marker_layout, render_svg
+from statusboard.mapgen import (
+    Marker,
+    card_html,
+    card_style,
+    hover_css,
+    marker_layout,
+    render_svg,
+)
 from statusboard.model import Region
 from statusboard.render import build_context, render
 
@@ -13,8 +20,18 @@ from conftest import make_incident, utc
 NOW = utc(2026, 9, 5, 20, 10, 0)
 
 
-def _marker(x=100.0, y=100.0, level="ok", incidents=None, mine=True, code="us-east-1", cloud="aws"):
-    return Marker(cloud, code, "N. Virginia (Ashburn)", x, y, level, [], mine, incidents or [])
+def _marker(
+    x=100.0,
+    y=100.0,
+    level="ok",
+    incidents=None,
+    mine=True,
+    code="us-east-1",
+    cloud="aws",
+):
+    return Marker(
+        cloud, code, "N. Virginia (Ashburn)", x, y, level, [], mine, incidents or []
+    )
 
 
 def test_every_circle_has_key_and_tabindex():
@@ -36,14 +53,16 @@ def test_every_marker_label_and_card_carries_its_cloud():
     for tag in ("<circle ", '<text class="label" ', '<div class="card" '):
         found = re.findall(re.escape(tag) + r'[^>]*data-cloud="(aws|gcp|azure)"', svg)
         assert len(found) == len(markers), tag
-    assert sorted(re.findall(r'<circle [^>]*data-cloud="(\w+)"', svg)) == sorted(m.cloud for m in markers)
+    assert sorted(re.findall(r'<circle [^>]*data-cloud="(\w+)"', svg)) == sorted(
+        m.cloud for m in markers
+    )
 
 
 def test_cloud_toggle_rules_are_in_the_page(conn, tmp_path):
     html = render(conn, tmp_path / "site", now=NOW).read_text()
     for cloud in ("aws", "gcp", "azure"):
         assert f'id="toggle-{cloud}" checked' in html
-        assert f'.map-wrap:has(#toggle-{cloud}:not(:checked))' in html
+        assert f".map-wrap:has(#toggle-{cloud}:not(:checked))" in html
         assert f'svg.map [data-cloud="{cloud}"]' in html
 
 
@@ -82,7 +101,10 @@ def test_card_opens_upward_in_the_bottom_third():
 
 
 def test_card_lists_five_and_counts_the_rest():
-    incidents = [{"title": f"Incident {i}", "url": f"https://x.test/{i}", "severity": "minor"} for i in range(6)]
+    incidents = [
+        {"title": f"Incident {i}", "url": f"https://x.test/{i}", "severity": "minor"}
+        for i in range(6)
+    ]
     html = card_html(_marker(level="minor", incidents=incidents), filter_active=False)
     assert html.count("<li>") == 5
     assert "and 1 more" in html
@@ -91,13 +113,22 @@ def test_card_lists_five_and_counts_the_rest():
 
 
 def test_single_incident_has_no_repeated_severity_chip():
-    one = card_html(_marker(level="critical", incidents=[{"title": "Only one", "url": None, "severity": "critical"}]), False)
+    one = card_html(
+        _marker(
+            level="critical",
+            incidents=[{"title": "Only one", "url": None, "severity": "critical"}],
+        ),
+        False,
+    )
     assert one.count("chip level-critical") == 1  # the region level in the head only
     two = card_html(
-        _marker(level="critical", incidents=[
-            {"title": "First", "url": None, "severity": "critical"},
-            {"title": "Second", "url": None, "severity": "minor"},
-        ]),
+        _marker(
+            level="critical",
+            incidents=[
+                {"title": "First", "url": None, "severity": "critical"},
+                {"title": "Second", "url": None, "severity": "minor"},
+            ],
+        ),
         False,
     )
     assert two.count("chip level-critical") == 2
@@ -114,14 +145,20 @@ def test_card_with_no_incidents_says_so():
 
 
 def test_card_escapes_titles():
-    m = _marker(level="major", incidents=[{"title": "A <b>bad</b> day", "url": None, "severity": "major"}])
+    m = _marker(
+        level="major",
+        incidents=[{"title": "A <b>bad</b> day", "url": None, "severity": "major"}],
+    )
     m.titles = ["A <b>bad</b> day"]
     html = card_html(m, filter_active=False)
     assert "A &lt;b&gt;bad&lt;/b&gt; day" in html
     assert "<b>bad</b>" not in html
     assert "<a " not in html  # no url, no link
     svg = render_svg([m], "M0 0Z")
-    assert "<title>AWS us-east-1 (N. Virginia (Ashburn)): major. A &lt;b&gt;bad&lt;/b&gt; day</title>" in svg
+    assert (
+        "<title>AWS us-east-1 (N. Virginia (Ashburn)): major. A &lt;b&gt;bad&lt;/b&gt; day</title>"
+        in svg
+    )
 
 
 def test_your_region_tag_only_when_filter_active_and_mine():
@@ -131,11 +168,27 @@ def test_your_region_tag_only_when_filter_active_and_mine():
 
 
 def test_page_contains_rules_and_still_no_script(conn, tmp_path):
-    for name in ("aws", "gcp", "azure", "github", "databricks", "cloudflare", "claude", "npm", "docker"):
+    for name in (
+        "aws",
+        "gcp",
+        "azure",
+        "github",
+        "databricks",
+        "cloudflare",
+        "claude",
+        "npm",
+        "docker",
+    ):
         db.record_poll(conn, name, NOW - timedelta(minutes=1), None)
     db.upsert_incident(
         conn,
-        make_incident(provider="aws", external_id="a", title="Edge trouble", url="https://x.test/a", regions=[Region("aws", "eu-west-2")]),
+        make_incident(
+            provider="aws",
+            external_id="a",
+            title="Edge trouble",
+            url="https://x.test/a",
+            regions=[Region("aws", "eu-west-2")],
+        ),
     )
     ctx = build_context(conn, NOW)
     assert ctx["map_css"].count(":focus-visible)") == len(regions.all_regions())

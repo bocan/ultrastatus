@@ -23,7 +23,13 @@ def test_example_file_loads_and_is_active():
     config = load_config(str(EXAMPLE))
     assert config.active is True
     assert config.my_regions == frozenset(
-        {("aws", "eu-west-2"), ("aws", "us-east-1"), ("gcp", "europe-west2"), ("azure", "uksouth"), ("azure", "westeurope")}
+        {
+            ("aws", "eu-west-2"),
+            ("aws", "us-east-1"),
+            ("gcp", "europe-west2"),
+            ("azure", "uksouth"),
+            ("azure", "westeurope"),
+        }
     )
 
 

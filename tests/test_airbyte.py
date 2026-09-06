@@ -34,14 +34,25 @@ def _by_id(incidents):
     return {i.external_id: i for i in incidents}
 
 
-def _item(description, title="T", pubdate="Tue, 1 Sep 2026 15:30:00 +0000", link="https://status.airbyte.com/incident/abc"):
-    return ITEM.format(title=title, description=description, pubdate=pubdate, link=link).encode()
+def _item(
+    description,
+    title="T",
+    pubdate="Tue, 1 Sep 2026 15:30:00 +0000",
+    link="https://status.airbyte.com/incident/abc",
+):
+    return ITEM.format(
+        title=title, description=description, pubdate=pubdate, link=link
+    ).encode()
 
 
 def test_fixture_parses_with_ids_from_the_guid_path(feed):
     incidents = AirbyteProvider().fetch()
     assert feed["requested"] == [FEED_URL]
-    assert [i.external_id for i in incidents] == ["cmtiukc5l0m7k1ao1dcpz87yt", "cma1j631b003h13zj4jvzzpdk", "handedited000000000000001"]
+    assert [i.external_id for i in incidents] == [
+        "cmtiukc5l0m7k1ao1dcpz87yt",
+        "cma1j631b003h13zj4jvzzpdk",
+        "handedited000000000000001",
+    ]
     assert all(i.provider == "airbyte" and i.regions == [] for i in incidents)
 
 
@@ -59,8 +70,12 @@ def test_maintenance_with_completed_entry_listed_first_is_resolved(feed):
     inc = _by_id(AirbyteProvider().fetch())["cma1j631b003h13zj4jvzzpdk"]
     assert inc.severity == "minor"
     assert inc.started_at == utc(2025, 5, 1, 13, 0, 0)
-    assert inc.resolved_at == utc(2025, 5, 1, 15, 0, 0)  # Completed is first in the text, newest by time
-    assert inc.last_message.startswith("Components: WebApp, Connector Builder, Airbyte API, Data Sync. Maintenance has completed")
+    assert inc.resolved_at == utc(
+        2025, 5, 1, 15, 0, 0
+    )  # Completed is first in the text, newest by time
+    assert inc.last_message.startswith(
+        "Components: WebApp, Connector Builder, Airbyte API, Data Sync. Maintenance has completed"
+    )
 
 
 def test_open_incident_ends_in_monitoring(feed):
@@ -80,7 +95,15 @@ def test_year_rollover(feed):
     assert inc.resolved_at == utc(2027, 1, 2, 1, 0, 0)
 
 
-@pytest.mark.parametrize("kind,expected", [("Incident", "major"), ("Maintenance", "minor"), ("Weird", "major"), (None, "major")])
+@pytest.mark.parametrize(
+    "kind,expected",
+    [
+        ("Incident", "major"),
+        ("Maintenance", "minor"),
+        ("Weird", "major"),
+        (None, "major"),
+    ],
+)
 def test_type_mapping(feed, kind, expected):
     header = f"Type: {kind}\n" if kind else ""
     feed["body"] = _item(header + "Sep 1, 15:30:00 GMT+0 - Resolved - Done.")
@@ -151,5 +174,7 @@ def test_end_to_end_poll(feed, conn):
     out = io.StringIO()
     assert poll_providers(conn, {"airbyte": AirbyteProvider()}, out=out) == 0
     assert out.getvalue().strip() == "airbyte: 3 incidents, 0 newly resolved"
-    assert [i.external_id for i in db.open_incidents(conn)] == ["handedited000000000000001"]
+    assert [i.external_id for i in db.open_incidents(conn)] == [
+        "handedited000000000000001"
+    ]
     assert len(db.recent_resolved(conn, utc(2000, 1, 1))) == 2

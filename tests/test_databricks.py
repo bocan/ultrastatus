@@ -23,7 +23,11 @@ AWS_ID, AZURE_ID, GCP_ID = (page_id for _, page_id, _ in PAGES)
 def feeds(monkeypatch):
     """One payload per page id. Tests swap payloads in, or set one to raise."""
     state = {
-        "payloads": {AWS_ID: copy.deepcopy(QUIET), AZURE_ID: copy.deepcopy(QUIET), GCP_ID: copy.deepcopy(QUIET)},
+        "payloads": {
+            AWS_ID: copy.deepcopy(QUIET),
+            AZURE_ID: copy.deepcopy(QUIET),
+            GCP_ID: copy.deepcopy(QUIET),
+        },
         "raise_for": set(),
         "requested": [],
     }
@@ -41,7 +45,9 @@ def feeds(monkeypatch):
 
 def _with_container_names(names):
     payload = copy.deepcopy(INCIDENT)
-    payload["result"]["incidents"][0]["containers_affected"] = [{"_id": f"id{i}", "name": n} for i, n in enumerate(names)]
+    payload["result"]["incidents"][0]["containers_affected"] = [
+        {"_id": f"id{i}", "name": n} for i, n in enumerate(names)
+    ]
     return payload
 
 
@@ -62,7 +68,10 @@ def test_aws_page_incident_maps_fields_and_regions(feeds):
     assert inc.started_at == utc(2026, 9, 5, 10, 0, 0)
     assert inc.updated_at == utc(2026, 9, 5, 10, 5, 0)
     assert inc.resolved_at is None
-    assert inc.url == f"https://status.databricks.com/pages/incident/{AWS_ID}/6afd0c1e2b3c4d5e6f708192"
+    assert (
+        inc.url
+        == f"https://status.databricks.com/pages/incident/{AWS_ID}/6afd0c1e2b3c4d5e6f708192"
+    )
     assert inc.last_message.startswith("Starting at 09:52 UTC")
     assert inc.regions == [Region("aws", "us-east-1"), Region("aws", "eu-west-1")]
 
@@ -81,14 +90,18 @@ def test_azure_page_normalises_display_names(feeds):
     inc = DatabricksProvider().fetch()[0]
     assert inc.external_id.startswith("azure:")
     assert inc.regions == [Region("azure", "australiaeast"), Region("azure", "eastus2")]
-    assert inc.url.startswith(f"https://status.azuredatabricks.net/pages/incident/{AZURE_ID}/")
+    assert inc.url.startswith(
+        f"https://status.azuredatabricks.net/pages/incident/{AZURE_ID}/"
+    )
 
 
 def test_gcp_page_normalises_hyphenated_names(feeds):
     feeds["payloads"][GCP_ID] = _with_container_names(["US-Central1", "EU-West1"])
     inc = DatabricksProvider().fetch()[0]
     assert inc.regions == [Region("gcp", "us-central1"), Region("gcp", "europe-west1")]
-    assert inc.url.startswith(f"https://status.gcp.databricks.com/pages/incident/{GCP_ID}/")
+    assert inc.url.startswith(
+        f"https://status.gcp.databricks.com/pages/incident/{GCP_ID}/"
+    )
 
 
 def test_unknown_container_is_dropped_without_error(feeds):
@@ -99,7 +112,13 @@ def test_unknown_container_is_dropped_without_error(feeds):
 
 @pytest.mark.parametrize(
     "code,expected",
-    [(300, "minor"), (400, "major"), (500, "critical"), (600, "critical"), (999, "major")],
+    [
+        (300, "minor"),
+        (400, "major"),
+        (500, "critical"),
+        (600, "critical"),
+        (999, "major"),
+    ],
 )
 def test_status_code_mapping(feeds, code, expected):
     payload = copy.deepcopy(INCIDENT)
@@ -136,11 +155,29 @@ def test_one_page_failure_raises_without_partial_result(feeds):
 def test_end_to_end_incident_then_quiet_resolves(feeds, conn):
     out = io.StringIO()
     feeds["payloads"][AWS_ID] = copy.deepcopy(INCIDENT)
-    assert poll_providers(conn, {"databricks": DatabricksProvider()}, out=out, now=utc(2026, 9, 5, 10, 10)) == 0
-    assert [i.external_id for i in db.open_incidents(conn)] == ["aws:6afd0c1e2b3c4d5e6f708192"]
+    assert (
+        poll_providers(
+            conn,
+            {"databricks": DatabricksProvider()},
+            out=out,
+            now=utc(2026, 9, 5, 10, 10),
+        )
+        == 0
+    )
+    assert [i.external_id for i in db.open_incidents(conn)] == [
+        "aws:6afd0c1e2b3c4d5e6f708192"
+    ]
 
     feeds["payloads"][AWS_ID] = copy.deepcopy(QUIET)
-    assert poll_providers(conn, {"databricks": DatabricksProvider()}, out=out, now=utc(2026, 9, 5, 10, 12)) == 0
+    assert (
+        poll_providers(
+            conn,
+            {"databricks": DatabricksProvider()},
+            out=out,
+            now=utc(2026, 9, 5, 10, 12),
+        )
+        == 0
+    )
     assert db.open_incidents(conn) == []
     resolved = db.recent_resolved(conn, utc(2000, 1, 1))
     assert resolved[0].resolved_at == utc(2026, 9, 5, 10, 12)
@@ -150,5 +187,8 @@ def test_failed_poll_does_not_resolve_open_incident(feeds, conn):
     feeds["payloads"][AWS_ID] = copy.deepcopy(INCIDENT)
     poll_providers(conn, {"databricks": DatabricksProvider()}, out=io.StringIO())
     feeds["raise_for"].add(AZURE_ID)
-    assert poll_providers(conn, {"databricks": DatabricksProvider()}, out=io.StringIO()) == 1
+    assert (
+        poll_providers(conn, {"databricks": DatabricksProvider()}, out=io.StringIO())
+        == 1
+    )
     assert len(db.open_incidents(conn)) == 1
