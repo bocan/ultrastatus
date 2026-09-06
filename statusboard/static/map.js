@@ -13,6 +13,11 @@
   /* Label gap from the marker centre, in screen pixels. Labels live inside the
      zoomed group, so the gap is divided by the scale each frame, like the radius. */
   var LABEL_DX = 9, LABEL_DY = 4;
+  /* Per-cloud nudge so three clouds in one city stay apart, in screen pixels.
+     Same values mapgen uses at 1x. Divided by the scale each frame, so at
+     high zoom the dots converge on the true city instead of drifting 2.5
+     degrees away. Must match OFFSETS in mapgen.py. */
+  var CLOUD_OFFSETS = { aws: [0, 0], gcp: [7, 5], azure: [-7, 5] };
 
   function clampScale(s) { return Math.min(MAX_SCALE, Math.max(MIN_SCALE, s)); }
 
@@ -83,8 +88,15 @@
   var labels = Array.prototype.slice.call(svg.querySelectorAll("text.label"));
   var cards = Array.prototype.slice.call(svg.querySelectorAll(".card"));
   var baseRadius = circles.map(function (c) { return Number(c.getAttribute("r")); });
-  var centreX = circles.map(function (c) { return Number(c.getAttribute("cx")); });
-  var centreY = circles.map(function (c) { return Number(c.getAttribute("cy")); });
+  /* mapgen writes cx, cy with the 1x nudge already applied. Recover the true
+     city position so the nudge can be re-applied at any scale. */
+  var offsetX = circles.map(function (c) { return (CLOUD_OFFSETS[c.getAttribute("data-cloud")] || [0, 0])[0]; });
+  var offsetY = circles.map(function (c) { return (CLOUD_OFFSETS[c.getAttribute("data-cloud")] || [0, 0])[1]; });
+  var trueX = circles.map(function (c, i) { return Number(c.getAttribute("cx")) - offsetX[i]; });
+  var trueY = circles.map(function (c, i) { return Number(c.getAttribute("cy")) - offsetY[i]; });
+  var centreX = trueX.slice(), centreY = trueY.slice();   /* current, updated each frame */
+  var indexByKey = {};
+  circles.forEach(function (c, i) { indexByKey[c.getAttribute("data-key")] = i; });
   var cardByKey = {};
   cards.forEach(function (card) { cardByKey[card.getAttribute("data-key")] = card; });
 
@@ -98,7 +110,9 @@
 
   function repositionCards() {
     cards.forEach(function (card) {
-      var cx = Number(card.getAttribute("data-x")), cy = Number(card.getAttribute("data-y"));
+      var i = indexByKey[card.getAttribute("data-key")];
+      var cx = i === undefined ? Number(card.getAttribute("data-x")) : centreX[i];
+      var cy = i === undefined ? Number(card.getAttribute("data-y")) : centreY[i];
       var sx = cx * state.scale + state.tx, sy = cy * state.scale + state.ty;
       var style = cardStyle(sx, sy, view);
       card.style.left = style.left || ""; card.style.right = style.right || "";
@@ -112,6 +126,10 @@
     viewport.style.transform = "translate(" + state.tx + "px, " + state.ty + "px) scale(" + state.scale + ")";
     var s = state.scale;
     circles.forEach(function (c, i) {
+      centreX[i] = trueX[i] + offsetX[i] / s;
+      centreY[i] = trueY[i] + offsetY[i] / s;
+      c.setAttribute("cx", centreX[i].toFixed(2));
+      c.setAttribute("cy", centreY[i].toFixed(2));
       c.setAttribute("r", (baseRadius[i] / s).toFixed(2));
       c.style.strokeWidth = (1 / s).toFixed(3);
     });

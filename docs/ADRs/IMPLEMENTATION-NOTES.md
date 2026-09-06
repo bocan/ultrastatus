@@ -2,6 +2,10 @@
 
 What each ADR session found that the spec did not say, and where the code deviates from the spec. Newest ADR first. Follow-ups found by the user sit under the ADR they touch.
 
+## Marker offsets under zoom
+
+- Found by the user: at the Europe preset the GCP europe-west2 dot sat in France. `regions.csv` has it at London; the culprit was the per-cloud nudge of 7 by 5 canvas units that keeps three clouds apart in one city. Canvas units scale with the map, and 7 of them is 2.5 degrees of longitude. The script now recovers each marker's true position from its cloud and re-applies the nudge divided by the scale, the same treatment the radius and labels already had, so the dots converge on the city as you zoom and stay 7 by 5 screen pixels apart. Cards follow the moved marker. The no-script map is unchanged at 1x.
+
 ## Accessibility audit
 
 - Asked for by the user. Lighthouse's accessibility category, which runs axe-core, scored 0.9 with three findings: the `<meta http-equiv="refresh">`, 13 px checkboxes in the cloud toggles, and no `<main>` landmark. After the fixes it scores 1.0 with no failing audits.
