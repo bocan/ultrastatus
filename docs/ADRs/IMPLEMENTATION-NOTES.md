@@ -2,6 +2,12 @@
 
 What each ADR session found that the spec did not say, and where the code deviates from the spec. Newest ADR first. Follow-ups found by the user sit under the ADR they touch.
 
+## Accessibility audit
+
+- Asked for by the user. Lighthouse's accessibility category, which runs axe-core, scored 0.9 with three findings: the `<meta http-equiv="refresh">`, 13 px checkboxes in the cloud toggles, and no `<main>` landmark. After the fixes it scores 1.0 with no failing audits.
+- The meta refresh now sits inside `<noscript>`, so only browsers without scripts use it. The script reloads every two minutes instead, but only once the reader has been idle for 30 seconds with no pinned card and the map inactive; otherwise it retries every 20 seconds. A hidden tab reloads when it becomes visible again. The checkboxes are 24 px, the WCAG 2.2 minimum target size. The content between the header and footer is wrapped in `<main>`.
+- Lighthouse lists ten manual checks it cannot automate: focus order, focus traps, visible focus, custom control labels and roles, and offscreen content. The page has no custom controls beyond the SVG markers, which carry `tabindex`, a `<title>`, and a visible focus ring.
+
 ## Cooperative map gestures
 
 - Found by the user: two-finger scrolling with the pointer over the map zoomed the map and trapped the page. The fix is the rule embedded maps settled on years ago. A plain wheel scrolls the page and shows a hint; Cmd or Ctrl plus wheel zooms; clicking or tapping the map activates it so the wheel zooms until a click elsewhere or Escape. On touch the map uses `touch-action: pan-y` until activated, so one finger scrolls the page, and `none` after. ADR-0012's input table was updated.

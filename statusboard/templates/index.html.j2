@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="refresh" content="120">
+<noscript><meta http-equiv="refresh" content="120"></noscript>
 <title>Ultra Status</title>
 <link rel="icon" type="image/svg+xml" href="{{ favicon_svg }}">
 <link rel="icon" type="image/png" sizes="32x32" href="{{ favicon_png }}">
@@ -118,7 +118,9 @@ svg.map.zoomed text.label { display: block; }
 .map-wrap { position: relative; }
 .cloud-toggles { position: absolute; top: 0.75rem; right: 0.75rem; z-index: 1; display: flex; flex-direction: column; gap: 0.2rem;
   padding: 0.45rem 0.6rem; border: 1px solid var(--border); border-radius: 6px; background: var(--surface); font-size: 0.8rem; }
-.cloud-toggles label { display: flex; align-items: center; gap: 0.35rem; cursor: pointer; }
+.cloud-toggles label { display: flex; align-items: center; gap: 0.35rem; cursor: pointer; min-height: 24px; }
+/* 24 px hit targets, the WCAG 2.2 minimum, so the boxes are usable on touch. */
+.cloud-toggles input[type="checkbox"] { width: 24px; height: 24px; margin: 0; }
 .cloud-toggles .swatch { width: 0.6rem; height: 0.6rem; border-radius: 50%; border: 1px solid var(--map-stroke); background: var(--ok-fg); }
 .map-wrap:has(#toggle-aws:not(:checked))   svg.map [data-cloud="aws"]   { display: none; }
 .map-wrap:has(#toggle-gcp:not(:checked))   svg.map [data-cloud="gcp"]   { display: none; }
@@ -182,6 +184,7 @@ footer ul { list-style: none; padding: 0; margin: 0.25rem 0 0; display: flex; fl
   <span class="meta">Generated {{ generated_at | ts }}. Refreshes every 2 minutes.</span>
 </header>
 
+<main>
 {% if filter_active %}
 <p class="banner {{ 'banner-clear' if all_clear else 'banner-open' }}">
   {% if all_clear %}
@@ -348,6 +351,7 @@ footer ul { list-style: none; padding: 0; margin: 0.25rem 0 0; display: flex; fl
   </details>
   {% endif %}
 </section>
+</main>
 
 <footer>
   Sources

@@ -341,6 +341,32 @@
     });
   }
 
+  /* Periodic reload. A meta refresh reloads regardless of what the reader is
+     doing and resets focus, which fails accessibility checks, so the meta tag
+     is kept only for browsers without scripts. Here the page reloads every
+     two minutes, but only once the reader has been idle for a while and no
+     card is pinned and the map is not active. Otherwise it tries again soon. */
+  var RELOAD_MS = 120000, IDLE_MS = 30000, RETRY_MS = 20000;
+  var lastInteraction = Date.now();
+  ["pointerdown", "keydown", "wheel", "touchstart"].forEach(function (type) {
+    document.addEventListener(type, function () { lastInteraction = Date.now(); }, { passive: true, capture: true });
+  });
+  function maybeReload() {
+    var idle = Date.now() - lastInteraction >= IDLE_MS;
+    if (idle && !active && !pinned && document.visibilityState !== "hidden") {
+      location.reload();
+    } else if (document.visibilityState === "hidden") {
+      /* A hidden tab reloads when it comes back, not while nobody can see it. */
+      document.addEventListener("visibilitychange", function once() {
+        document.removeEventListener("visibilitychange", once);
+        setTimeout(maybeReload, 500);
+      });
+    } else {
+      setTimeout(maybeReload, RETRY_MS);
+    }
+  }
+  setTimeout(maybeReload, RELOAD_MS);
+
   /* Initial view: hash, then saved state, then world. */
   var hash = (location.hash.match(/view=([a-z-]+)/) || [])[1];
   if (hash && toBox(hash)) {

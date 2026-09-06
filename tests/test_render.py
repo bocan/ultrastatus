@@ -156,7 +156,12 @@ def test_render_writes_page_for_empty_database(conn, tmp_path):
     assert '<link rel="stylesheet"' not in html
     assert not re.search(r'<(script|link|img|iframe)[^>]+(src|href)="https?://', html)
     assert html.count('class="tile level-') == TILE_COUNT
-    assert 'http-equiv="refresh"' in html
+    # Accessibility: the meta refresh serves only no-script browsers, the
+    # script handles the reload otherwise; one main landmark; 24 px checkboxes.
+    assert '<noscript><meta http-equiv="refresh" content="120"></noscript>' in html
+    assert html.count("<main>") == 1 and html.count("</main>") == 1
+    assert html.find("<main>") < html.find('class="tile level-') < html.find("</main>")
+    assert 'input[type="checkbox"] { width: 24px; height: 24px;' in html
     # Cooperative gestures: the hint overlay exists and the map starts scrollable.
     assert '<div class="map-hint" role="status"' in html
     assert "svg.map { touch-action: pan-y;" in html
