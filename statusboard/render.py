@@ -18,10 +18,10 @@ from statusboard.providers import PROVIDERS
 # must appear in exactly one group; tests/test_groups.py enforces it.
 GROUPS: list[tuple[str, list[tuple[str, str]]]] = [
     ("Clouds", [("aws", "AWS"), ("gcp", "GCP"), ("azure", "Azure")]),
-    ("Data platforms", [("databricks", "Databricks")]),
-    ("AI", [("claude", "Claude")]),
-    ("Developer tooling", [("github", "GitHub"), ("cloudflare", "Cloudflare"), ("npm", "npm"), ("docker", "Docker")]),
-    ("Workplace", [("google-workspace", "Google Workspace"), ("slack", "Slack")]),
+    ("Data platforms", [("databricks", "Databricks"), ("dbt", "dbt Cloud")]),
+    ("AI", [("claude", "Claude"), ("openai", "OpenAI")]),
+    ("Developer tooling", [("github", "GitHub"), ("cloudflare", "Cloudflare"), ("npm", "npm"), ("docker", "Docker"), ("pypi", "PyPI")]),
+    ("Workplace", [("google-workspace", "Google Workspace"), ("slack", "Slack"), ("atlassian", "Atlassian")]),
 ]
 PROVIDER_ORDER: list[tuple[str, str]] = [pair for _, pairs in GROUPS for pair in pairs]
 
@@ -41,6 +41,10 @@ SOURCE_URLS: dict[str, str] = {
     "docker": "https://www.dockerstatus.com/",
     "google-workspace": "https://www.google.com/appsstatus/dashboard/",
     "slack": "https://slack-status.com/",
+    "dbt": "https://status.getdbt.com/",
+    "openai": "https://status.openai.com/",
+    "atlassian": "https://status.atlassian.com/",
+    "pypi": "https://status.python.org/",
 }
 
 STALE_AFTER = timedelta(minutes=15)

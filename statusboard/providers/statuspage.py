@@ -68,6 +68,11 @@ STATUSPAGE_PROVIDERS = [
     StatuspageProvider("claude", "status.claude.com", "Claude"),
     StatuspageProvider("npm", "status.npmjs.org", "npm"),
     StatuspageProvider("docker", "www.dockerstatus.com", "Docker"),
+    # ADR-0017. dbt and OpenAI run on incident.io and use the two fallbacks.
+    StatuspageProvider("dbt", "status.getdbt.com", "dbt Cloud"),
+    StatuspageProvider("openai", "status.openai.com", "OpenAI"),
+    StatuspageProvider("atlassian", "status.atlassian.com", "Atlassian"),
+    StatuspageProvider("pypi", "status.python.org", "PyPI"),
 ]
 
 for _provider in STATUSPAGE_PROVIDERS:

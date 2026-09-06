@@ -105,32 +105,43 @@ def test_docker_falls_back_to_created_at_and_incident_url(feeds):
 # Registry and per-host routing.
 
 
-def test_five_statuspage_providers_are_registered():
-    expected = {
-        "github": "www.githubstatus.com",
-        "cloudflare": "www.cloudflarestatus.com",
-        "claude": "status.claude.com",
-        "npm": "status.npmjs.org",
-        "docker": "www.dockerstatus.com",
-    }
-    for name, host in expected.items():
+EXPECTED_STATUSPAGE = {
+    "github": ("www.githubstatus.com", "GitHub"),
+    "cloudflare": ("www.cloudflarestatus.com", "Cloudflare"),
+    "claude": ("status.claude.com", "Claude"),
+    "npm": ("status.npmjs.org", "npm"),
+    "docker": ("www.dockerstatus.com", "Docker"),
+    "dbt": ("status.getdbt.com", "dbt Cloud"),
+    "openai": ("status.openai.com", "OpenAI"),
+    "atlassian": ("status.atlassian.com", "Atlassian"),
+    "pypi": ("status.python.org", "PyPI"),
+}
+
+
+def test_statuspage_providers_are_registered_with_hosts_and_labels():
+    for name, (host, label) in EXPECTED_STATUSPAGE.items():
         provider = PROVIDERS[name]
-        assert isinstance(provider, StatuspageProvider)
+        assert isinstance(provider, StatuspageProvider), name
         assert provider.host == host
+        assert provider.label == label
         assert provider.lists_resolved is True
-    assert {PROVIDERS[n].label for n in expected} == {"GitHub", "Cloudflare", "Claude", "npm", "Docker"}
 
 
 def test_each_instance_requests_its_own_host(feeds):
-    for name in ("github", "cloudflare", "claude", "npm", "docker"):
+    for name in EXPECTED_STATUSPAGE:
         PROVIDERS[name].fetch()
-    assert feeds["requested"] == [
-        "https://www.githubstatus.com/api/v2/incidents.json",
-        "https://www.cloudflarestatus.com/api/v2/incidents.json",
-        "https://status.claude.com/api/v2/incidents.json",
-        "https://status.npmjs.org/api/v2/incidents.json",
-        "https://www.dockerstatus.com/api/v2/incidents.json",
-    ]
+    assert feeds["requested"] == [f"https://{host}/api/v2/incidents.json" for host, _ in EXPECTED_STATUSPAGE.values()]
+
+
+def test_incident_io_shaped_feed_on_dbt_uses_the_fallbacks(feeds):
+    # Reuse the Docker fixture, which has no started_at or shortlink, served for dbt's host.
+    feeds["payloads"]["status.getdbt.com"] = feeds["payloads"]["www.dockerstatus.com"]
+    incidents = PROVIDERS["dbt"].fetch()
+    assert len(incidents) == 3
+    inc = incidents[0]
+    assert inc.provider == "dbt"
+    assert inc.started_at == utc(2026, 8, 24, 19, 13, 56)
+    assert inc.url == "https://status.getdbt.com/incidents/01M0TK349Z8VCJ3ERNSAAW7YKA"
 
 
 def test_end_to_end_poll(feeds, conn):
