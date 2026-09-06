@@ -22,7 +22,8 @@ def config(monkeypatch):
     return activate
 
 NOW = utc(2026, 9, 5, 20, 10, 0)
-EXPECTED_NAMES = ["aws", "gcp", "azure", "databricks", "claude", "github", "cloudflare", "npm", "docker"]
+EXPECTED_NAMES = ["aws", "gcp", "azure", "databricks", "claude", "github", "cloudflare", "npm", "docker", "google-workspace"]
+TILE_COUNT = len(EXPECTED_NAMES)
 
 
 def _fresh_polls(conn, names=EXPECTED_NAMES, at=None):
@@ -30,7 +31,7 @@ def _fresh_polls(conn, names=EXPECTED_NAMES, at=None):
         db.record_poll(conn, name, at or NOW - timedelta(minutes=1), None)
 
 
-def test_empty_database_gives_nine_stale_providers(conn):
+def test_empty_database_gives_all_stale_providers(conn):
     ctx = build_context(conn, NOW)
     assert [p["name"] for p in ctx["providers"]] == EXPECTED_NAMES
     assert [p["name"] for p in ctx["providers"]] == [n for n, _ in PROVIDER_ORDER]
@@ -115,7 +116,7 @@ def test_render_writes_page_for_empty_database(conn, tmp_path):
     assert "<script src" not in html and "<script " not in html
     assert '<link rel="stylesheet"' not in html
     assert not re.search(r'<(script|link|img|iframe)[^>]+(src|href)="https?://', html)
-    assert html.count('class="tile level-') == 9
+    assert html.count('class="tile level-') == TILE_COUNT
     assert 'http-equiv="refresh"' in html
 
 
@@ -220,7 +221,8 @@ def _group(ctx, label):
 
 def test_groups_follow_the_declared_order_and_skip_empty_ones(conn):
     ctx = build_context(conn, NOW)
-    assert [g["label"] for g in ctx["groups"]] == ["Clouds", "Data platforms", "AI", "Developer tooling"]
+    assert [g["label"] for g in ctx["groups"]] == ["Clouds", "Data platforms", "AI", "Developer tooling", "Workplace"]
+    assert [p["name"] for p in _group(ctx, "Workplace")["providers"]] == ["google-workspace"]
     assert [p["name"] for p in _group(ctx, "Clouds")["providers"]] == ["aws", "gcp", "azure"]
     assert [p["name"] for p in _group(ctx, "Developer tooling")["providers"]] == ["github", "cloudflare", "npm", "docker"]
     assert [p["name"] for g in ctx["groups"] for p in g["providers"]] == EXPECTED_NAMES
@@ -242,16 +244,22 @@ def test_group_is_stale_only_when_every_member_is_stale(conn):
     assert _group(ctx, "Clouds")["level"] == "ok"
     assert _group(ctx, "Developer tooling")["level"] == "stale"  # none of its members polled
     assert _group(ctx, "AI")["level"] == "stale"
+    assert _group(ctx, "Workplace")["level"] == "stale"
 
 
-def test_rendered_groups_have_headings_in_order_and_nine_tiles(conn, tmp_path):
+def test_rendered_groups_have_headings_in_order_and_all_tiles(conn, tmp_path):
     _fresh_polls(conn)
     html = render(conn, tmp_path / "site", now=NOW).read_text()
-    assert html.count('<section class="group">') == 4
-    positions = [html.find(f"\n    {label}\n") for label in ("Clouds", "Data platforms", "AI", "Developer tooling")]
+    assert html.count('<section class="group">') == 5
+    positions = [html.find(f"\n    {label}\n") for label in ("Clouds", "Data platforms", "AI", "Developer tooling", "Workplace")]
     assert all(p >= 0 for p in positions) and positions == sorted(positions)
-    assert html.count('class="tile level-') == 9
-    assert "Workplace" not in html.split("</style>")[1]
+    assert html.count('class="tile level-') == TILE_COUNT
+
+
+def test_empty_group_is_not_rendered(conn, monkeypatch):
+    monkeypatch.setattr(render_module, "GROUPS", render_module.GROUPS + [("Ghost", [])])
+    ctx = build_context(conn, NOW)
+    assert "Ghost" not in [g["label"] for g in ctx["groups"]]
 
 
 def test_group_heading_counts_open_in_your_regions(conn, config, tmp_path):

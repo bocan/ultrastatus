@@ -21,7 +21,7 @@ GROUPS: list[tuple[str, list[tuple[str, str]]]] = [
     ("Data platforms", [("databricks", "Databricks")]),
     ("AI", [("claude", "Claude")]),
     ("Developer tooling", [("github", "GitHub"), ("cloudflare", "Cloudflare"), ("npm", "npm"), ("docker", "Docker")]),
-    ("Workplace", []),
+    ("Workplace", [("google-workspace", "Google Workspace")]),
 ]
 PROVIDER_ORDER: list[tuple[str, str]] = [pair for _, pairs in GROUPS for pair in pairs]
 
@@ -39,6 +39,7 @@ SOURCE_URLS: dict[str, str] = {
     "claude": "https://status.claude.com/",
     "npm": "https://status.npmjs.org/",
     "docker": "https://www.dockerstatus.com/",
+    "google-workspace": "https://www.google.com/appsstatus/dashboard/",
 }
 
 STALE_AFTER = timedelta(minutes=15)

@@ -1,0 +1,174 @@
+[
+  {
+    "id": "y2ufhCB886p7rveYNnko",
+    "number": "1967299596760361422",
+    "begin": "2026-08-28T17:50:00+00:00",
+    "created": "2026-08-28T19:25:37+00:00",
+    "end": "2026-08-28T20:34:00+00:00",
+    "modified": "2026-09-04T03:43:27+00:00",
+    "external_desc": "**Summary:**\nGoogle Chat users are experiencing an issue where they receive notifications for new messages, but the actual messages fail to appear in their chat application unless the user refreshes their view.\n**Description:**\nWe are experiencing an intermittent issue with Google Chat Friday, 2026-08-28 10:25 PDT.\nOur engineering team has investigated the issue and are currently working on mitiga",
+    "updates": [
+      {
+        "created": "2026-09-04T03:43:07+00:00",
+        "modified": "2026-09-04T03:43:27+00:00",
+        "when": "2026-09-04T03:43:07+00:00",
+        "status": "AVAILABLE",
+        "text": "## Incident Report\n## Summary\nOn Friday, August 28, 2026, between 10:50 US/Pacific and 13:34 US/Pacific for a duration of 2 hours and 44 minutes, Google Chat users experienced delays in receiving real"
+      },
+      {
+        "created": "2026-08-28T20:55:51+00:00",
+        "modified": "2026-09-04T03:43:07+00:00",
+        "when": "2026-08-28T20:55:51+00:00",
+        "status": "AVAILABLE",
+        "text": "**Summary**\nGoogle Chat users experienced an issue where they received notifications for new messages, but the actual messages failed to appear in their chat application unless the user refreshed thei"
+      }
+    ],
+    "most_recent_update": {
+      "created": "2026-09-04T03:43:07+00:00",
+      "modified": "2026-09-04T03:43:27+00:00",
+      "when": "2026-09-04T03:43:07+00:00",
+      "text": "## Incident Report\n## Summary\nOn Friday, August 28, 2026, between 10:50 US/Pacific and 13:34 US/Pacific for a duration of 2 hours and 44 minutes, Google Chat users experienced delays in receiving real-time incoming messages within active conversation streams across web, desktop, and mobile applicati",
+      "status": "AVAILABLE"
+    },
+    "status_impact": "SERVICE_INFORMATION",
+    "severity": "low",
+    "service_key": "Ht9Vx5PFzDPHYvrnrvSk",
+    "service_name": "Google Chat",
+    "affected_products": [
+      {
+        "title": "Google Chat",
+        "id": "Ht9Vx5PFzDPHYvrnrvSk"
+      }
+    ],
+    "uri": "incidents/y2ufhCB886p7rveYNnko"
+  },
+  {
+    "id": "sjDiph2NXGAfkYYLfK7T",
+    "number": "9682992681334163277",
+    "begin": "2026-08-18T23:58:00+00:00",
+    "created": "2026-08-19T03:57:37+00:00",
+    "end": "2026-08-19T12:40:00+00:00",
+    "modified": "2026-08-24T16:31:00+00:00",
+    "external_desc": "**Summary**\nSome customers may experience slowness while using Google Drive.\n**Description**\nWe are experiencing an issue with Google Drive beginning Tuesday, 2026-08-18 16:58 PDT.\nOur engineering team is currently working on a potential fix while continuing to investigate the full root cause.\nWe will provide an update by Tuesday, 2026-08-18 22:00 PDT with current details.\nWe apologize to all who ",
+    "updates": [
+      {
+        "created": "2026-08-24T16:31:00+00:00",
+        "modified": "2026-08-24T16:31:00+00:00",
+        "when": "2026-08-24T16:31:00+00:00",
+        "status": "AVAILABLE",
+        "text": "# Incident Report\n## Summary\nOn Tuesday, 18 August 2026 at 16:58 US/Pacific, an incident affecting Google Drive occurred for a duration of 12 hours and 42 minutes. Customers located in Australia, Phil"
+      },
+      {
+        "created": "2026-08-20T20:00:17+00:00",
+        "modified": "2026-08-24T16:31:00+00:00",
+        "when": "2026-08-20T20:00:17+00:00",
+        "status": "AVAILABLE",
+        "text": "# Preliminary Incident Report\nWe sincerely apologize for the disruption this incident caused to your business. We know how much you rely on Google Workspace, and we regret the impact on your productiv"
+      }
+    ],
+    "most_recent_update": {
+      "created": "2026-08-24T16:31:00+00:00",
+      "modified": "2026-08-24T16:31:00+00:00",
+      "when": "2026-08-24T16:31:00+00:00",
+      "text": "# Incident Report\n## Summary\nOn Tuesday, 18 August 2026 at 16:58 US/Pacific, an incident affecting Google Drive occurred for a duration of 12 hours and 42 minutes. Customers located in Australia, Philippines and New Zealand experienced severe latency, sporadic loading failures, and errors when acces",
+      "status": "AVAILABLE"
+    },
+    "status_impact": "SERVICE_DISRUPTION",
+    "severity": "medium",
+    "service_key": "VHNA7p3Z5p3iakj5sA8V",
+    "service_name": "Google Drive",
+    "affected_products": [
+      {
+        "title": "Google Drive",
+        "id": "VHNA7p3Z5p3iakj5sA8V"
+      }
+    ],
+    "uri": "incidents/sjDiph2NXGAfkYYLfK7T"
+  },
+  {
+    "id": "T5eKSXRWb6cNKTj4625p",
+    "number": "18104305937708421215",
+    "begin": "2026-03-20T22:30:00+00:00",
+    "created": "2026-03-21T03:19:14+00:00",
+    "end": "2026-03-21T05:03:00+00:00",
+    "modified": "2026-03-21T07:17:03+00:00",
+    "external_desc": "**Summary**\nWe are experiencing an issue with Google Keep where users may be unable to access keep.google.com via browser.\n**Description**\nThe issue began on Friday, 2026-03-20 15:30 US/Pacific.\nOur engineering team is aware of the situation and is actively implementing mitigations. We do not have any ETA at the moment.\nWe will provide the next update by Friday, 2026-03-20 21:00 US/Pacific.\n**Cust",
+    "updates": [
+      {
+        "created": "2026-03-21T07:17:03+00:00",
+        "modified": "2026-03-21T07:17:03+00:00",
+        "when": "2026-03-21T07:17:03+00:00",
+        "status": "AVAILABLE",
+        "text": "**Description**\nThe issue has been mitigated as of Friday, 2026-03-20 22:03 US/Pacific.\nThe service issue which resulted in connection timeouts and 502 error pages, was caused by excess traffic impact"
+      },
+      {
+        "created": "2026-03-21T05:33:44+00:00",
+        "modified": "2026-03-21T07:17:03+00:00",
+        "when": "2026-03-21T05:33:44+00:00",
+        "status": "SERVICE_OUTAGE",
+        "text": "**Summary**\nWe are experiencing an issue with Google Keep where users may be unable to access keep.google.com via browser.\n**Description**\nThe issue began on Friday, 2026-03-20 15:30 US/Pacific.\nOur m"
+      }
+    ],
+    "most_recent_update": {
+      "created": "2026-03-21T07:17:03+00:00",
+      "modified": "2026-03-21T07:17:03+00:00",
+      "when": "2026-03-21T07:17:03+00:00",
+      "text": "**Description**\nThe issue has been mitigated as of Friday, 2026-03-20 22:03 US/Pacific.\nThe service issue which resulted in connection timeouts and 502 error pages, was caused by excess traffic impacting the keep.google.com. Our engineering team has implemented a mitigation and is continuing to work",
+      "status": "AVAILABLE"
+    },
+    "status_impact": "SERVICE_OUTAGE",
+    "severity": "high",
+    "service_key": "aqVkUR9CFSoDHFUMD25G",
+    "service_name": "Google Keep",
+    "affected_products": [
+      {
+        "title": "Google Keep",
+        "id": "aqVkUR9CFSoDHFUMD25G"
+      }
+    ],
+    "uri": "incidents/T5eKSXRWb6cNKTj4625p"
+  },
+  {
+    "id": "MpR24eKjibRq1YEEaTfp",
+    "number": "17752500813029482969",
+    "begin": "2026-08-18T19:03:00+00:00",
+    "created": "2026-08-18T19:35:27+00:00",
+    "end": "2026-08-18T22:30:00+00:00",
+    "modified": "2026-08-18T23:02:54+00:00",
+    "external_desc": "**Summary:**\nInvestigating access issues with Classroom’s new web homepage.\n**Description:**\nWe are investigating reports of access issues with Classroom’s new web homepage beginning on Thursday, 2026-08-13.\nOur engineering team is currently working on a potential fix while continuing to investigate the full root cause.\nWe will provide an update by Tuesday, 2026-08-18 13:00 PDT with current detail",
+    "updates": [
+      {
+        "created": "2026-08-18T23:02:54+00:00",
+        "modified": "2026-08-18T23:02:54+00:00",
+        "when": "2026-08-18T23:02:54+00:00",
+        "status": "AVAILABLE",
+        "text": "**Summary**\n[Mitigated] Access issues for Workspace Admins with Classroom’s web homepage.\n**Description**\nThe issue with Classroom has been resolved for all affected users as of Tuesday, 2026-08-18 15"
+      },
+      {
+        "created": "2026-08-18T20:27:49+00:00",
+        "modified": "2026-08-18T23:02:54+00:00",
+        "when": "2026-08-18T20:27:49+00:00",
+        "status": "SERVICE_INFORMATION",
+        "text": "**Summary:**\nMitigating access issues for Workspace Admins with Classroom’s web homepage.\n**Description:**\nOur engineering has identified the cause and mitigation work is currently underway.\nThe mitig"
+      }
+    ],
+    "most_recent_update": {
+      "created": "2026-08-18T23:02:54+00:00",
+      "modified": "2026-08-18T23:02:54+00:00",
+      "when": "2026-08-18T23:02:54+00:00",
+      "text": "**Summary**\n[Mitigated] Access issues for Workspace Admins with Classroom’s web homepage.\n**Description**\nThe issue with Classroom has been resolved for all affected users as of Tuesday, 2026-08-18 15:30 PDT.\nFrom preliminary analysis, the issue was triggered due to a recent change which caused the ",
+      "status": "AVAILABLE"
+    },
+    "status_impact": "SERVICE_INFORMATION",
+    "severity": "low",
+    "service_key": "3GoNVrVz48jeNZSyLJMV",
+    "service_name": "Classroom",
+    "affected_products": [
+      {
+        "title": "Classroom",
+        "id": "3GoNVrVz48jeNZSyLJMV"
+      }
+    ],
+    "uri": "incidents/MpR24eKjibRq1YEEaTfp"
+  }
+]
