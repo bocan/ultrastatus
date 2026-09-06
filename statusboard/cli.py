@@ -90,5 +90,8 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def main(argv: list[str] | None = None) -> int:
+    from statusboard.http import prefer_ipv4_from_env
+
+    prefer_ipv4_from_env()
     args = build_parser().parse_args(argv)
     return args.func(args)

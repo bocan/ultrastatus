@@ -15,6 +15,12 @@ Edit with `crontab -e`.
 1. **Absolute paths.** Cron starts in your home directory with almost no environment. The `cd` must be absolute, and the database path defaults to `./statusboard.sqlite3` relative to that directory. Set `STATUSBOARD_DB=/absolute/path.sqlite3` in the crontab line if you want it elsewhere.
 2. **`PATH` for `uv`.** Cron's `PATH` is usually `/usr/bin:/bin`. Homebrew installs `uv` under `/opt/homebrew/bin` on Apple silicon, or `/usr/local/bin` on Intel. The `PATH=` prefix on the line above fixes that. Check with `which uv`.
 
+## Slow polls
+
+A poll that crawls, one provider line every 20 seconds or so, is almost always IPv6. The box has a v6 address but no v6 route, so every connection waits the full timeout on the v6 address before trying v4. The poller now prefers IPv4 addresses for every lookup. On a host where v6 works and you want it used, set `STATUSBOARD_IPV6=1` in the crontab line.
+
+The other silent wait is the first `uv run` on a fresh machine, which downloads a Python build when the system one is older than 3.12. Run `make install` once by hand to watch it.
+
 ## Serving the page
 
 `site/index.html` is one file with no external requests. Open it directly, or point any static file server at `site/`. The page reloads itself every two minutes through a meta refresh tag.
