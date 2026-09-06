@@ -74,18 +74,6 @@ Path comes from `STATUSBOARD_DB`, default `./statusboard.sqlite3`. Three tables:
 - **Anything else** gets a module under `statusboard/providers/`, a saved fixture, and a test file. ADR-0016 (Slack, custom JSON) and ADR-0019 (Airbyte, RSS) are the templates.
 - A test fails by name if a provider is registered without a group, or listed in a group without a module.
 
-## Design and history
-
-The build is specified in `docs/ADRs/`, one spec per session, written so a smaller model can implement each one. Start at `docs/ADRs/README.md`. What each session found that the spec did not say, and where the code deviates from a spec, is in `docs/ADRs/IMPLEMENTATION-NOTES.md`.
-
-## Favicon
-
-`statusboard/icon.py` draws the icon in code: a dark rounded square, a green dot, and a small red dot. The page links it as an SVG data URI and a 32 px PNG data URI for Safari, and `render` also writes `site/favicon.ico`. The PNG encoder is pure Python.
-
-## Data licences
-
-`statusboard/data/world-50m.geojson` is Natural Earth 1:50m admin 0 countries, from the `nvkelso/natural-earth-vector` repository. Natural Earth is public domain. `world-land.svgpath` is generated from it by `make world-svg`. `statusboard/data/regions.csv` is hand-maintained with host-city coordinates.
-
 ## Licence
 
 GPL. See `LICENSE`.
