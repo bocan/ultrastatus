@@ -7,7 +7,7 @@ from pathlib import Path
 
 from jinja2 import Environment, PackageLoader, select_autoescape
 
-from statusboard import db, regions
+from statusboard import db, icon, regions
 from statusboard.config import Config, load_config
 from statusboard.mapgen import hover_css, land_path, marker_layout, render_svg
 from statusboard.model import Incident
@@ -193,6 +193,8 @@ def build_context(conn: sqlite3.Connection, now: datetime) -> dict:
         "map_svg": map_svg,
         "map_css": map_css,
         "map_js": map_js(),
+        "favicon_svg": icon.svg_data_uri(),
+        "favicon_png": icon.png_data_uri(),
         "global_incidents": [d for d, i in zip(open_dicts, open_incidents) if not _on_map(i)],
     }
 
@@ -261,4 +263,7 @@ def render(conn: sqlite3.Connection, out_dir: str | Path, now: datetime | None =
     out.mkdir(parents=True, exist_ok=True)
     target = out / "index.html"
     target.write_text(html, encoding="utf-8")
+    # Browsers ask for /favicon.ico on their own. The page links inline data
+    # URIs, but writing the file too keeps a plain directory serve free of 404s.
+    (out / "favicon.ico").write_bytes(icon.ico_icon())
     return target

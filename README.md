@@ -32,6 +32,10 @@ With the file present, the page puts your regions first: a banner says whether y
 
 Path comes from `STATUSBOARD_DB`, default `./statusboard.sqlite3`. Three tables: `incident`, `incident_region`, `poll_run`. See ADR-0001 for the schema and the rule that every column must have a reader and a writer.
 
+## Favicon
+
+`statusboard/icon.py` draws the icon in code: a dark rounded square, a green dot, and a small red dot. The page links it twice as data URIs, an SVG for most browsers and a 32 px PNG for Safari, so the page still makes no network requests. `render` also writes `site/favicon.ico`, a one-image ICO wrapping the same PNG, for browsers that ask for the file directly. The PNG encoder is pure Python, so no image library is needed.
+
 ## Data licences
 
 `statusboard/data/world-50m.geojson` is Natural Earth 1:50m admin 0 countries, from the `nvkelso/natural-earth-vector` repository. Natural Earth is public domain. `world-land.svgpath` is generated from it by `make world-svg`. ADR-0009 used the 1:110m file; ADR-0012 moved to 1:50m so the coastline survives zoom.
