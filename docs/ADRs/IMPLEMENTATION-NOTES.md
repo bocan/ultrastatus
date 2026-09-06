@@ -2,6 +2,10 @@
 
 What each ADR session found that the spec did not say, and where the code deviates from the spec. Newest ADR first. Follow-ups found by the user sit under the ADR they touch.
 
+## Cooperative map gestures
+
+- Found by the user: two-finger scrolling with the pointer over the map zoomed the map and trapped the page. The fix is the rule embedded maps settled on years ago. A plain wheel scrolls the page and shows a hint; Cmd or Ctrl plus wheel zooms; clicking or tapping the map activates it so the wheel zooms until a click elsewhere or Escape. On touch the map uses `touch-action: pan-y` until activated, so one finger scrolls the page, and `none` after. ADR-0012's input table was updated.
+
 ## Open Graph board image
 
 - Asked for by the user, no ADR. `statusboard/og.py` builds a 1200 by 630 SVG from `render.GROUPS`, and `make og-image` renders it to `statusboard/static/og.png` with headless Chrome on the dev machine, since crawlers accept neither SVG nor data URIs. `render` copies the PNG beside the page. The tags appear only when `[site] url` is set in `statusboard.toml`, because the page cannot know its own address. Column widths follow the longest text per column; equal widths made "DEVELOPER TOOLING" collide with "WORKPLACE".

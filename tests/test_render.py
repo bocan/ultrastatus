@@ -157,6 +157,9 @@ def test_render_writes_page_for_empty_database(conn, tmp_path):
     assert not re.search(r'<(script|link|img|iframe)[^>]+(src|href)="https?://', html)
     assert html.count('class="tile level-') == TILE_COUNT
     assert 'http-equiv="refresh"' in html
+    # Cooperative gestures: the hint overlay exists and the map starts scrollable.
+    assert '<div class="map-hint" role="status"' in html
+    assert "svg.map { touch-action: pan-y;" in html
 
 
 def test_render_includes_incident_title_and_link(conn, tmp_path):

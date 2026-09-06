@@ -92,7 +92,16 @@ svg.map .card a { color: var(--link); }
 svg.map .card .muted { color: var(--ink-2); }
 svg.map .card .mine-tag { color: var(--ok-fg); font-weight: 600; font-size: 9px; }
 svg.map .card.pinned { opacity: 1; visibility: visible; transition-delay: 0s; }
-svg.map { touch-action: none; outline: none; }
+/* Cooperative gestures. Until the map is clicked or tapped, the browser keeps
+   the wheel and one-finger scrolling for the page. */
+svg.map { touch-action: pan-y; outline: none; }
+.map-wrap.active svg.map { touch-action: none; }
+.map-wrap.active { border-color: var(--link); }
+.map-hint { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 2;
+  padding: 0.6rem 1rem; border-radius: 8px; background: rgba(13, 17, 23, 0.85); color: #e6edf3;
+  font-size: 0.95rem; font-weight: 600; text-align: center; max-width: 80%;
+  opacity: 0; pointer-events: none; transition: opacity 0.2s ease; }
+.map-hint.show { opacity: 1; }
 svg.map:focus-visible { outline: 2px solid var(--link); outline-offset: 2px; border-radius: 6px; }
 svg.map g.viewport { transform-origin: 0 0; }
 svg.map g.viewport.animate { transition: transform 250ms ease; }
@@ -202,7 +211,7 @@ footer ul { list-style: none; padding: 0; margin: 0.25rem 0 0; display: flex; fl
   {% if filter_active %}
   <button type="button" data-preset="mine">My regions</button>
   {% endif %}
-  <span class="hint">Scroll to zoom, drag to pan, click a marker to pin its card</span>
+  <span class="hint">Click the map, then scroll to zoom and drag to pan. Click a marker to pin its card.</span>
   <span class="zoom-buttons">
     <button type="button" data-zoom="in" aria-label="Zoom in">+</button>
     <button type="button" data-zoom="out" aria-label="Zoom out">-</button>
@@ -210,6 +219,7 @@ footer ul { list-style: none; padding: 0; margin: 0.25rem 0 0; display: flex; fl
 </div>
 
 <div class="map-wrap">
+<div class="map-hint" role="status" aria-live="polite"></div>
 <form class="cloud-toggles" aria-label="Show clouds on the map">
   <label><input type="checkbox" id="toggle-aws" checked> <span class="swatch"></span>AWS</label>
   <label><input type="checkbox" id="toggle-gcp" checked> <span class="swatch"></span>GCP</label>

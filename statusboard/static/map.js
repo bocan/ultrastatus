@@ -5,7 +5,7 @@
 
   var MIN_SCALE = 1, MAX_SCALE = 8, FIT_MARGIN = 0.05;
   var CARD_GAP = 4, CARD_FLIP_X = 700, CARD_FLIP_Y = 260, CARD_LIFT = 10;
-  var LABEL_ZOOM = 5, PRESET_ANIMATE_MS = 250, DRAG_THRESHOLD_PX = 3;
+  var LABEL_ZOOM = 5, PRESET_ANIMATE_MS = 250, DRAG_THRESHOLD_PX = 3, HINT_MS = 1400;
   /* One mouse notch is about 100 px of deltaY and should zoom about 1.15x.
      A trackpad fires many events of a few px each; scaling by the delta keeps
      that smooth instead of stacking a fixed factor per event. */
@@ -150,9 +150,46 @@
     if (pinned) pinned.classList.add("pinned");
   }
 
-  /* Wheel zoom at the cursor. */
+  /* Cooperative gestures, the same rule as Google Maps and Mapbox embeds.
+     A plain wheel over the map scrolls the page. The wheel zooms the map when
+     Cmd or Ctrl is held, or after the map has been clicked or tapped. A click
+     elsewhere, or Escape, hands the wheel back to the page. On touch, one
+     finger scrolls the page until the map is tapped; then it drags the map. */
+  var wrap = svg.closest(".map-wrap") || svg.parentNode;
+  var hint = document.querySelector(".map-hint");
+  var hintTimer = null;
+  var active = false;
+  var isMac = /Mac|iPhone|iPad/.test(navigator.platform || "");
+
+  function setActive(on) {
+    active = !!on;
+    if (wrap && wrap.classList) wrap.classList.toggle("active", active);
+    if (active) hideHint();
+  }
+
+  function showHint(text) {
+    if (!hint) return;
+    hint.textContent = text;
+    hint.classList.add("show");
+    clearTimeout(hintTimer);
+    hintTimer = setTimeout(hideHint, HINT_MS);
+  }
+
+  function hideHint() {
+    if (hint) hint.classList.remove("show");
+  }
+
+  document.addEventListener("pointerdown", function (e) {
+    var inside = (wrap && wrap.contains(e.target)) || (toolbar && toolbar.contains(e.target));
+    if (!inside && active) setActive(false);
+  }, true);
+
   svg.addEventListener("wheel", function (e) {
     if (onCard(e.target)) return;  /* let a long card scroll the page instead of zooming */
+    if (!(active || e.ctrlKey || e.metaKey)) {
+      showHint("Use " + (isMac ? "Cmd" : "Ctrl") + " + scroll to zoom the map, or click the map first");
+      return;  /* no preventDefault: the page scrolls as normal */
+    }
     e.preventDefault();
     var p = toCanvas(e.clientX, e.clientY);
     state = zoomAt(state, wheelFactor(e.deltaY, e.deltaMode), p.x, p.y, view);
@@ -171,6 +208,26 @@
   svg.addEventListener("pointerdown", function (e) {
     if (e.button !== 0 && e.pointerType === "mouse") return;
     if (onCard(e.target)) return;
+    if (e.pointerType === "touch" && !active) {
+      /* Inactive map on touch: leave the finger to the browser so the page
+         scrolls. A tap (pointerup with no cancel) activates the map. */
+      var tapId = e.pointerId;
+      var onUp = function (up) {
+        if (up.pointerId !== tapId) return;
+        cleanup();
+        setActive(true);
+        showHint("Map active: drag to move, pinch to zoom. Tap outside to release.");
+      };
+      var onCancel = function (c) { if (c.pointerId === tapId) cleanup(); };
+      var cleanup = function () {
+        svg.removeEventListener("pointerup", onUp);
+        svg.removeEventListener("pointercancel", onCancel);
+      };
+      svg.addEventListener("pointerup", onUp);
+      svg.addEventListener("pointercancel", onCancel);
+      return;
+    }
+    setActive(true);
     pointers[e.pointerId] = { x: e.clientX, y: e.clientY };
     svg.setPointerCapture(e.pointerId);
     var list = pointerList();
@@ -245,7 +302,7 @@
       case "ArrowUp": state = panBy(state, 0, view.h * 0.1, view); break;
       case "ArrowDown": state = panBy(state, 0, -view.h * 0.1, view); break;
       case "0": goPreset("world", true); return;
-      case "Escape": setPinned(null); return;
+      case "Escape": setPinned(null); setActive(false); return;
       default: return;
     }
     e.preventDefault();
@@ -253,6 +310,8 @@
   }
   svg.addEventListener("keydown", onKey);
   if (toolbar) toolbar.addEventListener("keydown", onKey);
+  /* Keyboard focus on the map, from Tab, counts as activation too. */
+  svg.addEventListener("focus", function () { setActive(true); });
 
   /* Toolbar. */
   if (toolbar) {
@@ -260,6 +319,7 @@
     toolbar.addEventListener("click", function (e) {
       var button = e.target.closest ? e.target.closest("button") : null;
       if (!button) return;
+      setActive(true);
       if (button.hasAttribute("data-preset")) goPreset(button.getAttribute("data-preset"), true);
       else if (button.getAttribute("data-zoom") === "in") { state = zoomAt(state, 1.5, view.x + view.w / 2, view.y + view.h / 2, view); apply(false); }
       else if (button.getAttribute("data-zoom") === "out") { state = zoomAt(state, 1 / 1.5, view.x + view.w / 2, view.y + view.h / 2, view); apply(false); }

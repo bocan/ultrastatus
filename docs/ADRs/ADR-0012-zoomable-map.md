@@ -77,7 +77,10 @@ fitBox(box, view)                               -> state that frames {x, y, w, h
 
 | Input | Action |
 |---|---|
-| Wheel over the map | zoom proportional to `deltaY`, `exp(-deltaY * 0.0014)`, about 1.15x per 100 px mouse notch, capped at 1.5x per event, centred on the cursor. `deltaMode` lines and pages are converted to a pixel estimate first. `preventDefault` so the page does not scroll. |
+| Wheel over the map | Cooperative: only when Cmd or Ctrl is held, or the map is active. Otherwise the event is left alone so the page scrolls, and a hint overlay shows for 1.4 s. When it does zoom: proportional to `deltaY`, `exp(-deltaY * 0.0014)`, about 1.15x per 100 px mouse notch, capped at 1.5x per event, centred on the cursor. `deltaMode` lines and pages are converted to a pixel estimate first. |
+| Activation | A click or tap on the map, a toolbar button, or keyboard focus makes the map active, shown by a highlighted border. A pointer down outside the map and toolbar, or Escape, deactivates it. |
+| Touch, inactive map | `touch-action: pan-y`, so one finger scrolls the page. A tap activates the map. |
+| Touch, active map | `touch-action: none`, so one finger drags and two fingers pinch. |
 | Drag | pan. Ignore drags under 3 px so a click is still a click. |
 | Double click | zoom in by 2 at the cursor |
 | Pinch (two touches) | zoom, centred between the fingers |
