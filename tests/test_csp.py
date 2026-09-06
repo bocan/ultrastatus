@@ -2,7 +2,13 @@ import base64
 import hashlib
 import re
 
-from statusboard.render import content_security_policy, map_js, render, script_hash
+from statusboard.render import (
+    content_security_policy,
+    map_js,
+    nginx_csp_snippet,
+    render,
+    script_hash,
+)
 
 from conftest import utc
 
@@ -19,6 +25,7 @@ def test_policy_locks_everything_down():
     assert policy.startswith("default-src 'none'; script-src 'sha256-")
     assert "style-src 'unsafe-inline'" in policy
     assert "img-src data:" in policy
+    assert "object-src 'none'" in policy
     assert "base-uri 'none'" in policy
     assert "form-action 'none'" in policy
     assert "unsafe-inline" not in policy.split("script-src")[1].split(";")[0]
@@ -35,6 +42,14 @@ def test_rendered_page_carries_a_policy_whose_hash_matches_its_script(conn, tmp_
     assert body is not None
     assert script_hash(body.group(1)) in policy
     assert script_hash(map_js()) in policy
+    # The nginx snippet carries the same policy plus frame-ancestors.
+    snippet = (tmp_path / "site" / "csp.conf").read_text()
+    assert snippet.startswith("# Written by statusboard render.")
+    assert (
+        f"add_header Content-Security-Policy \"{policy}; frame-ancestors 'self'\" always;"
+        in snippet
+    )
+    assert nginx_csp_snippet(map_js()) == snippet
     # The policy comes before anything it governs: right after the charset.
     assert html.find("Content-Security-Policy") < html.find("<style>")
     assert html.find("Content-Security-Policy") < html.find("<link")

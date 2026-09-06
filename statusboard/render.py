@@ -329,9 +329,28 @@ def content_security_policy(script: str) -> str:
             f"script-src {script_hash(script)}",
             "style-src 'unsafe-inline'",
             "img-src data:",
+            "object-src 'none'",
             "base-uri 'none'",
             "form-action 'none'",
         ]
+    )
+
+
+CSP_SNIPPET_NAME = "csp.conf"
+
+
+def nginx_csp_snippet(script: str) -> str:
+    """An nginx include that sends the same policy as a header, plus frame-ancestors.
+
+    Scanners read headers, not meta tags, and frame-ancestors only works in a
+    header. The hash changes when map.js changes, so nginx must be reloaded
+    after a deploy that touches the script. Include it at server level:
+        include /path/to/site/csp.conf;
+    """
+    policy = content_security_policy(script) + "; frame-ancestors 'self'"
+    return (
+        "# Written by statusboard render. Do not edit; reload nginx after a deploy.\n"
+        f'add_header Content-Security-Policy "{policy}" always;\n'
     )
 
 
@@ -365,6 +384,9 @@ def render(
     # Browsers ask for /favicon.ico on their own. The page links inline data
     # URIs, but writing the file too keeps a plain directory serve free of 404s.
     (out / "favicon.ico").write_bytes(icon.ico_icon())
+    (out / CSP_SNIPPET_NAME).write_text(
+        nginx_csp_snippet(context["map_js"]), encoding="utf-8"
+    )
     # The Open Graph board image is committed as a PNG; crawlers cannot use
     # SVG or data URIs. Copy it beside the page when it exists.
     og_png = resources.files("statusboard").joinpath(f"static/{OG_IMAGE_NAME}")

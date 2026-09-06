@@ -5,6 +5,7 @@ What each ADR session found that the spec did not say, and where the code deviat
 ## Content Security Policy
 
 - Asked for by the user. The policy is a `<meta http-equiv>` in the page rather than a server header, so it travels with the file. `default-src 'none'`, `script-src` with the SHA-256 hash of the embedded script computed at render time, `style-src 'unsafe-inline'` because the hover cards carry style attributes, `img-src data:` for the favicon, `base-uri 'none'`, `form-action 'none'`. The script sets styles only through the CSSOM, which CSP permits. `frame-ancestors` cannot be set from a meta tag and stays on nginx, where `X-Frame-Options` already is. Verified under headless Chrome with the log domain open: zero violations, script ran, presets worked. Jinja autoescape turned the policy's single quotes into `&#39;`, which browsers decode but which the test caught; the value is emitted with `| safe`.
+- Follow-up from the user's header scanner: it reads headers, not meta tags, and reported the policy as `default-src` only. `render` now also writes `site/csp.conf`, an nginx `add_header` line with the identical policy plus `frame-ancestors 'self'`, and the policy gained `object-src 'none'`. nginx includes the snippet at server level and must be reloaded when the script hash changes, which `docs/cron.md` says.
 
 ## Marker offsets under zoom
 

@@ -21,6 +21,16 @@ A poll that crawls, one provider line every 20 seconds or so, is almost always I
 
 The other silent wait is the first `uv run` on a fresh machine, which downloads a Python build when the system one is older than 3.12. Run `make install` once by hand to watch it.
 
+## Security headers
+
+The page carries its Content-Security-Policy in a meta tag, but header scanners only read headers and `frame-ancestors` only works in one. `render` therefore also writes `site/csp.conf`, an nginx snippet with the same policy as a header plus `frame-ancestors 'self'`. Include it at server level, beside your other `add_header` lines and outside any `location` block:
+
+```nginx
+include /volume/ultrastatus/site/csp.conf;
+```
+
+The policy contains the hash of the inline script, so it changes when `map.js` changes. nginx reads the include only at start or reload, so after a `git pull` that touches the script, run `nginx -s reload`. Until then the stale header would block the new script, so make the reload part of the deploy step.
+
 ## Serving the page
 
 `site/index.html` is one file with no external requests. Open it directly, or point any static file server at `site/`. The page reloads itself every two minutes through a meta refresh tag.
