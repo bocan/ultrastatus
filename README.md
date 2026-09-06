@@ -1,19 +1,43 @@
-# statusboard
+# Ultra Status
 
-Polls the public status feeds of AWS, GCP, Azure, GitHub, and Databricks into one SQLite file, then renders one dashboard page. Python, standard library, cron-friendly.
+One page that shows whether the services your work depends on are up, worldwide. It polls seventeen public status feeds into a SQLite file, then renders a single self-contained HTML page with a zoomable world map, grouped status tiles, and incident tables. Python, standard library plus Jinja2, and cron.
 
-The design lives in `docs/ADRs/`. Read `docs/ADRs/README.md` first.
+The page makes no network requests of its own. Everything, map included, is inline.
+
+## What it watches
+
+| Group | Providers |
+|---|---|
+| Clouds | AWS, GCP, Azure |
+| Data platforms | Databricks, dbt Cloud, Snowflake, Airbyte |
+| AI | Claude, OpenAI |
+| Developer tooling | GitHub, Cloudflare, npm, Docker, PyPI |
+| Workplace | Google Workspace, Slack, Atlassian |
+
+All feeds are public. No API keys, no accounts. Each feed is polled once per run, or three times for Databricks, which runs one status page per host cloud, and twice for Snowflake, which needs its component list to place incidents on the map.
+
+Incidents from AWS, GCP, Azure, Databricks, and Snowflake carry regions and appear on the map. The others are global and appear in a line above it.
+
+## What the page shows
+
+- **A world map** with one marker per cloud region, 143 of them across AWS, GCP, and Azure. Green is fine, amber is minor, orange is major, red is critical, grey means the feed is stale. Databricks and Snowflake incidents colour the marker of their host cloud region.
+- **Hover cards** on every marker, with the region, its level, and each open incident linked to its status page. Pure CSS. Click a marker to pin its card.
+- **Pan and zoom** with the wheel, drag, pinch, keyboard, or the preset buttons for the world, each continent, and your regions. Region codes appear at 5x. The view survives the two-minute reload.
+- **Cloud toggles** in the map corner to hide or show AWS, GCP, or Azure markers.
+- **Grouped tiles**, one per provider, with the worst open severity, the open count, and when it was last polled. A tile goes grey when its feed has not been polled for 15 minutes or the last poll failed.
+- **Two tables**: open incidents, sorted by severity then recency, and everything resolved in the last 7 days.
+- **Light and dark** follow the system preference.
 
 ## Quick start
 
 ```
-make install
-make init-db
-make poll
-make test
+make install        # create the virtualenv with uv
+make refresh        # poll every feed, then write site/index.html
+open site/index.html
+make test           # 200+ tests, none touch the network
 ```
 
-`make help` lists every target.
+`make help` lists every target. `make poll` and `make render` are the two halves of `refresh`.
 
 ## Your regions
 
@@ -26,44 +50,42 @@ gcp   = ["europe-west2"]
 azure = ["uksouth"]
 ```
 
-With the file present, the page puts your regions first: a banner says whether you are all clear, cloud tiles count incidents in your regions and mute the rest, your markers draw large and the others faint, and incidents elsewhere collapse under a details block. Without the file every region is treated equally. The path can be changed with `STATUSBOARD_CONFIG`. A typo in a region code stops `make render` with a suggestion. The filter applies at render time only, so the database keeps every incident.
+With the file present the page puts your regions first. A banner says whether you are all clear. Cloud tiles count incidents in your regions and show the rest as a muted "elsewhere" line. Your markers draw large and the others faint. Incidents elsewhere collapse under a details block. A "My regions" preset frames them on the map. Databricks and Snowflake incidents in your host cloud regions count as yours.
+
+Without the file every region is treated equally. The filter applies at render time only, so the database keeps every incident and a config change applies to history. A typo in a region code stops `make render` with a suggestion. The path can be changed with `STATUSBOARD_CONFIG`.
+
+## Running it from cron
+
+```
+*/2 * * * * cd /path/to/statusboard && PATH=/opt/homebrew/bin:$PATH make refresh >> /tmp/statusboard.log 2>&1
+```
+
+`docs/cron.md` covers the two things people get wrong: absolute paths and the `PATH` for `uv`. Two minutes is well inside every provider's limits. Statuspage, which hosts nine of the feeds, allows one request per second per page. Do not go below one minute.
+
+`refresh` always renders, even when a feed fails, so the page keeps showing the last good data and marks that provider stale. Its exit code is the poll's.
 
 ## Database
 
-Path comes from `STATUSBOARD_DB`, default `./statusboard.sqlite3`. Three tables: `incident`, `incident_region`, `poll_run`. See ADR-0001 for the schema and the rule that every column must have a reader and a writer.
+Path comes from `STATUSBOARD_DB`, default `./statusboard.sqlite3`. Three tables: `incident`, `incident_region`, `poll_run`. There is no retention job yet; the file grows slowly. ADR-0001 holds the schema and the rule that every column must have a reader and a writer.
+
+## Adding a provider
+
+- **Runs on Atlassian Statuspage or incident.io?** One line in `statusboard/providers/statuspage.py` with the name, host, and label, plus one entry in `GROUPS` and `SOURCE_URLS` in `statusboard/render.py`. ADR-0017 is the worked example.
+- **Anything else** gets a module under `statusboard/providers/`, a saved fixture, and a test file. ADR-0016 (Slack, custom JSON) and ADR-0019 (Airbyte, RSS) are the templates.
+- A test fails by name if a provider is registered without a group, or listed in a group without a module.
+
+## Design and history
+
+The build is specified in `docs/ADRs/`, one spec per session, written so a smaller model can implement each one. Start at `docs/ADRs/README.md`. What each session found that the spec did not say, and where the code deviates from a spec, is in `docs/ADRs/IMPLEMENTATION-NOTES.md`.
 
 ## Favicon
 
-`statusboard/icon.py` draws the icon in code: a dark rounded square, a green dot, and a small red dot. The page links it twice as data URIs, an SVG for most browsers and a 32 px PNG for Safari, so the page still makes no network requests. `render` also writes `site/favicon.ico`, a one-image ICO wrapping the same PNG, for browsers that ask for the file directly. The PNG encoder is pure Python, so no image library is needed.
+`statusboard/icon.py` draws the icon in code: a dark rounded square, a green dot, and a small red dot. The page links it as an SVG data URI and a 32 px PNG data URI for Safari, and `render` also writes `site/favicon.ico`. The PNG encoder is pure Python.
 
 ## Data licences
 
-`statusboard/data/world-50m.geojson` is Natural Earth 1:50m admin 0 countries, from the `nvkelso/natural-earth-vector` repository. Natural Earth is public domain. `world-land.svgpath` is generated from it by `make world-svg`. ADR-0009 used the 1:110m file; ADR-0012 moved to 1:50m so the coastline survives zoom.
+`statusboard/data/world-50m.geojson` is Natural Earth 1:50m admin 0 countries, from the `nvkelso/natural-earth-vector` repository. Natural Earth is public domain. `world-land.svgpath` is generated from it by `make world-svg`. `statusboard/data/regions.csv` is hand-maintained with host-city coordinates.
 
-## Deviations from the ADRs
+## Licence
 
-- ADR-0004: no `aws_utf16_sample.bin` fixture. The test builds the UTF-16 bytes from the UTF-8 fixture at run time, so no binary file sits in git. Coverage is the same.
-
-## Notes from implementation
-
-- ADR-0002: the Statuspage docs do not state the order of `incident_updates`. The live GitHub feed, checked on 2026-09-05 across 12 incidents, is newest first. The provider reads index 0.
-- ADR-0005: the Azure CLI was installed but its login had expired, so Azure coordinates are host-city proxies from the ADR table, not `az account list-locations` metadata. Hatchling packages `statusboard/data/regions.csv` by default; a wheel build confirmed it, so `pyproject.toml` needed no change.
-- ADR-0006: Context7 has no status.io entry and developer.status.io is a JavaScript app with no static text. The incident shape was confirmed from a live status.io maintenance object, which uses the same fields. No named message-order constant exists: the provider sorts `messages` by `datetime` and takes the newest, so array order does not matter. The URL pattern `https://<host>/pages/incident/<page_id>/<incident_id>` returned 200 for a real incident. The Databricks GCP page writes `EU-West1` where GCP says `europe-west1`, so `regions.normalise` maps a leading `eu-` to `europe-` for gcp. `jioindiawest` was added to `regions.csv` because the Databricks Azure page lists it. After that, all 77 live container names resolve.
-- ADR-0007: two Wayback Machine captures from July 2024 showed that each Azure RSS item carries `<category>` elements naming the affected regions with exact display names, plus the service name and sometimes `Public Non-Regional`. The provider reads regions from categories first and falls back to the ADR's text matching only when no category names a known region. The fixture `azure_items.xml` is built from those two real items, trimmed, plus one hand-written item without a `guid`.
-- ADR-0008: labels come from a fixed list in `render.py`, with the Statuspage provider's own `label` attribute winning when present. Status colours are never used alone: every tile and severity cell also carries the level as text. `make refresh` uses `poll; render; exit $poll_code` so the page is rewritten even when one provider fails.
-- ADR-0009: three small deviations. The latitude crop uses the SVG `viewBox` rather than a `<g transform>`, which is one attribute instead of a computed scale. Global incident lines are rendered by the Jinja template as HTML, not inside the SVG, so their titles can be links; `render_svg` therefore has no `global_notes` parameter. An incident counts as global when none of its regions is in the region table, so a GCP `global` location lands in the global list rather than vanishing. `world-land.svgpath` came out at 126 KB.
-- ADR-0012: the page is 1.33 MB with the 1:50m countries file, under the 1.5 MB budget, so the land fallback was not needed. Cards are repositioned on every state change, all of them, not only the visible ones; 143 style writes per wheel event is cheap and the code is simpler. The label threshold is scale 5, not 3, because the Europe preset sits at about 3.1 and its labels overlapped. The viewport transform is set as a CSS `transform` style rather than the SVG attribute so the preset transition animates. Pinning is tested by hand, not under node.
-- ADR-0012 follow-up, found by the user: links inside hover cards did nothing once the script was live. The pointerdown handler captured the pointer to the SVG for every press, and a capture redirects the following click away from the link. Pointer, wheel, and double-click handlers now ignore anything that starts inside a card. Proven under headless Chrome through the DevTools protocol: hover the marker, travel to the card, click the first line of the link, and the page navigated to the incident URL. The scratch driver scripts are not committed.
-- ADR-0018: no deviations. The Statuspage docs confirmed `group` and `group_id` on component objects. Live on 2026-09-06, all 53 group names matched the table, with `AWS GovCloud - DoD` dropped on purpose. The 50 live incidents produced region rows led by `aws us-west-2` with 18 and `azure eastus2` with 13.
-- ADR-0017: no deviations. Live on 2026-09-06: dbt 25 incidents, OpenAI 25, Atlassian 34, PyPI 50, none open. The dbt fallback test reuses the Docker fixture rather than adding one.
-- ADR-0016: Context7 has no entry for the Slack Status API, only the Web API. Slack's own reference at docs.slack.dev confirmed the three `type` values and listed six `status` values, three more than the ADR assumed: `scheduled`, `completed`, and `cancelled` for maintenance. Completed and cancelled count as resolved; scheduled stays open. The ADR was updated.
-- ADR-0015: no deviations. The Workspace feed writes its summary heading two ways, `**Summary:**` and `**Summary**`, so the title rule strips both, case-insensitively. Live on 2026-09-06 the feed held 46 incidents and the poll took under two seconds.
-- ADR-0014: one deviation. Groups flow side by side and wrap instead of stacking, because a stacked one-tile group wasted a whole row; the ADR text was updated. `GROUPS` is the source of order and `PROVIDER_ORDER` is derived from it. The registration guard was checked by registering a fake provider in a scratch script: it failed with `registered but not in render.GROUPS: ['rogue']`.
-- Map cloud toggles, asked for by the user: a small box in the map's top-right corner with an AWS, GCP, and Azure checkbox. Unchecking hides that cloud's markers, labels, and hover cards through a `:has(:not(:checked))` rule, so it works without JavaScript. The script only saves the choice to `localStorage` so the two-minute reload keeps it. Databricks has no toggle because its incidents draw on the host cloud's marker.
-- ADR-0012 follow-up, found by the user: zoomed-in labels floated away from their dots. The 8 by 4 unit label offset was inside the zoomed group, so at 7x it became a 56 by 28 px gap and labels landed beside other regions' dots. The script now resets each label's `x` and `y` every frame to the marker centre plus a gap divided by the scale, the same trick as the radius. Measured under headless Chrome before and after.
-- ADR-0012 follow-up, found by the user: wheel zoom was violent on a trackpad. The ADR said to use the sign of `deltaY` only, so every one of a swipe's many small events zoomed by a full 1.2x. The factor is now `exp(-deltaY * 0.0014)`, about 1.15x per 100 px mouse notch, capped at 1.5x per event. The ADR gotcha was corrected.
-- ADR-0013 follow-up, found by the user: a card with one incident showed the severity chip twice, once as the region level and once on the incident line. The per-incident chip now appears only when a card lists more than one incident.
-- ADR-0013 follow-up, found by the user: hover cards closed before the pointer reached a link. `pointer-events` cannot be transitioned, so it switched off the instant the pointer left the marker. Hidden cards now use `visibility` with a 450 ms grace period, and the card edge sits 4 units from the marker centre instead of 8 so there is no gap. The ADR text was corrected.
-- ADR-0013: no deviations. The chip class is `.chip level-<level>` so the card and the global line share one rule. Cards are hidden with opacity and `pointer-events: none`, never `display: none`, and the 150 ms hide delay lets the pointer cross onto the card. Headless Chrome cannot hover, so the visual check forced three cards visible with an extra CSS rule in a scratch copy of the page. The page grew from 181 KB to 263 KB.
-- ADR-0010: Context7 documents only incident.io's authenticated API, not its public Statuspage mimic. Checked live on 2026-09-05: `https://www.dockerstatus.com/incidents/<id>` returns 200 for a real incident id, so that is the URL fallback. `incident_updates` on Docker is newest first, same as Statuspage.
-- ADR-0003: Context7 has no entry for the GCP status feed. The live feed on 2026-09-05 confirmed the three `status_impact` values in the ADR. The feed held 6 incidents, not hundreds, so no cutoff filter is needed.
+GPL. See `LICENSE`.

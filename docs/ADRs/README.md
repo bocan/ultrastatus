@@ -28,7 +28,7 @@ ADR-0010 is out of numeric order on purpose. Run it after ADR-0004 and before AD
 
 ADR-0013 is also out of order. Run ADR-0011, then ADR-0013, then ADR-0012. The zoomable map builds on the cards.
 
-ADR-0001 to ADR-0016 are built. ADR-0017, ADR-0018, and ADR-0019 are next, in that order. ADR-0017 goes first so the group order inside Data platforms comes out as Databricks, dbt, Snowflake, Airbyte.
+ADR-0001 to ADR-0019 are all built. What each session found beyond its spec, and every deviation, is in [IMPLEMENTATION-NOTES.md](IMPLEMENTATION-NOTES.md).
 
 ## How to run one
 
