@@ -55,6 +55,8 @@ def test_bad_site_url_raises(tmp_path):
 def test_render_writes_og_png_and_tags_only_with_site_url(conn, tmp_path, monkeypatch):
     html = render(conn, tmp_path / "a", now=NOW).read_text()
     assert "og:image" not in html
+    # The plain meta description is always present, site URL or not.
+    assert '<meta name="description" content="Live status of the clouds' in html
     assert (tmp_path / "a" / "og.png").read_bytes()[:8] == b"\x89PNG\r\n\x1a\n"
 
     monkeypatch.setattr(
