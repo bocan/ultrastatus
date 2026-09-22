@@ -21,19 +21,32 @@ STATUS_IMPACT_TO_SEVERITY: dict[str, Severity] = {
     "SERVICE_OUTAGE": "critical",
 }
 
-# Workspace descriptions open with a markdown heading such as "**Summary:**" or
-# "**Summary**" on its own line, then the real sentence.
-_SUMMARY_PREFIX = re.compile(r"^\s*\*\*Summary:?\*\*\s*", re.IGNORECASE)
+# Workspace descriptions open with a bold markdown heading, then the real
+# sentence. The live feed writes the heading many ways: "**Summary**",
+# "**Summary:**", "**Title:**", "**Title :**", "**Title** : text",
+# "**Title:** text", or "**Description**". Match a short bold run that is the
+# whole line or is followed by a colon, so bold emphasis inside a real sentence
+# ("**Gmail** is down") is left alone.
+_BOLD_HEADING = re.compile(r"^\s*\*\*\s*[^*\n]{1,40}?\s*(:\s*)?\*\*\s*(:\s*)?")
 
 
 def _parse_ts(text: str) -> datetime:
     return datetime.fromisoformat(text)
 
 
+def _strip_heading(line: str) -> str:
+    match = _BOLD_HEADING.match(line)
+    if not match:
+        return line.strip()
+    rest = line[match.end() :].strip()
+    if not rest or match.group(1) or match.group(2):
+        return rest
+    return line.strip()
+
+
 def _title(external_desc: str) -> str:
-    text = _SUMMARY_PREFIX.sub("", external_desc or "")
-    for line in text.splitlines():
-        line = line.strip()
+    for line in (external_desc or "").splitlines():
+        line = _strip_heading(line)
         if line:
             return line[:TITLE_LIMIT]
     return ""

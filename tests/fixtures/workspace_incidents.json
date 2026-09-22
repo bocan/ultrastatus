@@ -170,5 +170,76 @@
       }
     ],
     "uri": "incidents/MpR24eKjibRq1YEEaTfp"
+  },
+  {
+    "id": "B5V4MfnVp97nxoTYbxdX",
+    "number": "9353823205405529898",
+    "begin": "2026-09-18T05:00:00+00:00",
+    "created": "2026-09-22T21:38:51+00:00",
+    "modified": "2026-09-22T21:38:53+00:00",
+    "external_desc": "**Title:**\nGmail Android App users on the latest Gmail Android release may experience issues accessing their inbox.\n**Description:**\nOur engineering team has identified the root cause and is actively working on mitigating the issue.\nWe will provide more information by Tuesday, 2026-09-22 18:00 PDT.\n**Symptoms:**\n- Users on the Gmail Android app are finding that their accounts unexpectedly appear logged out.\n- Upon re-login, the process completes but the app fails to recognize the account.\n- Users receive an error message stating the account is already added.\n**Workaround:**\nThe workaround for the Gmail app issue is to uninstall recent application updates and revert to the system's base version of Gmail. Optionally reinstall the latest version of the Gmail app from play store.\nAlternatively, users can access https://mail.google.com on their mobile browsers.",
+    "updates": [
+      {
+        "created": "2026-09-22T21:38:51+00:00",
+        "modified": "2026-09-22T21:38:53+00:00",
+        "when": "2026-09-22T21:38:51+00:00",
+        "text": "**Title:**\nGmail Android App users on the latest Gmail Android release may experience issues accessing their inbox.\n**Description:**\nOur engineering team has identified the root cause and is actively ",
+        "status": "SERVICE_INFORMATION"
+      }
+    ],
+    "most_recent_update": {
+      "created": "2026-09-22T21:38:51+00:00",
+      "modified": "2026-09-22T21:38:53+00:00",
+      "when": "2026-09-22T21:38:51+00:00",
+      "text": "**Title:**\nGmail Android App users on the latest Gmail Android release may experience issues accessing their inbox.\n**Description:**\nOur engineering team has identified the root cause and is actively ",
+      "status": "SERVICE_INFORMATION"
+    },
+    "status_impact": "SERVICE_INFORMATION",
+    "severity": "low",
+    "service_key": "prPt2Yra2CbGsbEm9cpC",
+    "service_name": "Gmail",
+    "affected_products": [
+      {
+        "title": "Gmail",
+        "id": "prPt2Yra2CbGsbEm9cpC"
+      }
+    ],
+    "uri": "incidents/B5V4MfnVp97nxoTYbxdX"
+  },
+  {
+    "id": "nK23ZsSxV33wfkqXVeh3",
+    "number": "9941420584529604408",
+    "begin": "2026-02-18T16:30:00+00:00",
+    "created": "2026-02-19T10:57:52+00:00",
+    "end": "2026-02-22T20:08:00+00:00",
+    "modified": "2026-02-23T01:21:11+00:00",
+    "external_desc": "**Title** : Some customers may have experienced an issue with Gemini where conversation history may not have been visible.\n**Description**\nWe are investigating an issue where chat histories are not visible on Gemini Web (gemini.google.com) and the Gemini mobile apps on Wednesday, 2026-02-18 08:30 PST.\nOur engineering team has identified a background process that was causing the missing user conversation metadata and has successfully stopped the process to prevent further impact.\nMitigation efforts are underway, and we do not have an ETA for completion at this time.\nWe will provide an update by Thursday, 2026-02-19 09:00 PST with current details.\nWe apologize to all who are affected by the disruption.\n**Symptoms**\n* Users may find that their sidebar is empty or that previously saved conversations are missing.\n* Users may receive an empty response when attempting to list or search for existing conversations.\n* New conversations can still be created and utilized normally.\n**Workaround**\n* Impacted web users on gemini.google.com can navigate to Menu (top left) > Settings & Help > Activity.\n* Alternatively, users can navigate to myactivity.google.com/product/gemini to view their conversation history.\n* Mobile users could navigate to their profile (top right) and select Gemini Apps Activity.",
+    "updates": [
+      {
+        "created": "2026-02-23T01:20:58+00:00",
+        "modified": "2026-02-23T01:21:11+00:00",
+        "when": "2026-02-23T01:20:58+00:00",
+        "text": "**Title :** Some customers may have experienced an issue with Gemini where conversation history may not have been visible.\n**Description :**\nThe issue with Gemini has been resolved for all affected us",
+        "status": "AVAILABLE"
+      }
+    ],
+    "most_recent_update": {
+      "created": "2026-02-23T01:20:58+00:00",
+      "modified": "2026-02-23T01:21:11+00:00",
+      "when": "2026-02-23T01:20:58+00:00",
+      "text": "**Title :** Some customers may have experienced an issue with Gemini where conversation history may not have been visible.\n**Description :**\nThe issue with Gemini has been resolved for all affected us",
+      "status": "AVAILABLE"
+    },
+    "status_impact": "SERVICE_DISRUPTION",
+    "severity": "medium",
+    "service_key": "npdyhgECDJ6tB66MxXyo",
+    "service_name": "Gemini",
+    "affected_products": [
+      {
+        "title": "Gemini",
+        "id": "npdyhgECDJ6tB66MxXyo"
+      }
+    ],
+    "uri": "incidents/nK23ZsSxV33wfkqXVeh3"
   }
 ]

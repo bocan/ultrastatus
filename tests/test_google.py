@@ -115,7 +115,7 @@ def test_last_message_is_truncated(feeds):
 
 def test_workspace_fixture_parses_with_no_regions(feeds):
     incidents = WORKSPACE.fetch()
-    assert len(incidents) == 4
+    assert len(incidents) == 6
     assert all(i.provider == "google-workspace" for i in incidents)
     assert all(i.regions == [] for i in incidents)
     assert all(
@@ -124,7 +124,13 @@ def test_workspace_fixture_parses_with_no_regions(feeds):
         )
         for i in incidents
     )
-    assert all(i.resolved_at is not None for i in incidents)
+    by_id = _by_id(incidents)
+    assert by_id["B5V4MfnVp97nxoTYbxdX"].resolved_at is None
+    assert all(
+        i.resolved_at is not None
+        for i in incidents
+        if i.external_id != "B5V4MfnVp97nxoTYbxdX"
+    )
 
 
 def test_workspace_title_is_first_line_without_summary_prefix(feeds):
@@ -140,11 +146,56 @@ def test_workspace_title_is_first_line_without_summary_prefix(feeds):
     )
 
 
+def test_workspace_title_heading_on_its_own_line(feeds):
+    # The live feed sometimes writes "**Title:**" instead of "**Summary:**".
+    by_id = _by_id(WORKSPACE.fetch())
+    assert by_id["B5V4MfnVp97nxoTYbxdX"].title == (
+        "Gmail Android App users on the latest Gmail Android release "
+        "may experience issues accessing their inbox."
+    )
+
+
+def test_workspace_title_heading_with_text_on_the_same_line(feeds):
+    # "**Title** : text" puts the colon outside the bold and the text inline.
+    by_id = _by_id(WORKSPACE.fetch())
+    assert by_id["nK23ZsSxV33wfkqXVeh3"].title == (
+        "Some customers may have experienced an issue with Gemini "
+        "where conversation history may not have been visible."
+    )
+
+
+@pytest.mark.parametrize(
+    "desc",
+    [
+        "**Summary**\nFirst line\nSecond",
+        "**Summary:**\nFirst line\nSecond",
+        "**Title**\nFirst line\nSecond",
+        "**Title:**\nFirst line\nSecond",
+        "**Title :**\nFirst line\nSecond",
+        "**Description**\nFirst line\nSecond",
+        "**Title** : First line\nSecond",
+        "**Title:** First line\nSecond",
+        "**Title :** First line\nSecond",
+        "**title**:First line\nSecond",
+        "**Title**\n**Description**\nFirst line\nSecond",
+    ],
+)
+def test_title_strips_every_bold_heading_variant(desc):
+    assert _title(desc) == "First line"
+
+
+def test_title_keeps_bold_emphasis_inside_a_sentence():
+    assert (
+        _title("**Gmail** is down for some users") == "**Gmail** is down for some users"
+    )
+
+
 def test_title_helper_edge_cases():
     assert _title("**Summary:**\nFirst line\nSecond") == "First line"
     assert _title("**summary**\n\n  Padded line  ") == "Padded line"
     assert _title("Plain single line") == "Plain single line"
     assert _title("") == ""
+    assert _title("**Title:**") == ""
     assert len(_title("**Summary**\n" + "x" * 500)) == 200
 
 
@@ -167,9 +218,12 @@ def test_end_to_end_poll_writes_gcp_regions_and_workspace_rows(feeds, conn):
     )
     assert out.getvalue().splitlines() == [
         "gcp: 6 incidents, 0 newly resolved",
-        "google-workspace: 4 incidents, 0 newly resolved",
+        "google-workspace: 6 incidents, 0 newly resolved",
     ]
-    assert [i.external_id for i in db.open_incidents(conn)] == ["J5ia5t9p3g9Q5Wi7r8Ev"]
+    assert sorted(i.external_id for i in db.open_incidents(conn)) == [
+        "B5V4MfnVp97nxoTYbxdX",
+        "J5ia5t9p3g9Q5Wi7r8Ev",
+    ]
     rows = conn.execute(
         "SELECT count(*) FROM incident_region WHERE provider='gcp'"
     ).fetchone()[0]
@@ -177,4 +231,4 @@ def test_end_to_end_poll_writes_gcp_regions_and_workspace_rows(feeds, conn):
     ws_rows = conn.execute(
         "SELECT count(*) FROM incident WHERE provider='google-workspace'"
     ).fetchone()[0]
-    assert ws_rows == 4
+    assert ws_rows == 6
