@@ -26,6 +26,7 @@ Incidents from AWS, GCP, Azure, Databricks, and Snowflake carry regions and appe
 - **Cloud toggles** in the map corner to hide or show AWS, GCP, or Azure markers.
 - **Grouped tiles**, one per provider, with the worst open severity, the open count, and when it was last polled. A tile goes grey when its feed has not been polled for 15 minutes or the last poll failed.
 - **Two tables**: open incidents, sorted by severity then recency, and everything resolved in the last 7 days.
+- **An RSS feed** at `feed.xml` with every open incident, in the same order as the open table. The page links it for feed readers to discover.
 - **Light and dark** follow the system preference.
 
 ## Quick start
@@ -66,6 +67,10 @@ url = "https://ultrastatus.cloudcauldron.io"
 ```
 
 The page then carries Open Graph and Twitter card tags, so a link posted on Slack, LinkedIn, or Mastodon shows a board image listing every provider by group. The image is `statusboard/static/og.png`, generated once from the provider groups by `make og-image`, which needs Chrome, and copied to `site/og.png` on every render. Re-run `make og-image` after adding a provider. Without a site URL the tags are omitted.
+
+## RSS feed
+
+Every render also writes `site/feed.xml`, an RSS 2.0 feed with one item per open incident. The item title is `[Provider] severity: title`, the link is the incident's own status page URL, the guid is the provider plus the incident id, the date is when the incident began, and the description is the latest update. Categories carry the provider, the severity, and each affected region. The feed lists every open incident, whether or not it is in your regions, so a reader can filter by category. Resolved incidents drop out of the feed. With `[site] url` set the channel carries its own address as well.
 
 ## Running it from cron
 

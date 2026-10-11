@@ -9,6 +9,7 @@
 <meta name="description" content="{{ og_description }}">
 <link rel="icon" type="image/svg+xml" href="{{ favicon_svg }}">
 <link rel="icon" type="image/png" sizes="32x32" href="{{ favicon_png }}">
+<link rel="alternate" type="application/rss+xml" title="{{ feed_title }}" href="{{ feed_name }}">
 {% if site_url %}
 <meta property="og:type" content="website">
 <meta property="og:title" content="Ultra Status">
@@ -362,6 +363,7 @@ footer ul { list-style: none; padding: 0; margin: 0.25rem 0 0; display: flex; fl
     <li><a href="{{ p.source_url }}">{{ p.label }}</a></li>
   {% endfor %}
   </ul>
+  <p><a href="{{ feed_name }}" type="application/rss+xml">RSS feed of open incidents</a></p>
 </footer>
 <script>{{ map_js | safe }}</script>
 </body>

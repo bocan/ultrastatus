@@ -2,6 +2,10 @@
 
 What each ADR session found that the spec did not say, and where the code deviates from the spec. Newest ADR first. Follow-ups found by the user sit under the ADR they touch.
 
+## RSS feed
+
+- Asked for by the user, no ADR. `statusboard/feed.py` builds an RSS 2.0 document with `xml.etree`, so titles and messages are escaped by the library and never pasted into a string. `build_context` adds it as `feed_xml` and `render` writes it to `site/feed.xml` beside the page. One item per open incident in the open table's order; the guid is `provider:external_id`, so a reader shows each incident once and it drops out when resolved. The first cut used the incident URL as the guid; a live render showed both open AWS incidents share the one health page URL, which would have merged them into one item. The feed ignores the region filter on purpose: the filter is for the banner, and categories (provider, severity, region) let a reader filter instead. The page links the feed with `rel="alternate"` in the head and a text link in the footer; a relative `href` keeps `open site/index.html` working and stays inside the Content Security Policy, which does not govern link discovery.
+
 ## Content Security Policy
 
 - Asked for by the user. The policy is a `<meta http-equiv>` in the page rather than a server header, so it travels with the file. `default-src 'none'`, `script-src` with the SHA-256 hash of the embedded script computed at render time, `style-src 'unsafe-inline'` because the hover cards carry style attributes, `img-src data:` for the favicon, `base-uri 'none'`, `form-action 'none'`. The script sets styles only through the CSSOM, which CSP permits. `frame-ancestors` cannot be set from a meta tag and stays on nginx, where `X-Frame-Options` already is. Verified under headless Chrome with the log domain open: zero violations, script ran, presets worked. Jinja autoescape turned the policy's single quotes into `&#39;`, which browsers decode but which the test caught; the value is emitted with `| safe`.

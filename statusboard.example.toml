@@ -2,8 +2,8 @@
 #
 # [site] url is the public address of the page. With it set, the page carries
 # Open Graph and Twitter card tags pointing at og.png, so a link posted on
-# Slack, LinkedIn, or Mastodon shows the board image. Leave it out and the
-# tags are omitted.
+# Slack, LinkedIn, or Mastodon shows the board image, and the RSS feed at
+# feed.xml carries its own address. Leave it out and the tags are omitted.
 
 [site]
 url = "https://ultrastatus.cloudcauldron.io"

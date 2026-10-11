@@ -10,7 +10,7 @@ from pathlib import Path
 
 from jinja2 import Environment, PackageLoader, select_autoescape
 
-from statusboard import db, icon, regions
+from statusboard import db, feed, icon, regions
 from statusboard.config import Config, load_config
 from statusboard.mapgen import hover_css, land_path, marker_layout, render_svg
 from statusboard.model import Incident
@@ -250,6 +250,11 @@ def build_context(conn: sqlite3.Connection, now: datetime) -> dict:
         "global_incidents": [
             d for d, i in zip(open_dicts, open_incidents) if not _on_map(i)
         ],
+        # Every open incident, filtered or not: the feed is for readers, not
+        # the banner, and a reader can skip what it does not care about.
+        "feed_xml": feed.rss(open_incidents, labels, config.site_url, now),
+        "feed_name": feed.FEED_NAME,
+        "feed_title": feed.FEED_TITLE,
     }
 
 
@@ -387,6 +392,7 @@ def render(
     (out / CSP_SNIPPET_NAME).write_text(
         nginx_csp_snippet(context["map_js"]), encoding="utf-8"
     )
+    (out / feed.FEED_NAME).write_text(context["feed_xml"], encoding="utf-8")
     # The Open Graph board image is committed as a PNG; crawlers cannot use
     # SVG or data URIs. Copy it beside the page when it exists.
     og_png = resources.files("statusboard").joinpath(f"static/{OG_IMAGE_NAME}")
